@@ -27,9 +27,8 @@ import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
-import rst.geometry.Ray3DFloatType;
-import rst.math.Vec3DFloatType;
-import rst.tracking.PointingRay3DFloatType;
+import rst.math.Vec3DFloatType.Vec3DFloat;
+import rst.tracking.PointingRay3DFloatType.PointingRay3DFloat;
 
 /**
  *
@@ -37,14 +36,20 @@ import rst.tracking.PointingRay3DFloatType;
  */
 public abstract class AbstractDistanceMeasure {
     
-    //TODO: Implement the change from center to translation.
-    //TODO: Check all the code an inheriting classes.
+    public static Vector3d toVector(Vec3DFloat vec3d){
+        return new Vector3d(vec3d.getX(), vec3d.getY(), vec3d.getZ());
+    }
     
-    public final double probability(PointingRay3DFloatType.PointingRay3DFloat ray, BoundingBox box){
-        Vec3DFloatType.Vec3DFloat o = ray.getRay().getOrigin();
-        Vec3DFloatType.Vec3DFloat d = ray.getRay().getDirection();
-        Point3d origin = new Point3d(o.getX(), o.getY(), o.getZ());
-        Vector3d direction = new Vector3d(d.getX(), d.getY(), d.getZ());
+    public static Point3d toPoint(Vec3DFloat vec3d){
+        return new Point3d(vec3d.getX(), vec3d.getY(), vec3d.getZ());
+    }
+    
+    //TODO: Implement the change from center to translation.
+    //TODO: Check all the code and inheriting classes.
+    
+    public final double probability(PointingRay3DFloat ray, BoundingBox box){
+        Point3d origin = toPoint(ray.getRay().getOrigin());
+        Vector3d direction = toVector(ray.getRay().getDirection());
         return distanceProbability(origin, direction, box);
     }
     

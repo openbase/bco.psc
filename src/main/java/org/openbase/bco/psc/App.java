@@ -31,6 +31,7 @@ import org.openbase.bco.psc.jp.JPLocalInput;
 import org.openbase.bco.psc.jp.JPRegistryFlags;
 import org.openbase.bco.psc.jp.JPThreshold;
 import org.openbase.bco.psc.rsb.RSBConnection;
+import org.openbase.bco.psc.testing.DistanceTest;
 import org.openbase.jps.core.JPService;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.printer.ExceptionPrinter;
@@ -103,7 +104,9 @@ public class App extends AbstractEventHandler {
 //            JPService.printHelp();
             //TODO: Mit Marian angucken:
 //            TransformTest.test();
-            TransformTestOffline.test();
+//            TransformTestOffline.test();
+            
+            DistanceTest.test();
             
             
 //            ServiceRemoteTest.test1();

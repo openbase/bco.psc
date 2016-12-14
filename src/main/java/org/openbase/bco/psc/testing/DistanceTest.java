@@ -27,6 +27,8 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
+import org.openbase.bco.psc.selection.distance.AbstractDistanceMeasure2;
+import org.openbase.bco.psc.selection.distance.AngleMeasure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,18 +40,21 @@ public class DistanceTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(DistanceTest.class);
     
     public static void test(){
-            Point3d origin = new Point3d(0, 0, 0);
-            Vector3d direction = new Vector3d(1, 0.5, 0);
-            Vector3d vec = new Vector3d(direction);vec.normalize();
-            //System.out.println(vec);
-            Quat4d quat = new Quat4d();
-            quat.set(new AxisAngle4d(1, 0, 0, Math.toRadians(45)));
+        Point3d origin = new Point3d(1, 0, 0);
+        Vector3d direction = new Vector3d(-1, .1, 0);
+//        Vector3d vec = new Vector3d(direction);vec.normalize();
+        //System.out.println(vec);
+//        Quat4d quat = new Quat4d();
+//        quat.set(new AxisAngle4d(1, 0, 0, Math.toRadians(45)));
+        
+        AngleMeasure distance = new AngleMeasure();
+        distance.distanceProbability(origin, direction, 1, 1, 1);
 
-//            BoundingBox box = new BoundingBox(new Point3d(2, 0, 0), new Vector3d(1, 1, 1), quat);
-//            LOGGER.debug(String.valueOf(DistanceMeasures.centerProjectionExtensionMeasure(origin, direction, box)));
-//            LOGGER.debug(String.valueOf(DistanceMeasures.pearsonMeasure(origin, direction, box)));
-//            LOGGER.debug(String.valueOf(DistanceMeasures.angleCornerMaxMeasure(origin, direction, box)));
-//            LOGGER.debug(String.valueOf(DistanceMeasures.getAngle(new Vector3d(0, 1, 0), new Vector3d(-1, 1, 0))));
+//        BoundingBox box = new BoundingBox(new Point3d(2, 0, 0), new Vector3d(1, 1, 1), quat);
+//        LOGGER.debug(String.valueOf(DistanceMeasures.centerProjectionExtensionMeasure(origin, direction, box)));
+//        LOGGER.debug(String.valueOf(DistanceMeasures.pearsonMeasure(origin, direction, box)));
+//        LOGGER.debug(String.valueOf(DistanceMeasures.angleCornerMaxMeasure(origin, direction, box)));
+//        LOGGER.debug(String.valueOf(DistanceMeasures.getAngle(new Vector3d(0, 1, 0), new Vector3d(-1, 1, 0))));
         
     }
     
