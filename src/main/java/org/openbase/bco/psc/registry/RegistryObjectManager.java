@@ -170,9 +170,10 @@ public class RegistryObjectManager implements Observer<UnitRegistryDataType.Unit
         try{
             String rootTransform = locationRemote.getRootLocationConfig().getPlacementConfig().getTransformationFrameId();
             // Lookup the transform
-            Transform t = transformReceiver.requestTransform(config.getPlacementConfig().getTransformationFrameId(), 
+            Transform toRootCoordinateTransform = transformReceiver.requestTransform(config.getPlacementConfig().getTransformationFrameId(), 
                     rootTransform,
                     System.currentTimeMillis()).get();
+            //TODO: Check whether the Transform that is gotten here is right and enough (Maybe does not include placement of unit?!).
 
             PowerStateServiceRemote powerRemote = new PowerStateServiceRemote();
             if(isGroup){
@@ -182,12 +183,11 @@ public class RegistryObjectManager implements Observer<UnitRegistryDataType.Unit
                     members.add(unitRemote.getUnitConfigById(memberId));
                 }
                 powerRemote.init(members);
-                //TODO: create bounding box from the transformation and config
             } else {
                 powerRemote.init(config);
             }
             powerRemote.activate();
-            return new UnitSelectable(config, t, powerRemote);
+            return new UnitSelectable(config, toRootCoordinateTransform, powerRemote);
         } catch (CouldNotPerformException | InterruptedException | ExecutionException ex) {
             throw new CouldNotPerformException("Could not create selectable for config with id: " + config.getId(), ex);
         }
@@ -234,6 +234,7 @@ public class RegistryObjectManager implements Observer<UnitRegistryDataType.Unit
 
     @Override
     public void processSelectedObject(AbstractSelectable selectedObject) throws CouldNotPerformException {
+        //TODO: Get rid of instance casting?! Template in SelectableManager and action in AbstractSelectable?!
         if(selectedObject instanceof UnitSelectable){
             try {
                 UnitSelectable cObject = (UnitSelectable) selectedObject;
@@ -251,6 +252,9 @@ public class RegistryObjectManager implements Observer<UnitRegistryDataType.Unit
             } catch (CouldNotPerformException | InterruptedException ex) {
                 throw new CouldNotPerformException("Could not process the selected object!", ex);
             }
+        } else {
+            throw new CouldNotPerformException("The object to be processed is of class " + selectedObject.getClass().toString() + 
+                    " not of expected class " + UnitSelectable.class.toString() + ".");
         }
     }
 }

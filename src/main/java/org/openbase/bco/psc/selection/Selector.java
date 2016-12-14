@@ -31,8 +31,8 @@ import java.util.logging.Logger;
 import org.openbase.jps.core.JPService;
 import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.exception.CouldNotPerformException;
-import rst.tracking.PointingRay3DFloatCollectionType;
-import rst.tracking.PointingRay3DFloatType;
+import rst.tracking.PointingRay3DFloatCollectionType.PointingRay3DFloatCollection;
+import rst.tracking.PointingRay3DFloatType.PointingRay3DFloat;
 
 /**
  *
@@ -56,12 +56,12 @@ public class Selector implements SelectorInterface {
     }
 
     @Override
-    public synchronized AbstractSelectable checkForSelections(PointingRay3DFloatCollectionType.PointingRay3DFloatCollection pointingRays) {
+    public synchronized AbstractSelectable checkForSelections(PointingRay3DFloatCollection pointingRays) {
         double maxProb = 0.0;
         AbstractSelectable bestObject = null;
         for (AbstractSelectable selectable : selectables) {
-            for (PointingRay3DFloatType.PointingRay3DFloat pointingRay : pointingRays.getElementList()) {
-                double prob = distance.probability(pointingRay, selectable.getBoundingBox());
+            for (PointingRay3DFloat pointingRay : pointingRays.getElementList()) {
+                double prob = distance.probability(pointingRay, selectable.getBoundingBox()) * pointingRay.getCertainty();
                 if(prob > maxProb){
                     bestObject = selectable;
                     maxProb = prob;

@@ -26,8 +26,7 @@ import org.openbase.bco.psc.selection.AbstractSelectable;
 import org.openbase.bco.psc.selection.BoundingBox;
 import org.openbase.bco.dal.remote.service.PowerStateServiceRemote;
 import rct.Transform;
-import rst.domotic.unit.UnitConfigType;
-import rst.spatial.PlacementConfigType;
+import rst.domotic.unit.UnitConfigType.UnitConfig;
 
 /**
  *
@@ -36,37 +35,27 @@ import rst.spatial.PlacementConfigType;
 public class UnitSelectable extends AbstractSelectable{
     private PowerStateServiceRemote powerRemote;
     private BoundingBox boundingBox;
-    private UnitConfigType.UnitConfig unitConfig;
+    private UnitConfig unitConfig;
     //TODO: Maybe remove unitConfig from here?! 
     
-    public UnitSelectable(UnitConfigType.UnitConfig unitConfig, Transform transform, PowerStateServiceRemote powerRemote) {
-        setBoundingBox(unitConfig.getPlacementConfig(), transform);
-        setPowerRemote(powerRemote);
+    public UnitSelectable(UnitConfig unitConfig, Transform fromUnitCoordinateToRootCoordinateTransform, PowerStateServiceRemote powerRemote) {
         this.unitConfig = unitConfig;
+        this.powerRemote = powerRemote;
+        boundingBox = new BoundingBox(fromUnitCoordinateToRootCoordinateTransform.getTransform(), unitConfig.getPlacementConfig().getShape().getBoundingBox());
     }
     
     public synchronized void update(UnitSelectable newObject){
         this.unitConfig = newObject.getUnitConfig();
-        setPowerRemote(newObject.getPowerRemote());
+        this.powerRemote = newObject.getPowerRemote();
         boundingBox = newObject.getBoundingBox();
     }
     
-    public UnitConfigType.UnitConfig getUnitConfig(){
+    public synchronized UnitConfig getUnitConfig(){
         return unitConfig;
     }
     
     public synchronized PowerStateServiceRemote getPowerRemote(){
         return powerRemote; 
-    }
-    
-    private synchronized void setPowerRemote(PowerStateServiceRemote powerRemote){
-        this.powerRemote = powerRemote;
-    }
-
-    private synchronized void setBoundingBox(PlacementConfigType.PlacementConfig placement, Transform transform) {
-        //TODO: Placement not only from config but from device class?!?! but not here...
-        //TODO: calculate bounding box here.
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
