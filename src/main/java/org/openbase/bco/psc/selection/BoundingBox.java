@@ -84,6 +84,18 @@ public class BoundingBox {
         return transformed;
     }
     
+    public Vector3d toCenterCoordinates(final Vector3d vector){
+        Vector3d transformed = new Vector3d(vector);
+        reverseCenterTransform.transform(transformed);
+        return transformed;
+    }
+    
+    public Point3d toCenterCoordinates(final Point3d point){
+        Point3d transformed = new Point3d(point);
+        reverseCenterTransform.transform(transformed);
+        return transformed;
+    }
+    
     private void setForwardTransform(Transform3D forwardTransform){
         this.forwardTransform = forwardTransform;
         reverseTransform = new Transform3D(forwardTransform);

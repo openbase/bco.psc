@@ -1,4 +1,4 @@
-package org.openbase.bco.psc.proximity;
+package org.openbase.bco.psc.selection;
 
 /*-
  * #%L
@@ -119,6 +119,7 @@ public class BoundingBoxTest {
     
     @Test
     public void testVectorTransformations(){
+        System.out.println("testVectorTransformations");
         Vector3d testVector = new Vector3d(1, 2, 0);
         
         Vector3d changedVector = new Vector3d(testVector);
@@ -132,6 +133,7 @@ public class BoundingBoxTest {
     
     @Test
     public void testPointTransformations(){
+        System.out.println("testPointTransformations");
         Point3d testPoint = new Point3d(1, 3, -2);
         
         Point3d changedPoint = new Point3d(testPoint);
@@ -143,6 +145,36 @@ public class BoundingBoxTest {
         inverse.transform(inversedPoint);
         
         assertAlmostEquals(box1.toBoxCoordinates(changedPoint), inversedPoint);
+    }
+    
+    @Test
+    public void testVectorCenterTransformations(){
+        System.out.println("testVectorCenterTransformations");
+        Vector3d testVector = new Vector3d(1, -1.2, 5);
+        
+        Vector3d changedVector = new Vector3d(testVector);
+        rotation.transform(testVector);
+        
+        Vector3d inversedVector = new Vector3d(changedVector);
+        inverse.transform(inversedVector);
+        
+        assertAlmostEquals(box1.toCenterCoordinates(changedVector), inversedVector);
+    }
+    
+    @Test
+    public void testPointCenterTransformations(){
+        System.out.println("testPointCenterTransformations");
+        Point3d testPoint = new Point3d(0.5, -7, 2);
+        
+        Point3d changedPoint = new Point3d(testPoint);
+        rotation.transform(testPoint);
+        changedPoint.add(getCenterVector(getLeftCornerVector(unitTranslation, orientation, lfb), orientation, size));
+        
+        Point3d inversedPoint = new Point3d(changedPoint);
+        inversedPoint.sub(getCenterVector(getLeftCornerVector(unitTranslation, orientation, lfb), orientation, size));
+        inverse.transform(inversedPoint);
+        
+        assertAlmostEquals(box1.toCenterCoordinates(changedPoint), inversedPoint);
     }
     
     private static void exampleValues(Vector3d unitTranslation, Matrix3d orientation, Vector3d lfb, Vector3d size){
