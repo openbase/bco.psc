@@ -21,11 +21,11 @@ package org.openbase.bco.psc.selection;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 /**
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de>Thoren Huppke</a>
  */
 public abstract class AbstractSelectable {
+
     public abstract BoundingBox getBoundingBox();
 }

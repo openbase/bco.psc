@@ -21,7 +21,6 @@ package org.openbase.bco.psc.registry;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import org.openbase.bco.psc.selection.AbstractSelectable;
 import org.openbase.bco.psc.selection.BoundingBox;
 import org.openbase.bco.dal.remote.service.PowerStateServiceRemote;
@@ -32,30 +31,31 @@ import rst.domotic.unit.UnitConfigType.UnitConfig;
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de>Thoren Huppke</a>
  */
-public class UnitSelectable extends AbstractSelectable{
+public class UnitSelectable extends AbstractSelectable {
+
     private PowerStateServiceRemote powerRemote;
     private BoundingBox boundingBox;
     private UnitConfig unitConfig;
     //TODO: Maybe remove unitConfig from here?! 
-    
+
     public UnitSelectable(UnitConfig unitConfig, Transform fromUnitCoordinateToRootCoordinateTransform, PowerStateServiceRemote powerRemote) {
         this.unitConfig = unitConfig;
         this.powerRemote = powerRemote;
         boundingBox = new BoundingBox(fromUnitCoordinateToRootCoordinateTransform.getTransform(), unitConfig.getPlacementConfig().getShape().getBoundingBox());
     }
-    
-    public synchronized void update(UnitSelectable newObject){
+
+    public synchronized void update(UnitSelectable newObject) {
         this.unitConfig = newObject.getUnitConfig();
         this.powerRemote = newObject.getPowerRemote();
         boundingBox = newObject.getBoundingBox();
     }
-    
-    public synchronized UnitConfig getUnitConfig(){
+
+    public synchronized UnitConfig getUnitConfig() {
         return unitConfig;
     }
-    
-    public synchronized PowerStateServiceRemote getPowerRemote(){
-        return powerRemote; 
+
+    public synchronized PowerStateServiceRemote getPowerRemote() {
+        return powerRemote;
     }
 
     @Override
