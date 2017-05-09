@@ -5,8 +5,8 @@ dist: trusty
 
 branches:
   except:
-  - /^(?i:feature)-.*$/
-  - /^(?i:release)-.*$/
+      #- /^(?i:feature)-.*$/
+      #- /^(?i:release)-.*$/
 
 jdk:
   - oraclejdk8
