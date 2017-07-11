@@ -29,7 +29,7 @@ import rsb.Scope;
 
 /**
  *
- * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de>Thoren Huppke</a>
+ * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public abstract class AbstractJPScope extends AbstractJavaProperty<Scope> {
     public final static String[] ARGUMENT_IDENTIFIERS = {"SCOPE"};

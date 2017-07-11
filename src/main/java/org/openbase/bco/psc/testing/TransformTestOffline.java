@@ -29,7 +29,7 @@ import javax.vecmath.Vector3d;
 
 /**
  *
- * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de>Thoren Huppke</a>
+ * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class TransformTestOffline {
     public static void test(){

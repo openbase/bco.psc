@@ -31,7 +31,7 @@ import static org.junit.Assert.*;
 
 /**
  *
- * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de>Thoren Huppke</a>
+ * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class AppTest {
     

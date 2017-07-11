@@ -27,7 +27,7 @@ import org.openbase.jul.exception.CouldNotPerformException;
 
 /**
  *
- * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de>Thoren Huppke</a>
+ * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public interface SelectableManager {
     public List<AbstractSelectable> getSelectables();

@@ -57,7 +57,7 @@ import rst.domotic.unit.unitgroup.UnitGroupConfigType;
 
 /**
  *
- * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de>Thoren Huppke</a>
+ * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class RegistryObjectManager implements Observer<UnitRegistryDataType.UnitRegistryData>, SelectableManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(RegistryObjectManager.class);

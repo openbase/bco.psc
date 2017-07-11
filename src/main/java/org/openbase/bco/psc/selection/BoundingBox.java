@@ -33,7 +33,7 @@ import rst.geometry.TranslationType.Translation;
 
 /**
  *
- * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de>Thoren Huppke</a>
+ * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class BoundingBox {
     private float width; //X-Coordinate

@@ -39,7 +39,7 @@ import rst.domotic.unit.UnitConfigType;
 
 /**
  *
- * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de>Thoren Huppke</a>
+ * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class ServiceRemoteTest {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ServiceRemoteTest.class);

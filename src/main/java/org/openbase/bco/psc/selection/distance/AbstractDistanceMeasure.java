@@ -32,7 +32,7 @@ import rst.tracking.PointingRay3DFloatType.PointingRay3DFloat;
 
 /**
  *
- * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de>Thoren Huppke</a>
+ * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public abstract class AbstractDistanceMeasure {
     
@@ -203,7 +203,8 @@ public abstract class AbstractDistanceMeasure {
     /**
      * Calculates the direction vector from the Point 'point' towards its perpendicular foot on the Ray 'ray'.
      * 
-     * @param ray the Ray to project on.
+     * @param origin
+     * @param direction
      * @param point the Point to be projected.
      * @return the direction vector.
      */

@@ -27,7 +27,7 @@ import rsb.Scope;
 
 /**
  *
- * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de>Thoren Huppke</a>
+ * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class JPInScope extends AbstractJPScope {
     public final static String[] COMMAND_IDENTIFIERS = {"--is", "--in-scope"};

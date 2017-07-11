@@ -29,7 +29,7 @@ import org.openbase.jps.exception.JPNotAvailableException;
 
 /**
  *
- * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de>Thoren Huppke</a>
+ * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class JPRegistryFlags extends AbstractJavaProperty<List<String>>{
     public final static String[] ARGUMENT_IDENTIFIERS = {"STRING-LIST"};

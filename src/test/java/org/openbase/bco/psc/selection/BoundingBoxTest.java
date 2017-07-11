@@ -39,7 +39,7 @@ import rst.geometry.TranslationType.Translation;
 
 /**
  *
- * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de>Thoren Huppke</a>
+ * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class BoundingBoxTest {
     Vector3d unitTranslation;

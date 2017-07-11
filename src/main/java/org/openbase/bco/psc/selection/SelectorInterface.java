@@ -27,7 +27,7 @@ import rst.tracking.PointingRay3DFloatCollectionType;
 
 /**
  *
- * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de>Thoren Huppke</a>
+ * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public interface SelectorInterface {
     public AbstractSelectable checkForSelections(PointingRay3DFloatCollectionType.PointingRay3DFloatCollection pointingRays);

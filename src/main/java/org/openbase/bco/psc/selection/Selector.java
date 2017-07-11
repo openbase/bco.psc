@@ -36,7 +36,7 @@ import rst.tracking.PointingRay3DFloatType.PointingRay3DFloat;
 
 /**
  *
- * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de>Thoren Huppke</a>
+ * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class Selector implements SelectorInterface {
     //TODO: Ideas: maximal bounding box and kdtree first.

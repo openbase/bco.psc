@@ -26,7 +26,7 @@ import org.openbase.jps.preset.AbstractJPBoolean;
 
 /**
  *
- * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de>Thoren Huppke</a>
+ * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class JPLocalInput extends AbstractJPBoolean{
     public final static String[] COMMAND_IDENTIFIERS = {"--li", "--local-input"};

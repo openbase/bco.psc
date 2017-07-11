@@ -30,6 +30,7 @@ import org.openbase.bco.psc.jp.JPInScope;
 import org.openbase.bco.psc.jp.JPLocalInput;
 import org.openbase.bco.psc.jp.JPRegistryFlags;
 import org.openbase.bco.psc.jp.JPThreshold;
+import org.openbase.bco.psc.registry.RegistryTemp;
 import org.openbase.bco.psc.rsb.RSBConnection;
 import org.openbase.bco.psc.testing.DistanceTest;
 import org.openbase.jps.core.JPService;
@@ -43,7 +44,7 @@ import org.openbase.bco.psc.testing.TransformTestOffline;
 
 /**
  * 
- * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de>Thoren Huppke</a>
+ * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class App extends AbstractEventHandler {
 
@@ -85,7 +86,7 @@ public class App extends AbstractEventHandler {
             }
             System.exit(0);
         } catch (Exception ex) { 
-           ExceptionPrinter.printHistory(new CouldNotPerformException("App failed", ex), LOGGER);
+            ExceptionPrinter.printHistory(new CouldNotPerformException("App failed", ex), LOGGER);
             System.exit(255);
         }
     }
@@ -101,12 +102,14 @@ public class App extends AbstractEventHandler {
 //        App app = new App();
 
         try {
+            RegistryTemp temp = new RegistryTemp();
+            
 //            JPService.printHelp();
             //TODO: Mit Marian angucken:
 //            TransformTest.test();
 //            TransformTestOffline.test();
             
-            DistanceTest.test();
+//            DistanceTest.test();
             
             
 //            ServiceRemoteTest.test1();

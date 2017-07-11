@@ -30,7 +30,7 @@ import rst.tracking.PointingRay3DFloatType;
 
 /**
  *
- * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de>Thoren Huppke</a>
+ * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public abstract class AbstractDistanceMeasure2 {
     

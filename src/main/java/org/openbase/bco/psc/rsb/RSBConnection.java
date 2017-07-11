@@ -41,7 +41,7 @@ import rst.tracking.PointingRay3DFloatCollectionType;
 
 /**
  *
- * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de>Thoren Huppke</a>
+ * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class RSBConnection {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(RSBConnection.class);

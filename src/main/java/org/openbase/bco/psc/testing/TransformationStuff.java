@@ -33,7 +33,7 @@ import rst.geometry.TranslationType;
 
 /**
  *
- * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de>Thoren Huppke</a>
+ * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class TransformationStuff {
     private Transform3D getCombinedTransform(Transform3D t, Vector3d frontLeftBottom){
