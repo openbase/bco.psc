@@ -85,8 +85,8 @@
                 <configuration>
                     <programs>
                         <program>
-                            <mainClass>org.openbase.bco.psc.App</mainClass>
-                            <id>App</id>
+                            <mainClass>org.openbase.bco.psc.PointingSmartControl</mainClass>
+                            <id>PointingSmartControl</id>
                             <platforms>
                                 <platform>unix</platform>
                             </platforms>
@@ -101,7 +101,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>org.openbase.bco.psc.App</mainClass>
+                            <mainClass>org.openbase.bco.psc.PointingSmartControl</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

@@ -47,43 +47,28 @@ public class RSBConnection {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(RSBConnection.class);
     private Listener listener;
     
-    public RSBConnection(AbstractEventHandler handler) throws CouldNotPerformException {
+    public RSBConnection(AbstractEventHandler handler) throws CouldNotPerformException, InterruptedException {
         initializeListener(handler);
     }
     
-    public void deactivate() throws CouldNotPerformException{
+    public void deactivate() throws CouldNotPerformException, InterruptedException{
         try{
             listener.deactivate();
-        } catch (RSBException | InterruptedException ex) {
+        } catch (RSBException ex) {
             throw new CouldNotPerformException("Could not deactivate informer and listener.", ex);
         } 
     }
     
-    private void initializeListener(AbstractEventHandler handler) throws CouldNotPerformException{
+    private void initializeListener(AbstractEventHandler handler) throws CouldNotPerformException, InterruptedException{
         final ProtocolBufferConverter<PointingRay3DFloatCollectionType.PointingRay3DFloatCollection> converter = new ProtocolBufferConverter<>(
                     PointingRay3DFloatCollectionType.PointingRay3DFloatCollection.getDefaultInstance());
 
         DefaultConverterRepository.getDefaultConverterRepository()
             .addConverter(converter);
         
-        ParticipantConfig localConfig = Factory.getInstance().getDefaultParticipantConfig().copy();
-        Properties localProperties = new Properties();
-        localProperties.setProperty("transport.socket.host", "localhost");
-        for (TransportConfig tc : localConfig.getTransports().values()) {
-            tc.setEnabled(false);
-        }
-        localConfig.getOrCreateTransport("socket").setEnabled(true);
-        localConfig.getOrCreateTransport("socket").setOptions(localProperties);
-
-        
-//        factory.getDefaultParticipantConfig().getOrCreateTransport("socket").setEnabled(true);
-//        factory.getDefaultParticipantConfig().getOrCreateTransport("spread").setEnabled(false);
-////            System.out.println(factory.getDefaultParticipantConfig());
-////            factory.setDefaultParticipantConfig(localConfig);
-//        
         try {
             if(JPService.getProperty(JPLocalInput.class).getValue()){
-                listener = Factory.getInstance().createListener(JPService.getProperty(JPInScope.class).getValue(), localConfig);
+                listener = Factory.getInstance().createListener(JPService.getProperty(JPInScope.class).getValue(), getLocalConfig());
             } else {
                 listener = Factory.getInstance().createListener(JPService.getProperty(JPInScope.class).getValue());
             }
@@ -92,8 +77,20 @@ public class RSBConnection {
             // Add an EventHandler.
             listener.addHandler(handler, true);
             
-        } catch (JPNotAvailableException | RSBException | InterruptedException ex) {
+        } catch (JPNotAvailableException | RSBException ex) {
             throw new CouldNotPerformException("RSB listener could not be initialized.", ex);
         }
     }
+
+    private ParticipantConfig getLocalConfig() {
+        ParticipantConfig localConfig = Factory.getInstance().getDefaultParticipantConfig().copy();
+        Properties localProperties = new Properties();
+        localProperties.setProperty("transport.socket.host", "localhost");
+        for (TransportConfig tc : localConfig.getTransports().values()) {
+            tc.setEnabled(false);
+        }
+        localConfig.getOrCreateTransport("socket").setEnabled(true);
+        localConfig.getOrCreateTransport("socket").setOptions(localProperties);
+        return localConfig;
+    }   
 }

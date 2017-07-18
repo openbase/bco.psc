@@ -22,7 +22,6 @@ package org.openbase.bco.psc;
  * #L%
  */
 
-import org.openbase.bco.psc.registry.RegistryObjectManager;
 import org.openbase.bco.psc.selection.SelectableManager;
 import org.openbase.bco.psc.selection.AbstractSelectable;
 import org.openbase.bco.psc.selection.SelectorInterface;
@@ -46,10 +45,9 @@ import org.openbase.bco.psc.testing.TransformTestOffline;
  * 
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class App extends AbstractEventHandler {
+public class PointingSmartControl extends AbstractEventHandler {
 
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(App.class);
-    private SelectableManager selectableManager;
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(PointingSmartControl.class);
     private SelectorInterface selector;
     private RSBConnection rsbConnection;
 
@@ -62,14 +60,8 @@ public class App extends AbstractEventHandler {
         PointingRay3DFloatCollection collection = (PointingRay3DFloatCollection) event.getData();
     }
     
-    public App() {
+    public PointingSmartControl() {
         try {
-            selectableManager = new RegistryObjectManager();
-            //TODO: remove this bit
-            for (AbstractSelectable obj : selectableManager.getSelectables()) {
-                LOGGER.info(obj.toString());
-                selectableManager.processSelectedObject(obj);
-            }
             
 //            selector = new Selector(new AngleCornerMaxMeasure());
             rsbConnection = new RSBConnection(this);
@@ -82,7 +74,6 @@ public class App extends AbstractEventHandler {
             } finally {
                 // Deactivate the listener after use.
                 rsbConnection.deactivate();
-                ((RegistryObjectManager) selectableManager).shutdown();
             }
             System.exit(0);
         } catch (Exception ex) { 
@@ -93,7 +84,7 @@ public class App extends AbstractEventHandler {
 
     public static void main(String[] args) throws InterruptedException {
         /* Setup JPService */
-        JPService.setApplicationName(App.class);
+        JPService.setApplicationName(PointingSmartControl.class);
         JPService.registerProperty(JPInScope.class);
         JPService.registerProperty(JPLocalInput.class);
         JPService.registerProperty(JPRegistryFlags.class);
