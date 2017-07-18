@@ -44,8 +44,9 @@ public class SelectableObject implements Configurable<String, UnitConfig>, Abstr
     @Override
     public synchronized UnitConfig applyConfigUpdate(UnitConfig config) throws CouldNotPerformException, InterruptedException {
         this.config = config;
-//        Transform3D transform3D = ((AbstractUnitRemote)Units.getUnit(config, false)).getTransform3D();
-//        boundingBox = new BoundingBox(transform3D, config.getPlacementConfig().getShape().getBoundingBox());
+        //TODO check this again and follow through bounding box... this may now be done in a better fashion.
+        Transform3D transform3D = ((AbstractUnitRemote)Units.getUnit(config, false)).getTransform3D();
+        boundingBox = new BoundingBox(transform3D, config.getPlacementConfig().getShape().getBoundingBox());
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 //        return this.config;
     }

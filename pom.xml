@@ -86,7 +86,7 @@
                     <programs>
                         <program>
                             <mainClass>org.openbase.bco.psc.PointingSmartControl</mainClass>
-                            <id>PointingSmartControl</id>
+                            <id>bco-psc</id>
                             <platforms>
                                 <platform>unix</platform>
                             </platforms>
