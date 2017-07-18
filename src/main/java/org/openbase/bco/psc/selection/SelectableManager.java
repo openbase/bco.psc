@@ -4,7 +4,7 @@ package org.openbase.bco.psc.selection;
  * #%L
  * BCO Pointing Smart Control
  * %%
- * Copyright (C) 2016 openbase.org
+ * Copyright (C) 2016 - 2017 openbase.org
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -31,5 +31,5 @@ import org.openbase.jul.exception.CouldNotPerformException;
  */
 public interface SelectableManager {
     public List<AbstractSelectable> getSelectables();
-    public void processSelectedObject(AbstractSelectable selectedObject) throws CouldNotPerformException;
+    public void processSelectedObject(AbstractSelectable selectedObject) throws CouldNotPerformException, InterruptedException;
 }

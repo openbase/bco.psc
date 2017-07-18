@@ -4,7 +4,7 @@ package org.openbase.bco.psc.registry;
  * #%L
  * BCO Pointing Smart Control
  * %%
- * Copyright (C) 2016 openbase.org
+ * Copyright (C) 2016 - 2017 openbase.org
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -62,6 +62,13 @@ import rst.domotic.unit.unitgroup.UnitGroupConfigType;
 public class RegistryObjectManager implements Observer<UnitRegistryDataType.UnitRegistryData>, SelectableManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(RegistryObjectManager.class);
     
+    
+    //
+    //
+    // TODO: Ersetzen durch ähnliches wie in Stage...
+    //
+    //
+    
     private UnitRegistryRemote unitRemote;
     private LocationRegistryRemote locationRemote;
     private TransformReceiver transformReceiver;
@@ -71,7 +78,7 @@ public class RegistryObjectManager implements Observer<UnitRegistryDataType.Unit
 
     private final Map<String, AbstractSelectable> selectables;
 
-    public RegistryObjectManager() throws CouldNotPerformException {
+    public RegistryObjectManager() throws CouldNotPerformException, InterruptedException {
         selectables = new HashMap<>();
         try {
             REGISTRY_FLAGS = JPService.getProperty(JPRegistryFlags.class).getValue();
@@ -106,7 +113,7 @@ public class RegistryObjectManager implements Observer<UnitRegistryDataType.Unit
             unitRemote.addDataObserver(this);
             
             updateSelectables();
-        } catch (JPNotAvailableException | InterruptedException | CouldNotPerformException | TransformerFactory.TransformerFactoryException ex) {
+        } catch (JPNotAvailableException | CouldNotPerformException | TransformerFactory.TransformerFactoryException ex) {
             throw new CouldNotPerformException("Could not initialize connection!", ex);
         }
     }
@@ -166,7 +173,7 @@ public class RegistryObjectManager implements Observer<UnitRegistryDataType.Unit
         }
     }
     
-    private UnitSelectable createSelectable(UnitConfigType.UnitConfig config, boolean isGroup) throws CouldNotPerformException{
+    private UnitSelectable createSelectable(UnitConfigType.UnitConfig config, boolean isGroup) throws CouldNotPerformException, InterruptedException{
         try{
             String rootTransform = locationRemote.getRootLocationConfig().getPlacementConfig().getTransformationFrameId();
             // Lookup the transform
@@ -188,7 +195,7 @@ public class RegistryObjectManager implements Observer<UnitRegistryDataType.Unit
             }
             powerRemote.activate();
             return new UnitSelectable(config, toRootCoordinateTransform, powerRemote);
-        } catch (CouldNotPerformException | InterruptedException | ExecutionException ex) {
+        } catch (CouldNotPerformException | ExecutionException ex) {
             throw new CouldNotPerformException("Could not create selectable for config with id: " + config.getId(), ex);
         }
     }
@@ -233,7 +240,7 @@ public class RegistryObjectManager implements Observer<UnitRegistryDataType.Unit
     }
 
     @Override
-    public void processSelectedObject(AbstractSelectable selectedObject) throws CouldNotPerformException {
+    public void processSelectedObject(AbstractSelectable selectedObject) throws CouldNotPerformException, InterruptedException {
         //TODO: Get rid of instance casting?! Template in SelectableManager and action in AbstractSelectable?!
         if(selectedObject instanceof UnitSelectable){
             try {
@@ -249,7 +256,7 @@ public class RegistryObjectManager implements Observer<UnitRegistryDataType.Unit
                         break;
                 }
                 cObject.getPowerRemote().setPowerState(PowerState.newBuilder().setValue(newState).build());
-            } catch (CouldNotPerformException | InterruptedException ex) {
+            } catch (CouldNotPerformException ex) {
                 throw new CouldNotPerformException("Could not process the selected object!", ex);
             }
         } else {
