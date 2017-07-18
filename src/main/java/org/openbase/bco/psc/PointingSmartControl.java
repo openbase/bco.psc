@@ -157,5 +157,27 @@ public class PointingSmartControl extends AbstractEventHandler {
         JPService.parseAndExitOnError(args);
         
         PointingSmartControl app = new PointingSmartControl();
+        
+//        try {
+//            RegistryTemp temp = new RegistryTemp();
+//            
+////            JPService.printHelp();
+//            //TODO: Mit Marian angucken:
+////            TransformTest.test();
+////            TransformTestOffline.test();
+//            
+////            DistanceTest.test();
+//            
+//            
+////            ServiceRemoteTest.test1();
+////            ServiceRemoteTest.test2();
+//            
+////            DistanceTest.test();
+//            
+//            System.exit(0);
+//        } catch (Exception ex) {
+//            ExceptionPrinter.printHistory(new CouldNotPerformException("PointingSmartControl failed", ex), LOGGER);
+//            System.exit(255);
+//        }
     }
 }
