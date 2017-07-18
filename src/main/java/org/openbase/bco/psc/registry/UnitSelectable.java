@@ -31,7 +31,7 @@ import rst.domotic.unit.UnitConfigType.UnitConfig;
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class UnitSelectable extends AbstractSelectable {
+public class UnitSelectable implements AbstractSelectable {
 
     private PowerStateServiceRemote powerRemote;
     private BoundingBox boundingBox;

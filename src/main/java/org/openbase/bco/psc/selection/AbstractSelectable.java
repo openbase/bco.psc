@@ -1,5 +1,7 @@
 package org.openbase.bco.psc.selection;
 
+import org.openbase.jul.exception.NotAvailableException;
+
 /*-
  * #%L
  * BCO Pointing Smart Control
@@ -25,7 +27,6 @@ package org.openbase.bco.psc.selection;
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public abstract class AbstractSelectable {
-
-    public abstract BoundingBox getBoundingBox();
+public interface AbstractSelectable {
+    public BoundingBox getBoundingBox() throws NotAvailableException;
 }

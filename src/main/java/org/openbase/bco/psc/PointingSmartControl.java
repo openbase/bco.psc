@@ -22,16 +22,21 @@ package org.openbase.bco.psc;
  * #L%
  */
 
-import org.openbase.bco.psc.selection.SelectableManager;
-import org.openbase.bco.psc.selection.AbstractSelectable;
-import org.openbase.bco.psc.selection.SelectorInterface;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.openbase.bco.psc.jp.JPInScope;
 import org.openbase.bco.psc.jp.JPLocalInput;
 import org.openbase.bco.psc.jp.JPRegistryFlags;
 import org.openbase.bco.psc.jp.JPThreshold;
-import org.openbase.bco.psc.registry.RegistryTemp;
+import org.openbase.bco.psc.registry.PointingUnitChecker;
+import org.openbase.bco.psc.registry.SelectableObject;
+import org.openbase.bco.psc.registry.SelectableObjectFactory;
 import org.openbase.bco.psc.rsb.RSBConnection;
-import org.openbase.bco.psc.testing.DistanceTest;
+import org.openbase.bco.psc.selection.AbstractSelector;
+import org.openbase.bco.psc.selection.MaxSelector;
+import org.openbase.bco.psc.selection.distance.AngleCornerMaxMeasure;
 import org.openbase.jps.core.JPService;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.printer.ExceptionPrinter;
@@ -39,7 +44,15 @@ import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Event;
 import rst.tracking.PointingRay3DFloatCollectionType.PointingRay3DFloatCollection;
-import org.openbase.bco.psc.testing.TransformTestOffline;
+import org.openbase.bco.registry.remote.Registries;
+import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
+import org.openbase.jps.exception.JPNotAvailableException;
+import org.openbase.jul.exception.NotAvailableException;
+import org.openbase.jul.exception.VerificationFailedException;
+import org.openbase.jul.exception.printer.LogLevel;
+import org.openbase.jul.storage.registry.RegistrySynchronizer;
+import rst.domotic.unit.UnitConfigType;
+import rst.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
 
 /**
  * 
@@ -48,23 +61,46 @@ import org.openbase.bco.psc.testing.TransformTestOffline;
 public class PointingSmartControl extends AbstractEventHandler {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(PointingSmartControl.class);
-    private SelectorInterface selector;
+    private AbstractSelector selector;
     private RSBConnection rsbConnection;
+    
+    private RegistrySynchronizer<String, SelectableObject, UnitConfigType.UnitConfig, UnitConfigType.UnitConfig.Builder> selectableObjectRegistrySynchronizer;
+    
+    private List<String> registryFlags;
+    private boolean connectedRegistry = false;
+    
+    // TODO list:
+    //-decide for double or float! (Single unitConfig/unitProbabilityDistribution)
 
     @Override
     public void handleEvent(final Event event) {
-//        LOGGER.info(event.toString());
-        if (!(event.getData() instanceof PointingRay3DFloatCollection)) {
-            return;
+//        LOGGER.trace(event.toString());
+        if ((event.getData() instanceof PointingRay3DFloatCollection)) {
+            PointingRay3DFloatCollection collection = (PointingRay3DFloatCollection) event.getData();
+            try {
+                UnitProbabilityCollection selectedUnits = selector.getUnitProbabilities(collection);
+                // TODO process the results!
+            } catch (CouldNotPerformException ex) {
+                ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
+            }
         }
-        PointingRay3DFloatCollection collection = (PointingRay3DFloatCollection) event.getData();
     }
     
     public PointingSmartControl() {
         try {
+            //TODO: Include this
+            selector = new MaxSelector(new AngleCornerMaxMeasure());
+            try {
+                registryFlags = JPService.getProperty(JPRegistryFlags.class).getValue();
+                
+                initializeRegistryConnection();
+
+                rsbConnection = new RSBConnection(this);
+            } catch (CouldNotPerformException | JPNotAvailableException | InterruptedException ex) {
+                selectableObjectRegistrySynchronizer.deactivate();
+                throw ex;
+            }
             
-//            selector = new Selector(new AngleCornerMaxMeasure());
-            rsbConnection = new RSBConnection(this);
 //            
             try {
 //                // Wait for events.
@@ -77,11 +113,40 @@ public class PointingSmartControl extends AbstractEventHandler {
             }
             System.exit(0);
         } catch (Exception ex) { 
-            ExceptionPrinter.printHistory(new CouldNotPerformException("App failed", ex), LOGGER);
+            ExceptionPrinter.printHistory(new CouldNotPerformException("PointingSmartControl failed", ex), LOGGER);
             System.exit(255);
         }
     }
 
+    public final void initializeRegistryConnection() throws InterruptedException, CouldNotPerformException{
+        if(connectedRegistry) return;
+        try {
+            LOGGER.info("Initializing Registry synchronization.");
+            Registries.getUnitRegistry().waitForData(3, TimeUnit.SECONDS);
+            
+            this.selectableObjectRegistrySynchronizer = new RegistrySynchronizer<String, SelectableObject, UnitConfigType.UnitConfig, UnitConfigType.UnitConfig.Builder>(
+                    selector.getSelectedObjectRegistry(), getUnitRegistry().getUnitConfigRemoteRegistry(), SelectableObjectFactory.getInstance()) {
+                @Override
+                public boolean verifyConfig(UnitConfigType.UnitConfig config) throws VerificationFailedException {
+                    try {
+                        return PointingUnitChecker.isApplicableUnit(config, registryFlags);
+                    } catch (InterruptedException ex) {
+                        ExceptionPrinter.printHistory(ex, logger);
+                        return false;
+                    }
+                }
+            };
+            
+            Registries.waitForData(); 
+            selectableObjectRegistrySynchronizer.activate();
+            connectedRegistry = true;
+        } catch (NotAvailableException ex) {
+            throw new CouldNotPerformException("Could not connect to the registry.", ex);
+        } catch (CouldNotPerformException ex) {
+            throw new CouldNotPerformException("The RegistrySynchronization could not be activated although connection to the registry is possible.", ex);
+        }
+    }
+    
     public static void main(String[] args) throws InterruptedException {
         /* Setup JPService */
         JPService.setApplicationName(PointingSmartControl.class);
@@ -90,28 +155,29 @@ public class PointingSmartControl extends AbstractEventHandler {
         JPService.registerProperty(JPRegistryFlags.class);
         JPService.registerProperty(JPThreshold.class);
         JPService.parseAndExitOnError(args);
-//        App app = new App();
+        
+        PointingSmartControl app = new PointingSmartControl();
 
-        try {
-            RegistryTemp temp = new RegistryTemp();
-            
-//            JPService.printHelp();
-            //TODO: Mit Marian angucken:
-//            TransformTest.test();
-//            TransformTestOffline.test();
-            
-//            DistanceTest.test();
-            
-            
-//            ServiceRemoteTest.test1();
-//            ServiceRemoteTest.test2();
-            
-//            DistanceTest.test();
-            
-            System.exit(0);
-        } catch (Exception ex) {
-            ExceptionPrinter.printHistory(new CouldNotPerformException("App failed", ex), LOGGER);
-            System.exit(255);
-        }
+//        try {
+//            RegistryTemp temp = new RegistryTemp();
+//            
+////            JPService.printHelp();
+//            //TODO: Mit Marian angucken:
+////            TransformTest.test();
+////            TransformTestOffline.test();
+//            
+////            DistanceTest.test();
+//            
+//            
+////            ServiceRemoteTest.test1();
+////            ServiceRemoteTest.test2();
+//            
+////            DistanceTest.test();
+//            
+//            System.exit(0);
+//        } catch (Exception ex) {
+//            ExceptionPrinter.printHistory(new CouldNotPerformException("PointingSmartControl failed", ex), LOGGER);
+//            System.exit(255);
+//        }
     }
 }
