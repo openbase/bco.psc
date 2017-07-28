@@ -24,8 +24,6 @@ package org.openbase.bco.psc;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openbase.bco.psc.jp.JPInScope;
 import org.openbase.bco.psc.jp.JPLocalInput;
 import org.openbase.bco.psc.jp.JPRegistryFlags;

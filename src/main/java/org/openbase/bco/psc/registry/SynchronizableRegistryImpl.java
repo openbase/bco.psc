@@ -32,6 +32,8 @@ import org.openbase.jul.storage.registry.SynchronizableRegistry;
 /**
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
+ * @param <KEY>
+ * @param <ENTRY>
  */
 public class SynchronizableRegistryImpl<KEY, ENTRY extends Identifiable<KEY>> extends RegistryImpl<KEY, ENTRY> implements SynchronizableRegistry<KEY, ENTRY>{
 

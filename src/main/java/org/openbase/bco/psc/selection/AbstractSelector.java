@@ -22,8 +22,6 @@ package org.openbase.bco.psc.selection;
  * #L%
  */
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openbase.bco.psc.registry.SelectableObject;
 import org.openbase.bco.psc.registry.SynchronizableRegistryImpl;
 import org.openbase.jul.exception.CouldNotPerformException;

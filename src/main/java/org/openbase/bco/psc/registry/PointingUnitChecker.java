@@ -30,7 +30,6 @@ import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.printer.ExceptionPrinter;
 import org.openbase.jul.exception.printer.LogLevel;
 import org.slf4j.LoggerFactory;
-import rst.configuration.EntryType;
 import rst.configuration.MetaConfigType;
 import rst.domotic.service.ServiceConfigType;
 import rst.domotic.service.ServiceTemplateType;
@@ -80,10 +79,6 @@ public class PointingUnitChecker {
     public static boolean isRegistryFlagSet(MetaConfigType.MetaConfig meta, List<String> registryFlags){
         if(meta == null || meta.getEntryList() == null) 
             return false;
-        for (EntryType.Entry entry : meta.getEntryList()) {
-            if (registryFlags.contains(entry.getKey()))
-                return true;
-        }
-        return false;
+        return meta.getEntryList().stream().anyMatch((entry) -> (registryFlags.contains(entry.getKey())));
     }
 }
