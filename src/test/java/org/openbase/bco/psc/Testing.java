@@ -1,4 +1,4 @@
-package org.openbase.bco.psc.selection.distance;
+package org.openbase.bco.psc;
 
 /*-
  * #%L
@@ -24,22 +24,30 @@ package org.openbase.bco.psc.selection.distance;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
+import static org.junit.Assert.assertEquals;
 
 /**
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class AngleMeasure extends AbstractDistanceProbabilityMeasure {
-    //TODO: This is not right!
-    @Override
-    public double distanceProbability(Point3d origin, Vector3d direction, float width, float depth, float height) {
-        Vector3d toCenter = new Vector3d(origin);toCenter.scale(-1.0);
-        double angle = getAngle(toCenter, direction);
-        if(angle > Math.PI/2) return 0;
-        //TODO: Calculate probability:
-        double prob = Math.pow(Math.max(1 - angle*4/Math.PI, 0), .5);
-        System.out.println(angle / Math.PI);
-        System.out.println(prob);
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+public class Testing {
+    public static void assertAlmostEquals(Vector3d vector1, Vector3d vector2, double delta){
+        assertEquals(vector1.x, vector2.x, delta);
+        assertEquals(vector1.y, vector2.y, delta);
+        assertEquals(vector1.z, vector2.z, delta);
+    }
+    
+    public static void assertAlmostEquals(Vector3d vector1, Vector3d vector2) {
+        assertAlmostEquals(vector1, vector2, 0.00000000000001);
+    }
+    
+    public static void assertAlmostEquals(Point3d point1, Point3d point2, double delta){
+        assertEquals(point1.x, point2.x, delta);
+        assertEquals(point1.y, point2.y, delta);
+        assertEquals(point1.z, point2.z, delta);
+    }
+    
+    public static void assertAlmostEquals(Point3d point1, Point3d point2) {
+        assertAlmostEquals(point1, point2, 0.00000000000001);
     }
 }

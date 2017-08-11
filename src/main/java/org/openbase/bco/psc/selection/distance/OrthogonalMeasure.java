@@ -29,17 +29,13 @@ import javax.vecmath.Vector3d;
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class AngleMeasure extends AbstractDistanceProbabilityMeasure {
-    //TODO: This is not right!
+public class OrthogonalMeasure extends AbstractDistanceProbabilityMeasure {
+
     @Override
-    public double distanceProbability(Point3d origin, Vector3d direction, float width, float depth, float height) {
-        Vector3d toCenter = new Vector3d(origin);toCenter.scale(-1.0);
-        double angle = getAngle(toCenter, direction);
-        if(angle > Math.PI/2) return 0;
+    protected double distanceProbability(Point3d origin, Vector3d direction, float width, float depth, float height) {
+        double distance = getClosestPoint(origin, direction).distance(ZERO_POINT);
         //TODO: Calculate probability:
-        double prob = Math.pow(Math.max(1 - angle*4/Math.PI, 0), .5);
-        System.out.println(angle / Math.PI);
-        System.out.println(prob);
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    
 }

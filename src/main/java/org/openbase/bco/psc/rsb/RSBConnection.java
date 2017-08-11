@@ -32,6 +32,7 @@ import rsb.AbstractEventHandler;
 import rsb.Factory;
 import rsb.Listener;
 import rsb.RSBException;
+import rsb.Scope;
 import rsb.config.ParticipantConfig;
 import rsb.config.TransportConfig;
 import rsb.converter.DefaultConverterRepository;
@@ -55,7 +56,7 @@ public class RSBConnection {
         try{
             listener.deactivate();
         } catch (RSBException ex) {
-            throw new CouldNotPerformException("Could not deactivate informer and listener.", ex);
+            throw new CouldNotPerformException("Could not deactivate listener.", ex);
         } 
     }
     
@@ -67,10 +68,12 @@ public class RSBConnection {
             .addConverter(converter);
         
         try {
+            Scope inScope = JPService.getProperty(JPInScope.class).getValue();
+            LOGGER.info("Initializing RSB Listener on scope: " + inScope);
             if(JPService.getProperty(JPLocalInput.class).getValue()){
-                listener = Factory.getInstance().createListener(JPService.getProperty(JPInScope.class).getValue(), getLocalConfig());
+                listener = Factory.getInstance().createListener(inScope, getLocalConfig());
             } else {
-                listener = Factory.getInstance().createListener(JPService.getProperty(JPInScope.class).getValue());
+                listener = Factory.getInstance().createListener(inScope);
             }
             listener.activate();
             
