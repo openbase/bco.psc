@@ -55,7 +55,7 @@ public class SelectableObjectFactory implements Factory<SelectableObject, UnitCo
             box.applyConfigUpdate(config);
             return box;
         } catch (CouldNotPerformException ex) {
-            throw new InstantiationException("ObjectBoxInstance", ex);
+            throw new InstantiationException("SelectableObjectInstance", ex);
         }
     }
     
