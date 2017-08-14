@@ -1,8 +1,8 @@
-package org.openbase.bco.psc.identification.selection.distance;
+package org.openbase.bco.psc.lib.jp;
 
-/*-
+/*
  * #%L
- * BCO PSC Identification
+ * BCO PSC Library
  * %%
  * Copyright (C) 2016 - 2017 openbase.org
  * %%
@@ -22,23 +22,30 @@ package org.openbase.bco.psc.identification.selection.distance;
  * #L%
  */
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
+import org.openbase.jps.exception.JPNotAvailableException;
+import rsb.Scope;
 
 /**
+ * JPScope used to parse the scope used for receiving pointing ray events from a command line argument.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class OrthogonalVsMaxMeasure extends AbstractDistanceMeasure {
+public class JPRayScope extends AbstractJPScope {
+    /** The identifiers that can be used in front of the command line argument. */
+    public final static String[] COMMAND_IDENTIFIERS = {"--rs", "--ray-scope"};
+    
+    /** Constructor. */
+    public JPRayScope(){
+        super(COMMAND_IDENTIFIERS);
+    }
 
     @Override
-    protected double distanceProbability(Point3d origin, Vector3d direction, float width, float depth, float height) {
-        double distance = getClosestPoint(origin, direction).distance(ZERO_POINT);
-        Vector3d maxDirection = new Vector3d(getMaximalPointOnBox(origin, direction, width, depth, height));
-        maxDirection.sub(origin);
-        double maxDistance = getClosestPoint(origin, maxDirection).distance(ZERO_POINT);
-        //TODO: Calculate probability:
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public String getDescription() {
+        return "Defines the scope used to send or receive pointing ray data.";
     }
-    
+
+    @Override
+    protected Scope getPropertyDefaultValue() throws JPNotAvailableException {
+        return new Scope("/pointing_rays");
+    }
 }

@@ -48,7 +48,7 @@ public class JPThreshold extends AbstractJPFloat {
 
     @Override
     public String getDescription() {
-        return "Probability threshold defining how big the combined probability of a pointing gesture at a selection object has to be, to trigger its corresponding action.";
+        return "Probability threshold defining how big the probability has to be, to trigger its corresponding action.";
     }
 
     @Override

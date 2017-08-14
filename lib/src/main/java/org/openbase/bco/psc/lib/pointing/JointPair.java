@@ -1,4 +1,4 @@
-package org.openbase.bco.psc.lib.jp;
+package org.openbase.bco.psc.lib.pointing;
 
 /*-
  * #%L
@@ -22,30 +22,24 @@ package org.openbase.bco.psc.lib.jp;
  * #L%
  */
 
-import org.openbase.jps.exception.JPNotAvailableException;
-import rsb.Scope;
-
 /**
- * JPScope used to parse the inScope for receiving events from a command line argument.
- * 
+ *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPInScope extends AbstractJPScope {
-    /** The identifiers that can be used in front of the command line argument. */
-    public final static String[] COMMAND_IDENTIFIERS = {"--is", "--in-scope"};
-    
-    /** Constructor. */
-    public JPInScope(){
-        super(COMMAND_IDENTIFIERS);
+public class JointPair {
+    private final Joints joint1;
+    private final Joints joint2;
+
+    public JointPair(Joints joint1, Joints joint2) {
+        this.joint1 = joint1;
+        this.joint2 = joint2;
     }
 
-    @Override
-    public String getDescription() {
-        return "Defines the scope used to receive incoming data.";
+    public Joints getJoint1() {
+        return joint1;
     }
 
-    @Override
-    protected Scope getPropertyDefaultValue() throws JPNotAvailableException {
-        return new Scope("/pointing_rays");
+    public Joints getJoint2() {
+        return joint2;
     }
 }

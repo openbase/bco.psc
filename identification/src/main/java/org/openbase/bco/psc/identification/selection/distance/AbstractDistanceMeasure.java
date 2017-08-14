@@ -76,7 +76,8 @@ public abstract class AbstractDistanceMeasure {
     
     protected static final Point3d getMaximalPointOnBox(final Point3d origin, final Vector3d direction, final float width, final float depth, final float height) {
         Vector3d size = new Vector3d(width, depth, height);
-        Vector3d dims = new Vector3d(size);dims.scale(0.5);
+        Vector3d dims = new Vector3d(size);
+        dims.scale(0.5);
         Vector3d originDir = new Vector3d(origin);
         Vector3d toCenter = new Vector3d(originDir);
         toCenter.scale(-1);

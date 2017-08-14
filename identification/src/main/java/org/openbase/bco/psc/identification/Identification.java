@@ -40,8 +40,8 @@ import org.openbase.bco.psc.identification.selection.distance.DistanceType;
 import org.openbase.bco.psc.identification.selection.distance.OrthogonalMeasure;
 import org.openbase.bco.psc.identification.selection.distance.OrthogonalVsMaxMeasure;
 import org.openbase.bco.psc.identification.selection.distance.PearsonMeasure;
-import org.openbase.bco.psc.lib.jp.JPInScope;
 import org.openbase.bco.psc.lib.jp.JPLocalInput;
+import org.openbase.bco.psc.lib.jp.JPRayScope;
 import org.openbase.bco.psc.lib.jp.JPRegistryFlags;
 import org.openbase.bco.psc.lib.jp.JPThreshold;
 import org.openbase.bco.psc.lib.registry.PointingUnitChecker;
@@ -199,7 +199,7 @@ public class Identification extends AbstractEventHandler {
         JPService.registerProperty(JPThreshold.class);
         JPService.registerProperty(JPSelectorType.class);
         JPService.registerProperty(JPDistanceType.class);
-        JPService.registerProperty(JPInScope.class);
+        JPService.registerProperty(JPRayScope.class);
         JPService.registerProperty(JPLocalInput.class);
         JPService.parseAndExitOnError(args);
         

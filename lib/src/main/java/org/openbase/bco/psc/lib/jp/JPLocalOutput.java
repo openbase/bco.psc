@@ -1,8 +1,8 @@
-package org.openbase.bco.psc.identification.selection.distance;
+package org.openbase.bco.psc.lib.jp;
 
-/*-
+/*
  * #%L
- * BCO PSC Identification
+ * BCO PSC Library
  * %%
  * Copyright (C) 2016 - 2017 openbase.org
  * %%
@@ -22,23 +22,25 @@ package org.openbase.bco.psc.identification.selection.distance;
  * #L%
  */
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
+import org.openbase.jps.preset.AbstractJPBoolean;
 
 /**
+ * JavaProperty used to specify the use of a local RSB config for outgoing events.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class OrthogonalVsMaxMeasure extends AbstractDistanceMeasure {
+public class JPLocalOutput extends AbstractJPBoolean{
+    /** The identifier can be used as an command line argument to activate the use of a local RSB config. */
+    public final static String[] COMMAND_IDENTIFIERS = {"--lo", "--local-output"};
+
+    /** Constructor. */
+    public JPLocalOutput() {
+        super(COMMAND_IDENTIFIERS);
+    }
 
     @Override
-    protected double distanceProbability(Point3d origin, Vector3d direction, float width, float depth, float height) {
-        double distance = getClosestPoint(origin, direction).distance(ZERO_POINT);
-        Vector3d maxDirection = new Vector3d(getMaximalPointOnBox(origin, direction, width, depth, height));
-        maxDirection.sub(origin);
-        double maxDistance = getClosestPoint(origin, maxDirection).distance(ZERO_POINT);
-        //TODO: Calculate probability:
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public String getDescription() {
+        return "If true, the program will try to send the Output via socket and localhost.";
     }
     
 }
