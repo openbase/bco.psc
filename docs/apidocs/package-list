@@ -1,6 +1,7 @@
-org.openbase.bco.psc
-org.openbase.bco.psc.jp
-org.openbase.bco.psc.registry
-org.openbase.bco.psc.rsb
-org.openbase.bco.psc.selection
-org.openbase.bco.psc.selection.distance
+org.openbase.bco.psc.control
+org.openbase.bco.psc.identification
+org.openbase.bco.psc.identification.jp
+org.openbase.bco.psc.identification.registry
+org.openbase.bco.psc.identification.rsb
+org.openbase.bco.psc.identification.selection
+org.openbase.bco.psc.identification.selection.distance
