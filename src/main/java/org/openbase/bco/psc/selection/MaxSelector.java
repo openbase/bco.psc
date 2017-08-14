@@ -43,7 +43,7 @@ public class MaxSelector extends AbstractSelector {
     protected float calculateProbability(BoundingBox boundingBox, PointingRay3DFloatCollection pointingRays) {
         float maxProb = 0.0f;
         for (PointingRay3DFloat pointingRay : pointingRays.getElementList()) {
-            float prob = (float) (distance.probability(pointingRay, boundingBox) * pointingRay.getCertainty());
+            float prob = (float) (distance.probability(pointingRay.getRay(), boundingBox) * pointingRay.getCertainty());
             if(prob > maxProb){
                 maxProb = prob;
             }

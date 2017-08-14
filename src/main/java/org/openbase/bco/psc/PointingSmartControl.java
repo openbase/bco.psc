@@ -24,9 +24,11 @@ package org.openbase.bco.psc;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.openbase.bco.psc.jp.JPDistanceType;
 import org.openbase.bco.psc.jp.JPInScope;
 import org.openbase.bco.psc.jp.JPLocalInput;
 import org.openbase.bco.psc.jp.JPRegistryFlags;
+import org.openbase.bco.psc.jp.JPSelectorType;
 import org.openbase.bco.psc.jp.JPThreshold;
 import org.openbase.bco.psc.registry.PointingUnitChecker;
 import org.openbase.bco.psc.registry.SelectableObject;
@@ -34,7 +36,15 @@ import org.openbase.bco.psc.registry.SelectableObjectFactory;
 import org.openbase.bco.psc.rsb.RSBConnection;
 import org.openbase.bco.psc.selection.AbstractSelector;
 import org.openbase.bco.psc.selection.MaxSelector;
-import org.openbase.bco.psc.selection.distance.AngleCornerMaxMeasure;
+import org.openbase.bco.psc.selection.MeanSelector;
+import org.openbase.bco.psc.selection.SelectorType;
+import org.openbase.bco.psc.selection.distance.AbstractDistanceMeasure;
+import org.openbase.bco.psc.selection.distance.AngleMeasure;
+import org.openbase.bco.psc.selection.distance.AngleVsMaxMeasure;
+import org.openbase.bco.psc.selection.distance.DistanceType;
+import org.openbase.bco.psc.selection.distance.OrthogonalMeasure;
+import org.openbase.bco.psc.selection.distance.OrthogonalVsMaxMeasure;
+import org.openbase.bco.psc.selection.distance.PearsonMeasure;
 import org.openbase.jps.core.JPService;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.printer.ExceptionPrinter;
@@ -45,6 +55,7 @@ import rst.tracking.PointingRay3DFloatCollectionType.PointingRay3DFloatCollectio
 import org.openbase.bco.registry.remote.Registries;
 import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
 import org.openbase.jps.exception.JPNotAvailableException;
+import org.openbase.jul.exception.InstantiationException;
 import org.openbase.jul.exception.NotAvailableException;
 import org.openbase.jul.exception.VerificationFailedException;
 import org.openbase.jul.exception.printer.LogLevel;
@@ -86,8 +97,7 @@ public class PointingSmartControl extends AbstractEventHandler {
     
     public PointingSmartControl() {
         try {
-            //TODO: Include this
-            selector = new MaxSelector(new AngleCornerMaxMeasure());
+            initSelector();
             try {
                 registryFlags = JPService.getProperty(JPRegistryFlags.class).getValue();
                 
@@ -95,21 +105,18 @@ public class PointingSmartControl extends AbstractEventHandler {
 
                 rsbConnection = new RSBConnection(this);
             } catch (CouldNotPerformException | JPNotAvailableException | InterruptedException ex) {
-                selectableObjectRegistrySynchronizer.deactivate();
+//                selectableObjectRegistrySynchronizer.deactivate();
                 throw ex;
             }
-            
-//            
             try {
-//                // Wait for events.
-//                while (true) {
-//                    Thread.sleep(1);
-//                }
+                // Wait for events.
+                while (true) {
+                    Thread.sleep(1);
+                }
             } finally {
                 // Deactivate the listener after use.
                 rsbConnection.deactivate();
             }
-            System.exit(0);
         } catch (Exception ex) { 
             ExceptionPrinter.printHistory(new CouldNotPerformException("PointingSmartControl failed", ex), LOGGER);
             System.exit(255);
@@ -145,13 +152,55 @@ public class PointingSmartControl extends AbstractEventHandler {
         }
     }
     
+    private void initSelector() throws JPNotAvailableException, InstantiationException{
+        SelectorType selectorType = JPService.getProperty(JPSelectorType.class).getValue();
+        LOGGER.info("Selected Selector implementation: " + selectorType.name());
+        DistanceType distanceType = JPService.getProperty(JPDistanceType.class).getValue();
+        LOGGER.info("Selected Distance implementation: " + distanceType.name());
+        AbstractDistanceMeasure distanceMeasure;
+        switch(distanceType) {
+            case ANGLE:
+                distanceMeasure = new AngleMeasure();
+                break;
+            case ANGLE_MAX:
+                distanceMeasure = new AngleVsMaxMeasure();
+                break;
+            case ORTHOGONAL:
+                distanceMeasure = new OrthogonalMeasure();
+                break;
+            case ORTHOGONAL_MAX:
+                distanceMeasure = new OrthogonalVsMaxMeasure();
+                break;
+            case PEARSON:
+                distanceMeasure = new PearsonMeasure();
+                break;
+            default:
+                distanceMeasure = new AngleMeasure();
+                break;
+        }
+        switch(selectorType) {
+            case MAX:
+                selector = new MaxSelector(distanceMeasure);
+                break;
+            case MEAN:
+                selector = new MeanSelector(distanceMeasure);
+                break;
+            default:
+                selector = new MeanSelector(distanceMeasure);
+                break;
+        }
+        
+    }
+    
     public static void main(String[] args) throws InterruptedException {
         /* Setup JPService */
         JPService.setApplicationName(PointingSmartControl.class);
-        JPService.registerProperty(JPInScope.class);
-        JPService.registerProperty(JPLocalInput.class);
         JPService.registerProperty(JPRegistryFlags.class);
         JPService.registerProperty(JPThreshold.class);
+        JPService.registerProperty(JPSelectorType.class);
+        JPService.registerProperty(JPDistanceType.class);
+        JPService.registerProperty(JPInScope.class);
+        JPService.registerProperty(JPLocalInput.class);
         JPService.parseAndExitOnError(args);
         
         PointingSmartControl app = new PointingSmartControl();

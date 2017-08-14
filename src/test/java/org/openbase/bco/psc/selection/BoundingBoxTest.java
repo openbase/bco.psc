@@ -22,7 +22,6 @@ package org.openbase.bco.psc.selection;
  * #L%
  */
 
-import org.openbase.bco.psc.selection.BoundingBox;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
@@ -34,6 +33,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import static org.openbase.bco.psc.Testing.*;
 import rst.geometry.AxisAlignedBoundingBox3DFloatType.AxisAlignedBoundingBox3DFloat;
 import rst.geometry.TranslationType.Translation;
 
@@ -184,18 +184,6 @@ public class BoundingBoxTest {
         rotation.get(orientation);
         lfb.set(0, 1, 0.5);
         size.set(0.2f, 0.3f, 0.8f);
-    }
-    
-    private void assertAlmostEquals(Vector3d vector1, Vector3d vector2){
-        assertTrue(Math.abs(vector1.x - vector2.x) < 0.00000000000001);
-        assertTrue(Math.abs(vector1.y - vector2.y) < 0.00000000000001);
-        assertTrue(Math.abs(vector1.z - vector2.z) < 0.00000000000001);
-    }
-    
-    private void assertAlmostEquals(Point3d point1, Point3d point2){
-        assertTrue(Math.abs(point1.x - point2.x) < 0.00000000000001);
-        assertTrue(Math.abs(point1.y - point2.y) < 0.00000000000001);
-        assertTrue(Math.abs(point1.z - point2.z) < 0.00000000000001);
     }
     
     private static BoundingBox createFromDimensions(Vector3d unitTranslation, Matrix3d orientation, Vector3d lfb, Vector3d size){

@@ -28,14 +28,17 @@ import org.openbase.jps.core.AbstractJavaProperty;
 import org.openbase.jps.exception.JPNotAvailableException;
 
 /**
+ * JavaProperty used to specify flags by which controllable objects are selected from the registry.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class JPRegistryFlags extends AbstractJavaProperty<List<String>>{
+    /** String identifying the type of the argument. */
     public final static String[] ARGUMENT_IDENTIFIERS = {"STRING-LIST"};
+    /** The identifiers that can be used in front of the command line argument. */
     public final static String[] COMMAND_IDENTIFIERS = {"--rf", "--registry-flags"};
-    public final static String[] DEFAULT_VALUE = {"POINTING_GESTURE"};
 
+    /** Constructor. */
     public JPRegistryFlags() {
         super(COMMAND_IDENTIFIERS);
     }
@@ -47,7 +50,7 @@ public class JPRegistryFlags extends AbstractJavaProperty<List<String>>{
 
     @Override
     protected List<String> getPropertyDefaultValue() throws JPNotAvailableException {
-        return Arrays.asList(DEFAULT_VALUE);
+        return Arrays.asList(new String[]{"POINTING_GESTURE"});
     }
 
     @Override
@@ -64,5 +67,4 @@ public class JPRegistryFlags extends AbstractJavaProperty<List<String>>{
     public String getDescription() {
         return "Flags that can be set in the Meta Data of Registry UnitConfigs, to make them controllable via pointing gestures.";
     }
-    
 }

@@ -28,12 +28,19 @@ import org.openbase.jps.exception.JPBadArgumentException;
 import rsb.Scope;
 
 /**
- *
+ * JavaProperty used to parse an RSB Scope from a command line argument.
+ * 
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public abstract class AbstractJPScope extends AbstractJavaProperty<Scope> {
+    /** String identifying the type of the argument. */
     public final static String[] ARGUMENT_IDENTIFIERS = {"SCOPE"};
     
+    /**
+     * Constructor.
+     * 
+     * @param commandIdentifiers the identifiers used before the property in the command line arguments.
+     */
     public AbstractJPScope(String[] commandIdentifiers) {
         super(commandIdentifiers);
     }

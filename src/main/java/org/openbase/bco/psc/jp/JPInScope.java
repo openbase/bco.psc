@@ -26,12 +26,15 @@ import org.openbase.jps.exception.JPNotAvailableException;
 import rsb.Scope;
 
 /**
- *
+ * JPScope used to parse the inScope for receiving events from a command line argument.
+ * 
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class JPInScope extends AbstractJPScope {
+    /** The identifiers that can be used in front of the command line argument. */
     public final static String[] COMMAND_IDENTIFIERS = {"--is", "--in-scope"};
     
+    /** Constructor. */
     public JPInScope(){
         super(COMMAND_IDENTIFIERS);
     }

@@ -32,33 +32,56 @@ import rsb.AbstractEventHandler;
 import rsb.Factory;
 import rsb.Listener;
 import rsb.RSBException;
+import rsb.Scope;
 import rsb.config.ParticipantConfig;
-import rsb.config.TransportConfig;
 import rsb.converter.DefaultConverterRepository;
 import rsb.converter.ProtocolBufferConverter;
 import rsb.util.Properties;
 import rst.tracking.PointingRay3DFloatCollectionType;
 
 /**
+ * This class handles the RSB connections of the project.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class RSBConnection {
+    /** Logger instance. */
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(RSBConnection.class);
+    /** RSB Listener used to receive events. */
     private Listener listener;
     
+    /**
+     * Constructor.
+     * 
+     * @param handler is used to handle incoming events.
+     * @throws CouldNotPerformException is thrown, if the initialization of the class fails.
+     * @throws InterruptedException is thrown in case of an external interruption.
+     */
     public RSBConnection(AbstractEventHandler handler) throws CouldNotPerformException, InterruptedException {
         initializeListener(handler);
     }
     
+    /**
+     * Deactivates the RSB connection.
+     * 
+     * @throws CouldNotPerformException is thrown, if the deactivation fails.
+     * @throws InterruptedException is thrown in case of an external interruption.
+     */
     public void deactivate() throws CouldNotPerformException, InterruptedException{
         try{
             listener.deactivate();
         } catch (RSBException ex) {
-            throw new CouldNotPerformException("Could not deactivate informer and listener.", ex);
+            throw new CouldNotPerformException("Could not deactivate listener.", ex);
         } 
     }
     
+    /**
+     * Initializes the RSB Listener.
+     * 
+     * @param handler is used to handle incoming events.
+     * @throws CouldNotPerformException is thrown, if the initialization of the Listener fails.
+     * @throws InterruptedException is thrown in case of an external interruption.
+     */
     private void initializeListener(AbstractEventHandler handler) throws CouldNotPerformException, InterruptedException{
         final ProtocolBufferConverter<PointingRay3DFloatCollectionType.PointingRay3DFloatCollection> converter = new ProtocolBufferConverter<>(
                     PointingRay3DFloatCollectionType.PointingRay3DFloatCollection.getDefaultInstance());
@@ -67,10 +90,12 @@ public class RSBConnection {
             .addConverter(converter);
         
         try {
+            Scope inScope = JPService.getProperty(JPInScope.class).getValue();
+            LOGGER.info("Initializing RSB Listener on scope: " + inScope);
             if(JPService.getProperty(JPLocalInput.class).getValue()){
-                listener = Factory.getInstance().createListener(JPService.getProperty(JPInScope.class).getValue(), getLocalConfig());
+                listener = Factory.getInstance().createListener(inScope, getLocalConfig());
             } else {
-                listener = Factory.getInstance().createListener(JPService.getProperty(JPInScope.class).getValue());
+                listener = Factory.getInstance().createListener(inScope);
             }
             listener.activate();
             
@@ -82,15 +107,20 @@ public class RSBConnection {
         }
     }
 
+    /**
+     * Creates an RSB configuration for connecting via socket and localhost.
+     * 
+     * @return the local communication configuration.
+     */
     private ParticipantConfig getLocalConfig() {
         ParticipantConfig localConfig = Factory.getInstance().getDefaultParticipantConfig().copy();
         Properties localProperties = new Properties();
         localProperties.setProperty("transport.socket.host", "localhost");
-        for (TransportConfig tc : localConfig.getTransports().values()) {
+        localConfig.getTransports().values().forEach((tc) -> {
             tc.setEnabled(false);
-        }
+        });
         localConfig.getOrCreateTransport("socket").setEnabled(true);
         localConfig.getOrCreateTransport("socket").setOptions(localProperties);
         return localConfig;
-    }   
+    } 
 }

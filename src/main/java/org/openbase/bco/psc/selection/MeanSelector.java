@@ -43,7 +43,7 @@ public class MeanSelector extends AbstractSelector {
     protected float calculateProbability(BoundingBox boundingBox, PointingRay3DFloatCollection pointingRays) {
         float totalProb = 0.0f;
         for (PointingRay3DFloat pointingRay : pointingRays.getElementList()) {
-            totalProb += (float) (distance.probability(pointingRay, boundingBox) * pointingRay.getCertainty());
+            totalProb += (float) (distance.probability(pointingRay.getRay(), boundingBox) * pointingRay.getCertainty());
         }
         return totalProb;
     }

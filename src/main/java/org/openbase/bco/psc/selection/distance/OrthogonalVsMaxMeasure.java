@@ -22,26 +22,22 @@ package org.openbase.bco.psc.selection.distance;
  * #L%
  */
 
-import org.openbase.bco.psc.selection.BoundingBox;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
-import rst.tracking.PointingRay3DFloatType;
 
 /**
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class AngleCornerMaxMeasure extends AbstractDistanceMeasure {
-    
-    //TODO: Implement the change from center to translation.
-    
+public class OrthogonalVsMaxMeasure extends AbstractDistanceMeasure {
+
     @Override
-    protected double distanceProbability(Point3d origin, Vector3d direction, BoundingBox boundingBox) {
-        Vector3d centerVec = new Vector3d(boundingBox.getRootCenter());
-        centerVec.sub(origin);
-        double angle = getAngle(direction, centerVec);
-        if(angle > Math.PI/2) return Double.MAX_VALUE;
-        double maxAngle = getMaxAngle(origin, boundingBox);
-        return angle/maxAngle;
+    protected double distanceProbability(Point3d origin, Vector3d direction, float width, float depth, float height) {
+        double distance = getClosestPoint(origin, direction).distance(ZERO_POINT);
+        Vector3d maxDirection = new Vector3d(getMaximalPointOnBox(origin, direction, width, depth, height));maxDirection.sub(origin);
+        double maxDistance = getClosestPoint(origin, maxDirection).distance(ZERO_POINT);
+        //TODO: Calculate probability:
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    
 }

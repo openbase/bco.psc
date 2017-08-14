@@ -22,7 +22,6 @@ package org.openbase.bco.psc.selection.distance;
  * #L%
  */
 
-import org.openbase.bco.psc.selection.BoundingBox;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -30,23 +29,13 @@ import javax.vecmath.Vector3d;
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class CenterProjectionExtensionMeasure extends AbstractDistanceMeasure {
-    
-    //TODO: Implement the change from center to translation.
+public class OrthogonalMeasure extends AbstractDistanceMeasure {
 
     @Override
-    protected double distanceProbability(Point3d origin, Vector3d direction, BoundingBox boundingBox) {
-        // Smaller means closer to the center compared to object size. 0 is right at the center, 1 is on the border greater than 1 outside.
-        Vector3d dir = getPerpendicularFootDirection(origin, direction, boundingBox.getRootCenter());
-        System.out.println(dir);
-        if(dir == null) return Double.MAX_VALUE;
-        double centerDistance = dir.length();
-        
-        removeRotation(boundingBox.getOrientation(), dir);
-        
-        scaleDirectionToBoundingBox(dir, boundingBox); 
-        double maxDistance = dir.length();
-        
-        return centerDistance / maxDistance;
+    protected double distanceProbability(Point3d origin, Vector3d direction, float width, float depth, float height) {
+        double distance = getClosestPoint(origin, direction).distance(ZERO_POINT);
+        //TODO: Calculate probability:
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    
 }

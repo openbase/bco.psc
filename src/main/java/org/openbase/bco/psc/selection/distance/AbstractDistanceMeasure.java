@@ -22,168 +22,88 @@ package org.openbase.bco.psc.selection.distance;
  * #L%
  */
 
-import org.openbase.bco.psc.selection.BoundingBox;
-import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
+import org.openbase.bco.psc.selection.BoundingBox;
+import rst.geometry.Ray3DFloatType.Ray3DFloat;
 import rst.math.Vec3DFloatType.Vec3DFloat;
-import rst.tracking.PointingRay3DFloatType.PointingRay3DFloat;
 
 /**
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public abstract class AbstractDistanceMeasure {
+    protected static final Vector3d X_AXIS = new Vector3d(1,0,0);
+    protected static final Vector3d Y_AXIS = new Vector3d(0,1,0);
+    protected static final Vector3d Z_AXIS = new Vector3d(0,0,1);
+    protected static final Point3d ZERO_POINT = new Point3d(0,0,0);
+    protected static int argMin(double[] values){
+        if(values.length < 1) return -1;
+        int min_i = 0;
+        double min_val = values[0];
+        for(int i = 1; i < values.length; i++){
+            if(values[i] < min_val){
+                min_i = i;
+                min_val = values[i];
+            }
+        }
+        return min_i;
+    }
     
-    public static Vector3d toVector(Vec3DFloat vec3d){
+    protected static double min(double[] values){
+        if(values.length < 1) return Integer.MIN_VALUE;
+        double min_val = values[0];
+        for(int i = 1; i < values.length; i++){
+            if(values[i] < min_val){
+                min_val = values[i];
+                System.out.println(i);
+            }
+        }
+        return min_val;
+    }
+    
+    protected static Vector3d toVector(Vec3DFloat vec3d){
         return new Vector3d(vec3d.getX(), vec3d.getY(), vec3d.getZ());
     }
     
-    public static Point3d toPoint(Vec3DFloat vec3d){
+    protected static Point3d toPoint(Vec3DFloat vec3d){
         return new Point3d(vec3d.getX(), vec3d.getY(), vec3d.getZ());
     }
     
-    //TODO: Implement the change from center to translation.
-    //TODO: Check all the code and inheriting classes.
-    
-    public final double probability(PointingRay3DFloat ray, BoundingBox box){
-        Point3d origin = toPoint(ray.getRay().getOrigin());
-        Vector3d direction = toVector(ray.getRay().getDirection());
-        return distanceProbability(origin, direction, box);
-    }
-    
-    protected abstract double distanceProbability(final Point3d origin, final Vector3d direction, final BoundingBox boundingBox);
-    
-    protected final double getAngle(final Vector3d vec1, final Vector3d vec2){
+    protected static final double getAngle(final Vector3d vec1, final Vector3d vec2){
         return Math.acos(vec1.dot(vec2) / (vec1.length()*vec2.length()));
     }
     
-    protected final void scaleDirectionToBoundingBox(Vector3d direction, final BoundingBox boundingBox){
-        // intersect with closest plane in direction
-        direction.absolute();
-        direction.normalize();
-        Vector3d size = new Vector3d(boundingBox.getBoxVector());
-        Vector3d sizeNormalized = new Vector3d(boundingBox.getBoxVector());
-        sizeNormalized.normalize();
-        double x = direction.x / sizeNormalized.x;
-        double y = direction.y / sizeNormalized.y;
-        double z = direction.z / sizeNormalized.z;
-        if(x >= y){
-            if(x >= z){
-                direction.scale(size.x/direction.x);
-            } else {
-                direction.scale(size.z/direction.z);
-            }
-        } else {
-            if(z >= y){
-                direction.scale(size.z/direction.z);
-            } else {
-                direction.scale(size.y/direction.y);
-            }
-        }
-    }
-    
-    protected final int intersectWithPlanes(final Point3d origin, final Vector3d direction, final BoundingBox boundingBox){
-        // TODO: nicht so!!
+    protected static final Point3d getMaximalPointOnBox(final Point3d origin, final Vector3d direction, final float width, final float depth, final float height) {
+        Vector3d size = new Vector3d(width, depth, height);
+        Vector3d dims = new Vector3d(size);dims.scale(0.5);
+        Vector3d originDir = new Vector3d(origin);
+        Vector3d toCenter = new Vector3d(originDir);toCenter.scale(-1);
+        Vector3d planeNormal = new Vector3d(toCenter);planeNormal.normalize();
+        double factor = planeNormal.dot(toCenter)/planeNormal.dot(direction);
+        Vector3d orthoDir = new Vector3d(direction);orthoDir.scale(factor);orthoDir.add(originDir);
         
-        double factor = Double.MAX_VALUE;
-        int type = -1;
-        Vector3d centerVec = new Vector3d(boundingBox.getRootCenter());
-        centerVec.sub(origin);
-        removeRotation(boundingBox.getOrientation(), centerVec);
-        Vector3d dir = new Vector3d(direction);
-        removeRotation(boundingBox.getOrientation(), dir);
-        double temp = (centerVec.x - boundingBox.getBoxVector().x)/dir.x;
-        if (temp < 0) return -1;
-        if (temp < factor){ 
-            factor = temp;
-            type = 0;
-        }
-        temp = (centerVec.x + boundingBox.getBoxVector().x)/dir.x;
-        if (temp < 0) return -1;
-        if (temp < factor){ 
-            factor = temp;
-            type = 1;
-        }
-        temp = (centerVec.y - boundingBox.getBoxVector().y)/dir.y;
-        if (temp < 0) return -1;
-        if (temp < factor){ 
-            factor = temp;
-            type = 2;
-        }
-        temp = (centerVec.y + boundingBox.getBoxVector().y)/dir.y;
-        if (temp < 0) return -1;
-        if (temp < factor){ 
-            factor = temp;
-            type = 3;
-        }
-        temp = (centerVec.z - boundingBox.getBoxVector().z)/dir.z;
-        if (temp < 0) return -1;
-        if (temp < factor){ 
-            factor = temp;
-            type = 4;
-        }
-        temp = (centerVec.z + boundingBox.getBoxVector().z)/dir.z;
-        if (temp < 0) return -1;
-        if (temp < factor){ 
-            factor = temp;
-            type = 5;
-        }
-        if(type != -1){
-            dir.scale(factor);
-        }
-        return -1;
-    }
-    
-    protected final double getMaxAngle(final Point3d origin, final BoundingBox boundingBox){
-        double max = 0;
-        Vector3d centerVec = new Vector3d(boundingBox.getRootCenter());
-        centerVec.sub(origin);
-        removeRotation(boundingBox.getOrientation(), centerVec);
-        Vector3d cornerVec = new Vector3d(centerVec);
-        cornerVec.add(boundingBox.getBoxVector());
-        double temp = getAngle(cornerVec, centerVec);
-        if(temp > max) max = temp;
-        cornerVec.z -= 2*boundingBox.getBoxVector().z;
-        temp = getAngle(cornerVec, centerVec);
-        if(temp > max) max = temp;
-        cornerVec.y -= 2*boundingBox.getBoxVector().y;
-        temp = getAngle(cornerVec, centerVec);
-        if(temp > max) max = temp;
-        cornerVec.z += 2*boundingBox.getBoxVector().z;
-        temp = getAngle(cornerVec, centerVec);
-        if(temp > max) max = temp;
-        cornerVec.x -= 2*boundingBox.getBoxVector().x;
-        temp = getAngle(cornerVec, centerVec);
-        if(temp > max) max = temp;
-        cornerVec.z -= 2*boundingBox.getBoxVector().z;
-        temp = getAngle(cornerVec, centerVec);
-        if(temp > max) max = temp;
-        cornerVec.y += 2*boundingBox.getBoxVector().y;
-        temp = getAngle(cornerVec, centerVec);
-        if(temp > max) max = temp;
-        cornerVec.z += 2*boundingBox.getBoxVector().z;
-        temp = getAngle(cornerVec, centerVec);
-        if(temp > max) max = temp;
-        return max;
-    }
-    
-    /**
-     * Applies the inverse rotation of the Quaternion 'orientation' on the Vector 'direction'.
-     * 
-     * @param orientation the orientation to be removed from 'direction'.
-     * @param direction the direction whose rotation should be removed.
-     */
-    protected final void removeRotation(final Quat4d orientation, Vector3d direction){
-        // Transform direction
-        if(orientation != null && orientation.w != 0){
-            Matrix4d rotation = new Matrix4d();
-            rotation.set(orientation);
-            rotation.invert();
-//            System.out.println(rotation);
-            rotation.transform(direction);
-        }
+        double[] possibleFactors = new double[]{Math.abs(dims.x/orthoDir.x), Math.abs(dims.y/orthoDir.y), Math.abs(dims.z/orthoDir.z)};
+        int index = argMin(possibleFactors);
+        Vector3d indexVector = index == 0 ? X_AXIS : index == 1 ? Y_AXIS : Z_AXIS;
+        Vector3d facePoint = new Vector3d(orthoDir);facePoint.scale(possibleFactors[index]);
+        
+        Vector3d normalToPointingPlane = new Vector3d();normalToPointingPlane.cross(direction, orthoDir);
+        Vector3d faceNormal = new Vector3d(indexVector);faceNormal.scale(Math.signum(facePoint.dot(indexVector)));
+        Vector3d inFaceDir = new Vector3d();inFaceDir.cross(faceNormal, normalToPointingPlane);
+        
+        double sign = Math.signum(Math.abs(originDir.dot(indexVector)) - dims.dot(indexVector));
+        sign = sign != 0 ? sign : -1;
+        
+        double[] possibleScales = new double[3];
+        possibleScales[0] = Math.abs((dims.x - Math.signum(inFaceDir.x)*sign*facePoint.x)/inFaceDir.x);
+        possibleScales[1] = Math.abs((dims.y - Math.signum(inFaceDir.y)*sign*facePoint.y)/inFaceDir.y);
+        possibleScales[2] = Math.abs((dims.z - Math.signum(inFaceDir.z)*sign*facePoint.z)/inFaceDir.z);
+        possibleScales[index] = Double.MAX_VALUE;
+        double scale = min(possibleScales);
+        
+        Point3d result = new Point3d(inFaceDir);result.scale(sign*scale);result.add(facePoint);
+        return result;
     }
     
     /**
@@ -193,28 +113,41 @@ public abstract class AbstractDistanceMeasure {
      * @param vector the Vector to be projected.
      * @return the projection of 'vector' on 'onto'
      */
-    protected final Vector3d getProjection(final Vector3d onto, final Vector3d vector){
-        Vector3d direction = new Vector3d(vector);
+    protected static final Vector3d getProjection(final Vector3d onto, final Vector3d vector){
         Vector3d projection = new Vector3d(onto);
-        projection.scale(projection.dot(direction)/projection.lengthSquared());
+        projection.scale(projection.dot(vector)/onto.lengthSquared());
         return projection;
     }
     
     /**
-     * Calculates the direction vector from the Point 'point' towards its perpendicular foot on the Ray 'ray'.
+     * Calculates the Point on the ray that is closest to the center (0, 0, 0).
      * 
      * @param origin
      * @param direction
-     * @param point the Point to be projected.
      * @return the direction vector.
      */
-    protected final Vector3d getPerpendicularFootDirection(final Point3d origin, final Vector3d direction, final Point3d point){
-        Vector3d ap = new Vector3d(point);
-        ap.sub(origin);
-        Vector3d projection = getProjection(direction, ap);
-        if(direction.dot(projection) < 0) return null;
-        Vector3d dir = new Vector3d(projection);
-        dir.sub(ap);
-        return dir;
+    protected static Point3d getClosestPoint(Point3d origin, Vector3d direction) {
+        Vector3d toCenter = new Vector3d(origin);toCenter.scale(-1);
+        Vector3d projection = getProjection(direction, toCenter);
+        if(projection.dot(direction) < 0) return null;
+        Point3d closestPoint = new Point3d(origin);
+        closestPoint.add(projection);
+        return closestPoint;
     }
+    
+    public final double probability(Ray3DFloat ray, BoundingBox box){
+        Point3d origin = toPoint(ray.getOrigin());
+        Vector3d direction = toVector(ray.getDirection());
+        //Transform everything to center coordinates of bounding box.
+        Point3d transformedOrigin = box.toCenterCoordinates(origin);
+        Vector3d transformedDirection = box.toCenterCoordinates(direction);
+        double distance = new Vector3d(origin).length();
+        //TODO: How much is that?!
+        if(distance < 0.05){
+            return 1;
+        }
+        return distanceProbability(transformedOrigin, transformedDirection, box.getWidth(), box.getDepth(), box.getHeight());
+    }
+    
+    protected abstract double distanceProbability(final Point3d origin, final Vector3d direction, final float width, final float depth, final float height);
 }
