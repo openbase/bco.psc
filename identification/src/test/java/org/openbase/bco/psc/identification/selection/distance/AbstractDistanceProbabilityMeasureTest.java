@@ -22,7 +22,6 @@ package org.openbase.bco.psc.identification.selection.distance;
  * #L%
  */
 
-import org.openbase.bco.psc.identification.selection.distance.AbstractDistanceMeasure;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 import org.junit.Test;

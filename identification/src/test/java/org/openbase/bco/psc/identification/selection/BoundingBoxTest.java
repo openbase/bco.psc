@@ -22,7 +22,6 @@ package org.openbase.bco.psc.identification.selection;
  * #L%
  */
 
-import org.openbase.bco.psc.identification.selection.BoundingBox;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
