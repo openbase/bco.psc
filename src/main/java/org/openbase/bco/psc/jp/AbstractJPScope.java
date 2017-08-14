@@ -55,8 +55,8 @@ public abstract class AbstractJPScope extends AbstractJavaProperty<Scope> {
         String oneArgumentResult = getOneArgumentResult();
         try {
             return new Scope(oneArgumentResult);
-        } catch(IllegalArgumentException e){
-            throw new JPBadArgumentException("Given Scope[" + oneArgumentResult + "] is not a Scope.", e);
+        } catch(IllegalArgumentException ex){
+            throw new JPBadArgumentException("Given Scope[" + oneArgumentResult + "] is not a Scope.", ex);
         }
     }
 }
