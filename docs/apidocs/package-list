@@ -5,3 +5,5 @@ org.openbase.bco.psc.identification.registry
 org.openbase.bco.psc.identification.rsb
 org.openbase.bco.psc.identification.selection
 org.openbase.bco.psc.identification.selection.distance
+org.openbase.bco.psc.lib.jp
+org.openbase.bco.psc.lib.registry
