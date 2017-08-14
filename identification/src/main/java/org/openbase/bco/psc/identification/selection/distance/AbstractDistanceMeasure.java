@@ -78,19 +78,28 @@ public abstract class AbstractDistanceMeasure {
         Vector3d size = new Vector3d(width, depth, height);
         Vector3d dims = new Vector3d(size);dims.scale(0.5);
         Vector3d originDir = new Vector3d(origin);
-        Vector3d toCenter = new Vector3d(originDir);toCenter.scale(-1);
-        Vector3d planeNormal = new Vector3d(toCenter);planeNormal.normalize();
+        Vector3d toCenter = new Vector3d(originDir);
+        toCenter.scale(-1);
+        Vector3d planeNormal = new Vector3d(toCenter);
+        planeNormal.normalize();
+        
         double factor = planeNormal.dot(toCenter)/planeNormal.dot(direction);
-        Vector3d orthoDir = new Vector3d(direction);orthoDir.scale(factor);orthoDir.add(originDir);
+        Vector3d orthoDir = new Vector3d(direction);
+        orthoDir.scale(factor);
+        orthoDir.add(originDir);
         
         double[] possibleFactors = new double[]{Math.abs(dims.x/orthoDir.x), Math.abs(dims.y/orthoDir.y), Math.abs(dims.z/orthoDir.z)};
         int index = argMin(possibleFactors);
         Vector3d indexVector = index == 0 ? X_AXIS : index == 1 ? Y_AXIS : Z_AXIS;
-        Vector3d facePoint = new Vector3d(orthoDir);facePoint.scale(possibleFactors[index]);
+        Vector3d facePoint = new Vector3d(orthoDir);
+        facePoint.scale(possibleFactors[index]);
         
-        Vector3d normalToPointingPlane = new Vector3d();normalToPointingPlane.cross(direction, orthoDir);
-        Vector3d faceNormal = new Vector3d(indexVector);faceNormal.scale(Math.signum(facePoint.dot(indexVector)));
-        Vector3d inFaceDir = new Vector3d();inFaceDir.cross(faceNormal, normalToPointingPlane);
+        Vector3d normalToPointingPlane = new Vector3d();
+        normalToPointingPlane.cross(direction, orthoDir);
+        Vector3d faceNormal = new Vector3d(indexVector);
+        faceNormal.scale(Math.signum(facePoint.dot(indexVector)));
+        Vector3d inFaceDir = new Vector3d();
+        inFaceDir.cross(faceNormal, normalToPointingPlane);
         
         double sign = Math.signum(Math.abs(originDir.dot(indexVector)) - dims.dot(indexVector));
         sign = sign != 0 ? sign : -1;
@@ -102,7 +111,9 @@ public abstract class AbstractDistanceMeasure {
         possibleScales[index] = Double.MAX_VALUE;
         double scale = min(possibleScales);
         
-        Point3d result = new Point3d(inFaceDir);result.scale(sign*scale);result.add(facePoint);
+        Point3d result = new Point3d(inFaceDir);
+        result.scale(sign*scale);
+        result.add(facePoint);
         return result;
     }
     
@@ -127,7 +138,8 @@ public abstract class AbstractDistanceMeasure {
      * @return the direction vector.
      */
     protected static Point3d getClosestPoint(Point3d origin, Vector3d direction) {
-        Vector3d toCenter = new Vector3d(origin);toCenter.scale(-1);
+        Vector3d toCenter = new Vector3d(origin);
+        toCenter.scale(-1);
         Vector3d projection = getProjection(direction, toCenter);
         if(projection.dot(direction) < 0) return null;
         Point3d closestPoint = new Point3d(origin);

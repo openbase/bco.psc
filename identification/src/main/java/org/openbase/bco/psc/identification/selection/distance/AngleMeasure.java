@@ -30,10 +30,11 @@ import javax.vecmath.Vector3d;
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class AngleMeasure extends AbstractDistanceMeasure {
-    //TODO: This is not right!
+    //TODO: This is wrong!
     @Override
     public double distanceProbability(Point3d origin, Vector3d direction, float width, float depth, float height) {
-        Vector3d toCenter = new Vector3d(origin);toCenter.scale(-1.0);
+        Vector3d toCenter = new Vector3d(origin);
+        toCenter.scale(-1.0);
         double angle = getAngle(toCenter, direction);
         if(angle > Math.PI/2) return 0;
         //TODO: Calculate probability:

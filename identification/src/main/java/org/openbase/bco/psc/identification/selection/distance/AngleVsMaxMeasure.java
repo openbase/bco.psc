@@ -33,8 +33,10 @@ public class AngleVsMaxMeasure extends AbstractDistanceMeasure {
 
     @Override
     protected double distanceProbability(Point3d origin, Vector3d direction, float width, float depth, float height) {
-        Vector3d toCenter = new Vector3d(origin);toCenter.scale(-1.0);
-        Vector3d maxPointDirection = new Vector3d(getMaximalPointOnBox(origin, direction, width, depth, height));maxPointDirection.sub(origin);
+        Vector3d toCenter = new Vector3d(origin);
+        toCenter.scale(-1.0);
+        Vector3d maxPointDirection = new Vector3d(getMaximalPointOnBox(origin, direction, width, depth, height));
+        maxPointDirection.sub(origin);
         double angle = getAngle(toCenter, direction);
         if(angle > Math.PI/2) return 0;
         double maxAngle = getAngle(toCenter, maxPointDirection);
