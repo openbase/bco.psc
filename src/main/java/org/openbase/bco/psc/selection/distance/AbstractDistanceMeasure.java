@@ -32,7 +32,7 @@ import rst.math.Vec3DFloatType.Vec3DFloat;
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public abstract class AbstractDistanceProbabilityMeasure {
+public abstract class AbstractDistanceMeasure {
     protected static final Vector3d X_AXIS = new Vector3d(1,0,0);
     protected static final Vector3d Y_AXIS = new Vector3d(0,1,0);
     protected static final Vector3d Z_AXIS = new Vector3d(0,0,1);

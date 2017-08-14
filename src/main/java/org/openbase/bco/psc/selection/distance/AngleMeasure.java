@@ -29,7 +29,7 @@ import javax.vecmath.Vector3d;
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class AngleMeasure extends AbstractDistanceProbabilityMeasure {
+public class AngleMeasure extends AbstractDistanceMeasure {
     //TODO: This is not right!
     @Override
     public double distanceProbability(Point3d origin, Vector3d direction, float width, float depth, float height) {

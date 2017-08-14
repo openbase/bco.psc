@@ -22,7 +22,7 @@ package org.openbase.bco.psc.selection;
  * #L%
  */
 
-import org.openbase.bco.psc.selection.distance.AbstractDistanceProbabilityMeasure;
+import org.openbase.bco.psc.selection.distance.AbstractDistanceMeasure;
 import org.openbase.jul.exception.InstantiationException;
 import rst.tracking.PointingRay3DFloatCollectionType.PointingRay3DFloatCollection;
 import rst.tracking.PointingRay3DFloatType.PointingRay3DFloat;
@@ -32,9 +32,9 @@ import rst.tracking.PointingRay3DFloatType.PointingRay3DFloat;
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class MaxSelector extends AbstractSelector {
-    private final AbstractDistanceProbabilityMeasure distance;
+    private final AbstractDistanceMeasure distance;
     
-    public MaxSelector(AbstractDistanceProbabilityMeasure distance) throws InstantiationException {
+    public MaxSelector(AbstractDistanceMeasure distance) throws InstantiationException {
         super();
         this.distance = distance;
     }

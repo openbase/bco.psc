@@ -27,13 +27,17 @@ import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jps.preset.AbstractJPEnum;
 
 /**
+ * JavaProperty used to specify the AbstractDistanceMeasure implementation to be used.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class JPDistanceType extends AbstractJPEnum<DistanceType> {
+    /** The identifiers that can be used in front of the command line argument. */
     public final static String[] COMMAND_IDENTIFIERS = {"-d", "--distance-type"};
+    /** Names of the enum values. */
     private String typeNames;
 
+    /** Constructor. */
     public JPDistanceType() {
         super(COMMAND_IDENTIFIERS);
         DistanceType[] types = DistanceType.values();

@@ -25,12 +25,15 @@ package org.openbase.bco.psc.jp;
 import org.openbase.jps.preset.AbstractJPBoolean;
 
 /**
+ * JavaProperty used to specify the use of a local RSB config for incoming events.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class JPLocalInput extends AbstractJPBoolean{
+    /** The identifier can be used as an command line argument to activate the use of a local RSB config. */
     public final static String[] COMMAND_IDENTIFIERS = {"--li", "--local-input"};
 
+    /** Constructor. */
     public JPLocalInput() {
         super(COMMAND_IDENTIFIERS);
     }
@@ -39,5 +42,4 @@ public class JPLocalInput extends AbstractJPBoolean{
     public String getDescription() {
         return "If true, the program will try to receive the Input via socket and localhost.";
     }
-    
 }

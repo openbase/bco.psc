@@ -29,7 +29,7 @@ import javax.vecmath.Vector3d;
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class AngleVsMaxMeasure extends AbstractDistanceProbabilityMeasure {
+public class AngleVsMaxMeasure extends AbstractDistanceMeasure {
 
     @Override
     protected double distanceProbability(Point3d origin, Vector3d direction, float width, float depth, float height) {

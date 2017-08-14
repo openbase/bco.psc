@@ -28,12 +28,15 @@ import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jps.preset.AbstractJPFloat;
 
 /**
+ * JavaProperty used to specify the probability threshold that is applied before sending data.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPThreshold extends AbstractJPFloat{
+public class JPThreshold extends AbstractJPFloat {
+    /** The identifiers that can be used in front of the command line argument. */
     public final static String[] COMMAND_IDENTIFIERS = {"-t", "--threshold"};
     
+    /** Constructor. */
     public JPThreshold(){
         super(COMMAND_IDENTIFIERS);
     }

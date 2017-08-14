@@ -38,7 +38,7 @@ import org.openbase.bco.psc.selection.AbstractSelector;
 import org.openbase.bco.psc.selection.MaxSelector;
 import org.openbase.bco.psc.selection.MeanSelector;
 import org.openbase.bco.psc.selection.SelectorType;
-import org.openbase.bco.psc.selection.distance.AbstractDistanceProbabilityMeasure;
+import org.openbase.bco.psc.selection.distance.AbstractDistanceMeasure;
 import org.openbase.bco.psc.selection.distance.AngleMeasure;
 import org.openbase.bco.psc.selection.distance.AngleVsMaxMeasure;
 import org.openbase.bco.psc.selection.distance.DistanceType;
@@ -157,7 +157,7 @@ public class PointingSmartControl extends AbstractEventHandler {
         LOGGER.info("Selected Selector implementation: " + selectorType.name());
         DistanceType distanceType = JPService.getProperty(JPDistanceType.class).getValue();
         LOGGER.info("Selected Distance implementation: " + distanceType.name());
-        AbstractDistanceProbabilityMeasure distanceMeasure;
+        AbstractDistanceMeasure distanceMeasure;
         switch(distanceType) {
             case ANGLE:
                 distanceMeasure = new AngleMeasure();
