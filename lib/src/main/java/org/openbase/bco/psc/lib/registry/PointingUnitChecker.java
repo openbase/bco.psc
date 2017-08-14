@@ -1,4 +1,4 @@
-package org.openbase.bco.psc.identification.registry;
+package org.openbase.bco.psc.lib.registry;
 
 /*-
  * #%L

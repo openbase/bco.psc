@@ -22,8 +22,8 @@ package org.openbase.bco.psc.identification.rsb;
  * #L%
  */
 
-import org.openbase.bco.psc.identification.jp.JPInScope;
-import org.openbase.bco.psc.identification.jp.JPLocalInput;
+import org.openbase.bco.psc.lib.jp.JPInScope;
+import org.openbase.bco.psc.lib.jp.JPLocalInput;
 import org.openbase.jps.core.JPService;
 import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.exception.CouldNotPerformException;

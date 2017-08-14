@@ -1,4 +1,4 @@
-package org.openbase.bco.psc.identification.jp;
+package org.openbase.bco.psc.lib.jp;
 
 /*-
  * #%L

@@ -23,7 +23,7 @@ package org.openbase.bco.psc.identification.selection;
  */
 
 import org.openbase.bco.psc.identification.registry.SelectableObject;
-import org.openbase.bco.psc.identification.registry.SynchronizableRegistryImpl;
+import org.openbase.bco.psc.lib.registry.SynchronizableRegistryImpl;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InstantiationException;
 import org.openbase.jul.exception.NotAvailableException;
