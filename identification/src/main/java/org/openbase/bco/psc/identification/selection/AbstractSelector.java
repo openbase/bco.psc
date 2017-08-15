@@ -22,6 +22,7 @@ package org.openbase.bco.psc.identification.selection;
  * #L%
  */
 
+import java.util.stream.Collectors;
 import org.openbase.bco.psc.identification.registry.SelectableObject;
 import org.openbase.bco.psc.lib.registry.SynchronizableRegistryImpl;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -32,7 +33,8 @@ import org.openbase.jul.exception.printer.LogLevel;
 import org.slf4j.LoggerFactory;
 import rst.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
 import rst.domotic.unit.UnitProbabilityType.UnitProbability;
-import rst.tracking.PointingRay3DFloatCollectionType.PointingRay3DFloatCollection;
+import rst.tracking.PointingRay3DFloatDistributionCollectionType.PointingRay3DFloatDistributionCollection;
+import rst.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
 
 /**
  *
@@ -40,13 +42,15 @@ import rst.tracking.PointingRay3DFloatCollectionType.PointingRay3DFloatCollectio
  */
 public abstract class AbstractSelector {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AbstractSelector.class);
+    private final double threshold;
     //TODO: Ideas: maximal bounding box and kdtree first.
     // Then rating by distances
     // Maybe fast enough for required numbers
     
     private SynchronizableRegistryImpl<String, SelectableObject> selectedObjectRegistry;
     
-    public AbstractSelector() throws InstantiationException{
+    public AbstractSelector(double threshold) throws InstantiationException{
+        this.threshold = threshold;
         try {
             this.selectedObjectRegistry = new SynchronizableRegistryImpl<>();
         } catch (InstantiationException ex) {
@@ -58,22 +62,27 @@ public abstract class AbstractSelector {
         return selectedObjectRegistry;
     }
     
-    public UnitProbabilityCollection getUnitProbabilities(PointingRay3DFloatCollection pointingRays) throws CouldNotPerformException{
+    public UnitProbabilityCollection getUnitProbabilities(PointingRay3DFloatDistributionCollection pointingRays) throws CouldNotPerformException{
         UnitProbabilityCollection.Builder collectionBuilder = UnitProbabilityCollection.newBuilder();
-        try {
-            for(SelectableObject entry : selectedObjectRegistry.getEntries()){
-                try {
-                    float prob = calculateProbability(entry.getBoundingBox(), pointingRays);
-                    collectionBuilder.addElement(UnitProbability.newBuilder().setId(entry.getId()).setProbability(prob).build());
-                } catch (NotAvailableException ex) {
-                    ExceptionPrinter.printHistory(new CouldNotPerformException("Could not calculate the probability for a SelectableObject", ex), LOGGER, LogLevel.WARN);
-                }
-            }
-        } catch (CouldNotPerformException ex) {
-            throw new CouldNotPerformException("Could not get UnitProbabilitites", ex);
-        }
+        collectionBuilder.addAllElement(selectedObjectRegistry.getEntries().stream()
+                .map(entry -> pointingRays.getElementList().stream()
+                        .map(rayDist -> getUnitProbability(entry, rayDist))
+                        .min((u1, u2) -> Float.compare(u1.getProbability(), u2.getProbability())))
+                .filter(u -> u.isPresent() && u.get().getProbability() >= threshold)
+                .map(u -> u.get())
+                .collect(Collectors.toList()));
         return collectionBuilder.build();
     }
     
-    protected abstract float calculateProbability(BoundingBox boundingBox, PointingRay3DFloatCollection pointingRays);
+    private UnitProbability getUnitProbability(SelectableObject object, PointingRay3DFloatDistribution rayDistribution) {
+        try {
+            float prob = calculateProbability(object.getBoundingBox(), rayDistribution);
+            return UnitProbability.newBuilder().setId(object.getId()).setProbability(prob).build();
+        } catch (NotAvailableException ex) {
+            ExceptionPrinter.printHistory(new CouldNotPerformException("Could not calculate the probability for a SelectableObject", ex), LOGGER, LogLevel.WARN);
+            return UnitProbability.newBuilder().setProbability(Float.NEGATIVE_INFINITY).build();
+        }
+    }
+    
+    protected abstract float calculateProbability(BoundingBox boundingBox, PointingRay3DFloatDistribution pointingRays);
 }

@@ -24,7 +24,7 @@ package org.openbase.bco.psc.identification.selection;
 
 import org.openbase.bco.psc.identification.selection.distance.AbstractDistanceMeasure;
 import org.openbase.jul.exception.InstantiationException;
-import rst.tracking.PointingRay3DFloatCollectionType.PointingRay3DFloatCollection;
+import rst.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
 import rst.tracking.PointingRay3DFloatType.PointingRay3DFloat;
 
 /**
@@ -34,15 +34,15 @@ import rst.tracking.PointingRay3DFloatType.PointingRay3DFloat;
 public class MeanSelector extends AbstractSelector {
     private final AbstractDistanceMeasure distance;
     
-    public MeanSelector(AbstractDistanceMeasure distance) throws InstantiationException{
-        super();
+    public MeanSelector(double threshold, AbstractDistanceMeasure distance) throws InstantiationException{
+        super(threshold);
         this.distance = distance;
     }
 
     @Override
-    protected float calculateProbability(BoundingBox boundingBox, PointingRay3DFloatCollection pointingRays) {
+    protected float calculateProbability(BoundingBox boundingBox, PointingRay3DFloatDistribution pointingRays) {
         float totalProb = 0.0f;
-        for (PointingRay3DFloat pointingRay : pointingRays.getElementList()) {
+        for (PointingRay3DFloat pointingRay : pointingRays.getRayList()) {
             totalProb += (float) (distance.probability(pointingRay.getRay(), boundingBox) * pointingRay.getCertainty());
         }
         return totalProb;

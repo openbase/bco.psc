@@ -62,6 +62,7 @@ import org.openbase.jul.exception.printer.LogLevel;
 import org.openbase.jul.storage.registry.RegistrySynchronizer;
 import rst.domotic.unit.UnitConfigType;
 import rst.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
+import rst.tracking.PointingRay3DFloatDistributionCollectionType.PointingRay3DFloatDistributionCollection;
 
 /**
  * 
@@ -80,12 +81,13 @@ public class Identification extends AbstractEventHandler {
     
     // TODO list:
     //-decide for double or float! (Single unitConfig/unitProbabilityDistribution)
+    // Use the new pointing ray types!
 
     @Override
     public void handleEvent(final Event event) {
 //        LOGGER.trace(event.toString());
-        if ((event.getData() instanceof PointingRay3DFloatCollection)) {
-            PointingRay3DFloatCollection collection = (PointingRay3DFloatCollection) event.getData();
+        if ((event.getData() instanceof PointingRay3DFloatDistributionCollection)) {
+            PointingRay3DFloatDistributionCollection collection = (PointingRay3DFloatDistributionCollection) event.getData();
             try {
                 UnitProbabilityCollection selectedUnits = selector.getUnitProbabilities(collection);
                 // TODO process the results!
@@ -157,6 +159,8 @@ public class Identification extends AbstractEventHandler {
         LOGGER.info("Selected Selector implementation: " + selectorType.name());
         DistanceType distanceType = JPService.getProperty(JPDistanceType.class).getValue();
         LOGGER.info("Selected Distance implementation: " + distanceType.name());
+        double threshold = JPService.getProperty(JPThreshold.class).getValue();
+        LOGGER.info("Selected threshold: " + threshold);
         AbstractDistanceMeasure distanceMeasure;
         switch(distanceType) {
             case ANGLE:
@@ -180,13 +184,13 @@ public class Identification extends AbstractEventHandler {
         }
         switch(selectorType) {
             case MAX:
-                selector = new MaxSelector(distanceMeasure);
+                selector = new MaxSelector(threshold, distanceMeasure);
                 break;
             case MEAN:
-                selector = new MeanSelector(distanceMeasure);
+                selector = new MeanSelector(threshold, distanceMeasure);
                 break;
             default:
-                selector = new MeanSelector(distanceMeasure);
+                selector = new MeanSelector(threshold, distanceMeasure);
                 break;
         }
         
