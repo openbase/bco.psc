@@ -49,7 +49,7 @@
                 <configuration>
                     <programs>
                         <program>
-                            <mainClass>org.openbase.bco.psc.Control</mainClass>
+                            <mainClass>org.openbase.bco.psc.control.Control</mainClass>
                             <id>bco-psc-control</id>
                             <platforms>
                                 <platform>unix</platform>

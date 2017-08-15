@@ -22,19 +22,25 @@ package org.openbase.bco.psc.control;
  * #L%
  */
 
+import org.openbase.bco.psc.control.rsb.RSBConnection;
+import org.openbase.jul.exception.CouldNotPerformException;
+import org.openbase.jul.exception.printer.ExceptionPrinter;
+import org.openbase.jul.exception.printer.LogLevel;
+import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Event;
+import rst.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
+import rst.tracking.PointingRay3DFloatCollectionType.PointingRay3DFloatCollection;
 
 /**
  * 
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class Control extends AbstractEventHandler {
-
-//    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Control.class);
-//    private AbstractSelector selector;
-//    private RSBConnection rsbConnection;
-//    
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Control.class);
+    
+    private RSBConnection rsbConnection;
+    
 //    private RegistrySynchronizer<String, SelectableObject, UnitConfigType.UnitConfig, UnitConfigType.UnitConfig.Builder> selectableObjectRegistrySynchronizer;
 //    
 //    private List<String> registryFlags;
@@ -45,16 +51,16 @@ public class Control extends AbstractEventHandler {
 //
     @Override
     public void handleEvent(final Event event) {
-//        LOGGER.trace(event.toString());
-//        if ((event.getData() instanceof PointingRay3DFloatCollection)) {
-//            PointingRay3DFloatCollection collection = (PointingRay3DFloatCollection) event.getData();
+        LOGGER.trace(event.toString());
+        if ((event.getData() instanceof UnitProbabilityCollection)) {
+            UnitProbabilityCollection collection = (UnitProbabilityCollection) event.getData();
 //            try {
 //                UnitProbabilityCollection selectedUnits = selector.getUnitProbabilities(collection);
-//                // TODO process the results!
+                // TODO process the results!
 //            } catch (CouldNotPerformException ex) {
 //                ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
 //            }
-//        }
+        }
     }
 //    
 //    public Control() {
