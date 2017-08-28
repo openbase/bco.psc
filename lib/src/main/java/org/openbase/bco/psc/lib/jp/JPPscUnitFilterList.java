@@ -32,27 +32,46 @@ import org.openbase.jps.exception.JPNotAvailableException;
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPRegistryFlags extends AbstractJavaProperty<List<String>>{
+public class JPPscUnitFilterList extends AbstractJavaProperty<List<String>>{
     /** String identifying the type of the argument. */
     public final static String[] ARGUMENT_IDENTIFIERS = {"STRING-LIST"};
     /** The identifiers that can be used in front of the command line argument. */
-    public final static String[] COMMAND_IDENTIFIERS = {"--rf", "--registry-flags"};
+    public final static String[] COMMAND_IDENTIFIERS = {"--fl", "--filter-list"};
 
     /** Constructor. */
-    public JPRegistryFlags() {
+    public JPPscUnitFilterList() {
         super(COMMAND_IDENTIFIERS);
     }
+    //TODO: Rename to Filter PSC Units
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @return {@inheritDoc}
+     */
     @Override
     protected String[] generateArgumentIdentifiers() {
         return ARGUMENT_IDENTIFIERS;
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @return {@inheritDoc}
+     * @throws JPNotAvailableException {@inheritDoc}
+     */
     @Override
     protected List<String> getPropertyDefaultValue() throws JPNotAvailableException {
         return Arrays.asList(new String[]{"POINTING_GESTURE"});
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @param arguments {@inheritDoc}
+     * @return {@inheritDoc}
+     * @throws Exception {@inheritDoc}
+     */
     @Override
     protected List<String> parse(List<String> arguments) throws Exception {
 //        for (String argument : arguments) {
@@ -63,8 +82,13 @@ public class JPRegistryFlags extends AbstractJavaProperty<List<String>>{
         return arguments;
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @return {@inheritDoc}
+     */
     @Override
     public String getDescription() {
-        return "Flags that can be set in the Meta Data of Registry UnitConfigs, to make them controllable via pointing gestures.";
+        return "Filters that can be set in the Meta Data of Registry UnitConfigs, to make them controllable via pointing gestures.";
     }
 }

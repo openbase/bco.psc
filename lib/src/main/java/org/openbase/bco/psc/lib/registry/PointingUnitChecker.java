@@ -25,15 +25,15 @@ package org.openbase.bco.psc.lib.registry;
 import java.util.List;
 import org.openbase.bco.dal.remote.unit.AbstractUnitRemote;
 import org.openbase.bco.dal.remote.unit.Units;
+import org.openbase.bco.registry.lib.util.UnitConfigProcessor;
 import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
 import org.openbase.jul.exception.CouldNotPerformException;
-import org.openbase.jul.exception.printer.ExceptionPrinter;
-import org.openbase.jul.exception.printer.LogLevel;
 import org.slf4j.LoggerFactory;
-import rst.configuration.MetaConfigType;
-import rst.domotic.service.ServiceConfigType;
-import rst.domotic.service.ServiceTemplateType;
-import rst.domotic.unit.UnitConfigType;
+import rst.configuration.MetaConfigType.MetaConfig;
+import rst.domotic.service.ServiceConfigType.ServiceConfig;
+import rst.domotic.service.ServiceTemplateType.ServiceTemplate;
+import rst.domotic.unit.UnitConfigType.UnitConfig;
+import rst.domotic.unit.UnitTemplateType.UnitTemplate.UnitType;
 
 /**
  *
@@ -42,41 +42,52 @@ import rst.domotic.unit.UnitConfigType;
 public class PointingUnitChecker {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(PointingUnitChecker.class);
     
-    public static boolean isApplicableUnit(UnitConfigType.UnitConfig config, List<String> registryFlags) throws InterruptedException {
+    public static boolean isPointingControlUnit(UnitConfig config, List<String> registryFlags) throws InterruptedException, CouldNotPerformException {
         if (config != null && isRegistryFlagSet(config.getMetaConfig(), registryFlags)) {
-            return hasPowerStateService(config) && hasLocationData(config);
+            return hasPowerStateService(config) && isDalOrGroupWithLocation(config);
+        }
+        return false;
+    }
+  
+    public static boolean isDalOrGroupWithLocation(UnitConfig config) throws InterruptedException, CouldNotPerformException {
+        try {
+            if (config != null && (config.getType() == UnitType.UNIT_GROUP || UnitConfigProcessor.isDalUnit(config))) {
+                return hasLocationData(config);
+            }
+        } catch (CouldNotPerformException ex) {
+            throw new CouldNotPerformException("Could not check if unit " + config.getLabel() + " is dal unit.", ex);
         }
         return false;
     }
     
-    public static boolean hasLocationData(UnitConfigType.UnitConfig config) throws InterruptedException{
+    private static boolean hasLocationData(UnitConfig config) throws InterruptedException {
         try {
             AbstractUnitRemote unitRemote = (AbstractUnitRemote) Units.getUnit(config, false);
             unitRemote.getGlobalBoundingBoxCenterPoint3d();
             return true;
         } catch (CouldNotPerformException ex) {
-            ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.WARN);
+//            ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.WARN);
             return false;
         }
     }
     
-    public static boolean hasPowerStateService(UnitConfigType.UnitConfig config) throws InterruptedException{
-        for (ServiceConfigType.ServiceConfig sc : config.getServiceConfigList()) {
-            ServiceTemplateType.ServiceTemplate.ServiceType type;
+    private static boolean hasPowerStateService(UnitConfig config) throws InterruptedException {
+        for (ServiceConfig sc : config.getServiceConfigList()) {
+            ServiceTemplate.ServiceType type;
             try {
                 type = getUnitRegistry().getServiceTemplateById(sc.getServiceDescription().getServiceTemplateId()).getType();
             } catch (CouldNotPerformException ex) {
                 type = sc.getServiceDescription().getType();
             } 
-            if (ServiceTemplateType.ServiceTemplate.ServiceType.POWER_STATE_SERVICE == type
-                    && ServiceTemplateType.ServiceTemplate.ServicePattern.OPERATION == sc.getServiceDescription().getPattern()) {
+            if (ServiceTemplate.ServiceType.POWER_STATE_SERVICE == type
+                    && ServiceTemplate.ServicePattern.OPERATION == sc.getServiceDescription().getPattern()) {
                 return true;
             }
         }
         return false;
     }
     
-    public static boolean isRegistryFlagSet(MetaConfigType.MetaConfig meta, List<String> registryFlags){
+    private static boolean isRegistryFlagSet(MetaConfig meta, List<String> registryFlags) {
         if(meta == null || meta.getEntryList() == null) 
             return false;
         return meta.getEntryList().stream().anyMatch((entry) -> (registryFlags.contains(entry.getKey())));

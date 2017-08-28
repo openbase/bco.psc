@@ -39,11 +39,22 @@ public class JPSelectedUnitScope extends AbstractJPScope {
         super(COMMAND_IDENTIFIERS);
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @return {@inheritDoc}
+     */
     @Override
     public String getDescription() {
         return "Defines the scope used to send or receive units selected by pointing and their probabilities.";
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @return {@inheritDoc}
+     * @throws JPNotAvailableException {@inheritDoc}
+     */
     @Override
     protected Scope getPropertyDefaultValue() throws JPNotAvailableException {
         return new Scope("/selected_units");

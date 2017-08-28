@@ -38,6 +38,11 @@ public class JPLocalInput extends AbstractJPBoolean{
         super(COMMAND_IDENTIFIERS);
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @return {@inheritDoc}
+     */
     @Override
     public String getDescription() {
         return "If true, the program will try to receive the Input via socket and localhost.";

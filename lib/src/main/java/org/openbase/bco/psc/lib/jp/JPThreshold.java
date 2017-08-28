@@ -41,11 +41,22 @@ public class JPThreshold extends AbstractJPFloat {
         super(COMMAND_IDENTIFIERS);
     }
     
+    /**
+     * {@inheritDoc}
+     * 
+     * @return {@inheritDoc}
+     * @throws JPNotAvailableException {@inheritDoc}
+     */
     @Override
     protected Float getPropertyDefaultValue() throws JPNotAvailableException {
         return 0.0f;
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @return {@inheritDoc}
+     */
     @Override
     public String getDescription() {
         return "Probability threshold defining how big the probability has to be, to trigger its corresponding action.";

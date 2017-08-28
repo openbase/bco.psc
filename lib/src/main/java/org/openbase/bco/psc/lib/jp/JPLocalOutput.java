@@ -38,6 +38,11 @@ public class JPLocalOutput extends AbstractJPBoolean{
         super(COMMAND_IDENTIFIERS);
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @return {@inheritDoc}
+     */
     @Override
     public String getDescription() {
         return "If true, the program will try to send the Output via socket and localhost.";

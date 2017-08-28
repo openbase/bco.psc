@@ -45,11 +45,23 @@ public abstract class AbstractJPScope extends AbstractJavaProperty<Scope> {
         super(commandIdentifiers);
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @return {@inheritDoc}
+     */
     @Override
     protected String[] generateArgumentIdentifiers() {
         return ARGUMENT_IDENTIFIERS;
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @param arguments {@inheritDoc}
+     * @return {@inheritDoc}
+     * @throws JPBadArgumentException {@inheritDoc}
+     */
     @Override
     protected Scope parse(List<String> arguments) throws JPBadArgumentException {
         String oneArgumentResult = getOneArgumentResult();

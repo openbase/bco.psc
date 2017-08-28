@@ -39,11 +39,22 @@ public class JPPostureScope extends AbstractJPScope {
         super(COMMAND_IDENTIFIERS);
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @return {@inheritDoc}
+     */
     @Override
     public String getDescription() {
         return "Defines the scope used to send or receive posture data.";
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @return {@inheritDoc}
+     * @throws JPNotAvailableException {@inheritDoc}
+     */
     @Override
     protected Scope getPropertyDefaultValue() throws JPNotAvailableException {
         return new Scope("/skeleton/merged");
