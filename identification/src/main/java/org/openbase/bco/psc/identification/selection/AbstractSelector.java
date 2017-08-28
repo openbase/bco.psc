@@ -24,12 +24,12 @@ package org.openbase.bco.psc.identification.selection;
 
 import java.util.stream.Collectors;
 import org.openbase.bco.psc.identification.registry.SelectableObject;
-import org.openbase.bco.psc.lib.registry.SynchronizableRegistryImpl;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InstantiationException;
 import org.openbase.jul.exception.NotAvailableException;
 import org.openbase.jul.exception.printer.ExceptionPrinter;
 import org.openbase.jul.exception.printer.LogLevel;
+import org.openbase.jul.storage.registry.SynchronizableRegistryImpl;
 import org.slf4j.LoggerFactory;
 import rst.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
 import rst.domotic.unit.UnitProbabilityType.UnitProbability;

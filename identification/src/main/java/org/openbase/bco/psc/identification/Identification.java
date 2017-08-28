@@ -41,8 +41,10 @@ import org.openbase.bco.psc.identification.selection.distance.OrthogonalMeasure;
 import org.openbase.bco.psc.identification.selection.distance.OrthogonalVsMaxMeasure;
 import org.openbase.bco.psc.identification.selection.distance.PearsonMeasure;
 import org.openbase.bco.psc.lib.jp.JPLocalInput;
+import org.openbase.bco.psc.lib.jp.JPLocalOutput;
 import org.openbase.bco.psc.lib.jp.JPRayScope;
-import org.openbase.bco.psc.lib.jp.JPRegistryFlags;
+import org.openbase.bco.psc.lib.jp.JPPscUnitFilterList;
+import org.openbase.bco.psc.lib.jp.JPSelectedUnitScope;
 import org.openbase.bco.psc.lib.jp.JPThreshold;
 import org.openbase.bco.psc.lib.registry.PointingUnitChecker;
 import org.openbase.jps.core.JPService;
@@ -51,7 +53,6 @@ import org.openbase.jul.exception.printer.ExceptionPrinter;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Event;
-import rst.tracking.PointingRay3DFloatCollectionType.PointingRay3DFloatCollection;
 import org.openbase.bco.registry.remote.Registries;
 import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
 import org.openbase.jps.exception.JPNotAvailableException;
@@ -77,11 +78,9 @@ public class Identification extends AbstractEventHandler {
     private RegistrySynchronizer<String, SelectableObject, UnitConfigType.UnitConfig, UnitConfigType.UnitConfig.Builder> selectableObjectRegistrySynchronizer;
     
     private List<String> registryFlags;
-    private boolean connectedRegistry = false;
     
     // TODO list:
     //-decide for double or float! (Single unitConfig/unitProbabilityDistribution)
-    // Use the new pointing ray types!
 
     @Override
     public void handleEvent(final Event event) {
@@ -90,7 +89,7 @@ public class Identification extends AbstractEventHandler {
             PointingRay3DFloatDistributionCollection collection = (PointingRay3DFloatDistributionCollection) event.getData();
             try {
                 UnitProbabilityCollection selectedUnits = selector.getUnitProbabilities(collection);
-                // TODO process the results!
+                rsbConnection.sendUnitProbabilities(selectedUnits);
             } catch (CouldNotPerformException ex) {
                 ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
             }
@@ -101,13 +100,13 @@ public class Identification extends AbstractEventHandler {
         try {
             initSelector();
             try {
-                registryFlags = JPService.getProperty(JPRegistryFlags.class).getValue();
+                registryFlags = JPService.getProperty(JPPscUnitFilterList.class).getValue();
                 
                 initializeRegistryConnection();
 
                 rsbConnection = new RSBConnection(this);
             } catch (CouldNotPerformException | JPNotAvailableException | InterruptedException ex) {
-//                selectableObjectRegistrySynchronizer.deactivate();
+                selectableObjectRegistrySynchronizer.deactivate();
                 throw ex;
             }
             try {
@@ -119,14 +118,22 @@ public class Identification extends AbstractEventHandler {
                 // Deactivate the listener after use.
                 rsbConnection.deactivate();
             }
+            
+            //TODO: Remove this!
+//            rsbConnection = new RSBConnection(this);
+//            rsbConnection.sendUnitProbabilities(UnitProbabilityCollection.newBuilder().addElement(
+////                    UnitProbability.newBuilder().setId("c8b2bfb5-45d9-4a2b-9994-d4062ab19cab").setProbability(1.0f)
+////                    UnitProbability.newBuilder().setId("c8b2bfb5-45da9-4a2b-9994-d4062ab19cab").setProbability(1.0f)
+//                    UnitProbability.newBuilder().setId("2c95255e-a491-46d7-a6a6-f66d5e6c2d3b").setProbability(1.0f)
+//            ).build());
+//            rsbConnection.deactivate();
         } catch (Exception ex) { 
-            ExceptionPrinter.printHistory(new CouldNotPerformException("PointingSmartControl failed", ex), LOGGER);
+            ExceptionPrinter.printHistory(new CouldNotPerformException("PSC Identification failed", ex), LOGGER);
             System.exit(255);
         }
     }
 
-    public final void initializeRegistryConnection() throws InterruptedException, CouldNotPerformException{
-        if(connectedRegistry) return;
+    private void initializeRegistryConnection() throws InterruptedException, CouldNotPerformException{
         try {
             LOGGER.info("Initializing Registry synchronization.");
             Registries.getUnitRegistry().waitForData(3, TimeUnit.SECONDS);
@@ -136,9 +143,13 @@ public class Identification extends AbstractEventHandler {
                 @Override
                 public boolean verifyConfig(UnitConfigType.UnitConfig config) throws VerificationFailedException {
                     try {
-                        return PointingUnitChecker.isApplicableUnit(config, registryFlags);
+                        return PointingUnitChecker.isPointingControlUnit(config, registryFlags);
                     } catch (InterruptedException ex) {
-                        ExceptionPrinter.printHistory(ex, logger);
+                        Thread.currentThread().interrupt();
+                        ExceptionPrinter.printHistory(ex, logger, LogLevel.ERROR);
+                        return false;
+                    } catch (CouldNotPerformException ex) {
+                        ExceptionPrinter.printHistory(ex, logger, LogLevel.WARN);
                         return false;
                     }
                 }
@@ -146,7 +157,6 @@ public class Identification extends AbstractEventHandler {
             
             Registries.waitForData(); 
             selectableObjectRegistrySynchronizer.activate();
-            connectedRegistry = true;
         } catch (NotAvailableException ex) {
             throw new CouldNotPerformException("Could not connect to the registry.", ex);
         } catch (CouldNotPerformException ex) {
@@ -199,12 +209,14 @@ public class Identification extends AbstractEventHandler {
     public static void main(String[] args) throws InterruptedException {
         /* Setup JPService */
         JPService.setApplicationName(Identification.class);
-        JPService.registerProperty(JPRegistryFlags.class);
+        JPService.registerProperty(JPPscUnitFilterList.class);
         JPService.registerProperty(JPThreshold.class);
         JPService.registerProperty(JPSelectorType.class);
         JPService.registerProperty(JPDistanceType.class);
         JPService.registerProperty(JPRayScope.class);
+        JPService.registerProperty(JPSelectedUnitScope.class);
         JPService.registerProperty(JPLocalInput.class);
+        JPService.registerProperty(JPLocalOutput.class);
         JPService.parseAndExitOnError(args);
         
         Identification app = new Identification();

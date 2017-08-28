@@ -39,8 +39,15 @@ import rst.domotic.unit.UnitConfigType.UnitConfig;
 public class SelectableObject implements Configurable<String, UnitConfig>, AbstractSelectable{
     private UnitConfig config;
     private BoundingBox boundingBox;
-    public SelectableObject(){}
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @param config {@inheritDoc}
+     * @return {@inheritDoc}
+     * @throws CouldNotPerformException {@inheritDoc}
+     * @throws InterruptedException {@inheritDoc}
+     */
     @Override
     public synchronized UnitConfig applyConfigUpdate(UnitConfig config) throws CouldNotPerformException, InterruptedException {
         this.config = config;
@@ -51,18 +58,36 @@ public class SelectableObject implements Configurable<String, UnitConfig>, Abstr
 //        return this.config;
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @return {@inheritDoc}
+     * @throws NotAvailableException {@inheritDoc}
+     */
     @Override
     public synchronized String getId() throws NotAvailableException {
         if(config == null) throw new NotAvailableException("Id");
         return config.getId();
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @return {@inheritDoc}
+     * @throws NotAvailableException {@inheritDoc}
+     */
     @Override
     public synchronized UnitConfig getConfig() throws NotAvailableException {
         if(config == null) throw new NotAvailableException("Config");
         return config;
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @return {@inheritDoc}
+     * @throws NotAvailableException {@inheritDoc}
+     */
     @Override
     public synchronized BoundingBox getBoundingBox() throws NotAvailableException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

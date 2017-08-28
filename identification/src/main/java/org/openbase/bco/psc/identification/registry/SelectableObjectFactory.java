@@ -48,6 +48,14 @@ public class SelectableObjectFactory implements Factory<SelectableObject, UnitCo
         return instance;
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @param config {@inheritDoc}
+     * @return {@inheritDoc}
+     * @throws InstantiationException {@inheritDoc}
+     * @throws InterruptedException {@inheritDoc}
+     */
     @Override
     public SelectableObject newInstance(UnitConfigType.UnitConfig config) throws InstantiationException, InterruptedException {
         try {
