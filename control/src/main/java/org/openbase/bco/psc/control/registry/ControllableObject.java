@@ -1,8 +1,8 @@
-package org.openbase.bco.psc.identification.registry;
+package org.openbase.bco.psc.control.registry;
 
 /*-
  * #%L
- * BCO PSC Identification
+ * BCO PSC Control
  * %%
  * Copyright (C) 2016 - 2017 openbase.org
  * %%
@@ -22,49 +22,119 @@ package org.openbase.bco.psc.identification.registry;
  * #L%
  */
 
-import javax.media.j3d.Transform3D;
-import org.openbase.bco.dal.remote.unit.AbstractUnitRemote;
-import org.openbase.bco.dal.remote.unit.Units;
-import org.openbase.bco.psc.identification.selection.AbstractSelectable;
-import org.openbase.bco.psc.identification.selection.BoundingBox;
+import org.openbase.bco.dal.remote.service.PowerStateServiceRemote;
+import org.openbase.bco.dal.remote.service.ServiceRemoteFactoryImpl;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
 import org.openbase.jul.iface.Configurable;
+import org.slf4j.LoggerFactory;
+import rst.domotic.service.ServiceTemplateType;
+import rst.domotic.state.PowerStateType.PowerState;
 import rst.domotic.unit.UnitConfigType.UnitConfig;
 
 /**
- *
+ * This class represents a Unit which whose power state can be controlled.
+ * 
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class SelectableObject implements Configurable<String, UnitConfig>, AbstractSelectable{
+public class ControllableObject implements Configurable<String, UnitConfig> {
+    /** Logger instance. */
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ControllableObject.class);
+    /** Cooldown time that is required before the power state can be switched again. */
+    private final long cooldownTime;
+    /** UnitConfig of the corresponding Unit. */
     private UnitConfig config;
-    private BoundingBox boundingBox;
-    public SelectableObject(){}
+    /** PowerStateServiceRemote used to control the power state. */
+    private PowerStateServiceRemote serviceRemote;
+    /** Timestamp of the last power switch action. */
+    private long lastSwitch = 0;
+    
+    /**
+     * Constructor. 
+     * 
+     * @param cooldownTime Cooldown time that is required before the power state can be switched again.
+     */
+    public ControllableObject(final long cooldownTime) {
+        this.cooldownTime = cooldownTime;
+    }
+    
+    /**
+     * Switches the power state of the corresponding unit (from off to on and vice versa).
+     * 
+     * @return true, if the power switch was successful.
+     * @throws CouldNotPerformException is thrown if something goes wrong during the power switch.
+     */
+    public synchronized boolean switchPowerState() throws CouldNotPerformException{
+        long currentTime = System.currentTimeMillis();
+        if(currentTime - lastSwitch > cooldownTime) {
+            PowerState.State newState;
+            try {
+                switch(serviceRemote.getPowerState().getValue()) {
+                    case OFF:
+                    case UNKNOWN:
+                    default:
+                        newState = PowerState.State.ON;
+                        break;
+                    case ON:
+                        newState = PowerState.State.OFF;
+                        break;
+                }
+                LOGGER.info("Switching power of " + config.getLabel() + " to " + newState.toString());
+                serviceRemote.setPowerState(PowerState.newBuilder().setValue(newState).build());
+            } catch (CouldNotPerformException ex) {
+                throw new CouldNotPerformException("Could not switch power state.", ex);
+            }
+            lastSwitch = currentTime;
+            return true;
+        }
+        return false;
+    }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @param config {@inheritDoc}
+     * @return {@inheritDoc}
+     * @throws CouldNotPerformException {@inheritDoc}
+     * @throws InterruptedException {@inheritDoc}
+     */
     @Override
     public synchronized UnitConfig applyConfigUpdate(UnitConfig config) throws CouldNotPerformException, InterruptedException {
         this.config = config;
-        //TODO check this again and follow through bounding box... this may now be done in a better fashion.
-        Transform3D transform3D = ((AbstractUnitRemote)Units.getUnit(config, false)).getTransform3D();
-        boundingBox = new BoundingBox(transform3D, config.getPlacementConfig().getShape().getBoundingBox());
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//        return this.config;
+        try {
+            serviceRemote = (PowerStateServiceRemote)
+                    ServiceRemoteFactoryImpl.getInstance().newInitializedInstance(
+                            ServiceTemplateType.ServiceTemplate.ServiceType.POWER_STATE_SERVICE,
+                            config);
+            serviceRemote.activate();
+            System.out.println(serviceRemote.getPowerState());
+        } catch (CouldNotPerformException ex) {
+            throw new CouldNotPerformException("Could not apply ConfigUpdate on ControllableObject", ex);
+        }
+        return this.config;
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @return {@inheritDoc}
+     * @throws NotAvailableException {@inheritDoc}
+     */
     @Override
     public synchronized String getId() throws NotAvailableException {
         if(config == null) throw new NotAvailableException("Id");
         return config.getId();
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @return {@inheritDoc}
+     * @throws NotAvailableException {@inheritDoc}
+     */
     @Override
     public synchronized UnitConfig getConfig() throws NotAvailableException {
         if(config == null) throw new NotAvailableException("Config");
         return config;
-    }
-
-    @Override
-    public synchronized BoundingBox getBoundingBox() throws NotAvailableException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

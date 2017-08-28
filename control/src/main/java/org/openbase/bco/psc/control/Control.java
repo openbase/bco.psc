@@ -22,15 +22,34 @@ package org.openbase.bco.psc.control;
  * #L%
  */
 
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import org.openbase.bco.psc.control.jp.JPCooldownTime;
+import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
+import org.openbase.bco.psc.control.registry.ControllableObject;
+import org.openbase.bco.psc.control.registry.ControllableObjectFactory;
 import org.openbase.bco.psc.control.rsb.RSBConnection;
+import org.openbase.bco.psc.lib.jp.JPLocalInput;
+import org.openbase.bco.psc.lib.jp.JPPscUnitFilterList;
+import org.openbase.bco.psc.lib.jp.JPSelectedUnitScope;
+import org.openbase.bco.psc.lib.jp.JPThreshold;
+import org.openbase.bco.psc.lib.registry.PointingUnitChecker;
+import org.openbase.bco.registry.remote.Registries;
+import org.openbase.jps.core.JPService;
+import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.exception.CouldNotPerformException;
+import org.openbase.jul.exception.InstantiationException;
+import org.openbase.jul.exception.NotAvailableException;
+import org.openbase.jul.exception.VerificationFailedException;
 import org.openbase.jul.exception.printer.ExceptionPrinter;
 import org.openbase.jul.exception.printer.LogLevel;
+import org.openbase.jul.storage.registry.RegistrySynchronizer;
+import org.openbase.jul.storage.registry.SynchronizableRegistryImpl;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Event;
+import rst.domotic.unit.UnitConfigType;
 import rst.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
-import rst.tracking.PointingRay3DFloatCollectionType.PointingRay3DFloatCollection;
 
 /**
  * 
@@ -41,136 +60,112 @@ public class Control extends AbstractEventHandler {
     
     private RSBConnection rsbConnection;
     
-//    private RegistrySynchronizer<String, SelectableObject, UnitConfigType.UnitConfig, UnitConfigType.UnitConfig.Builder> selectableObjectRegistrySynchronizer;
-//    
-//    private List<String> registryFlags;
-//    private boolean connectedRegistry = false;
-//    
-//    // TODO list:
-//    //-decide for double or float! (Single unitConfig/unitProbabilityDistribution)
-//
+    private RegistrySynchronizer<String, ControllableObject, UnitConfigType.UnitConfig, UnitConfigType.UnitConfig.Builder> controllableObjectRegistrySynchronizer;
+    private SynchronizableRegistryImpl<String, ControllableObject> controllableObjectRegistry;
+    
+    private List<String> registryFlags;
+    private double threshold;
+    
     @Override
     public void handleEvent(final Event event) {
+        //TODO: Test program with unit group!!
         LOGGER.trace(event.toString());
         if ((event.getData() instanceof UnitProbabilityCollection)) {
             UnitProbabilityCollection collection = (UnitProbabilityCollection) event.getData();
-//            try {
-//                UnitProbabilityCollection selectedUnits = selector.getUnitProbabilities(collection);
-                // TODO process the results!
-//            } catch (CouldNotPerformException ex) {
-//                ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
-//            }
+            collection.getElementList().stream().filter(x -> x.getProbability() >= threshold).forEach(x -> {
+                try {
+                    if(controllableObjectRegistry.contains(x.getId())){
+                        try {
+                            if(controllableObjectRegistry.get(x.getId()).switchPowerState()) {
+                                LOGGER.info("Switched power state of unit "+controllableObjectRegistry.get(x.getId()).getConfig().getLabel() +" with id " + x.getId());
+                            } else {
+                                LOGGER.info("Did not switch power state of unit "+controllableObjectRegistry.get(x.getId()).getConfig().getLabel() +" with id " + x.getId());
+                            }
+                        } catch (CouldNotPerformException ex) {
+                            ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
+                        }
+                    }
+                } catch (CouldNotPerformException ex) {
+                    ExceptionPrinter.printHistory(new CouldNotPerformException("Id of the UnitProbability is not set.", ex), LOGGER, LogLevel.WARN);
+                }
+            });
         }
     }
-//    
-//    public Control() {
-//        try {
-//            initSelector();
-//            try {
-//                registryFlags = JPService.getProperty(JPRegistryFlags.class).getValue();
-//                
-//                initializeRegistryConnection();
-//
-//                rsbConnection = new RSBConnection(this);
-//            } catch (CouldNotPerformException | JPNotAvailableException | InterruptedException ex) {
-////                selectableObjectRegistrySynchronizer.deactivate();
-//                throw ex;
-//            }
-//            try {
-//                // Wait for events.
-//                while (true) {
-//                    Thread.sleep(1);
-//                }
-//            } finally {
-//                // Deactivate the listener after use.
-//                rsbConnection.deactivate();
-//            }
-//        } catch (Exception ex) { 
-//            ExceptionPrinter.printHistory(new CouldNotPerformException("Control failed", ex), LOGGER);
-//            System.exit(255);
-//        }
-//    }
-//
-//    public final void initializeRegistryConnection() throws InterruptedException, CouldNotPerformException{
-//        if(connectedRegistry) return;
-//        try {
-//            LOGGER.info("Initializing Registry synchronization.");
-//            Registries.getUnitRegistry().waitForData(3, TimeUnit.SECONDS);
-//            
-//            this.selectableObjectRegistrySynchronizer = new RegistrySynchronizer<String, SelectableObject, UnitConfigType.UnitConfig, UnitConfigType.UnitConfig.Builder>(
-//                    selector.getSelectedObjectRegistry(), getUnitRegistry().getUnitConfigRemoteRegistry(), SelectableObjectFactory.getInstance()) {
-//                @Override
-//                public boolean verifyConfig(UnitConfigType.UnitConfig config) throws VerificationFailedException {
-//                    try {
-//                        return PointingUnitChecker.isApplicableUnit(config, registryFlags);
-//                    } catch (InterruptedException ex) {
-//                        ExceptionPrinter.printHistory(ex, logger);
-//                        return false;
-//                    }
-//                }
-//            };
-//            
-//            Registries.waitForData(); 
-//            selectableObjectRegistrySynchronizer.activate();
-//            connectedRegistry = true;
-//        } catch (NotAvailableException ex) {
-//            throw new CouldNotPerformException("Could not connect to the registry.", ex);
-//        } catch (CouldNotPerformException ex) {
-//            throw new CouldNotPerformException("The RegistrySynchronization could not be activated although connection to the registry is possible.", ex);
-//        }
-//    }
-//    
-//    private void initSelector() throws JPNotAvailableException, InstantiationException{
-//        SelectorType selectorType = JPService.getProperty(JPSelectorType.class).getValue();
-//        LOGGER.info("Selected Selector implementation: " + selectorType.name());
-//        DistanceType distanceType = JPService.getProperty(JPDistanceType.class).getValue();
-//        LOGGER.info("Selected Distance implementation: " + distanceType.name());
-//        AbstractDistanceMeasure distanceMeasure;
-//        switch(distanceType) {
-//            case ANGLE:
-//                distanceMeasure = new AngleMeasure();
-//                break;
-//            case ANGLE_MAX:
-//                distanceMeasure = new AngleVsMaxMeasure();
-//                break;
-//            case ORTHOGONAL:
-//                distanceMeasure = new OrthogonalMeasure();
-//                break;
-//            case ORTHOGONAL_MAX:
-//                distanceMeasure = new OrthogonalVsMaxMeasure();
-//                break;
-//            case PEARSON:
-//                distanceMeasure = new PearsonMeasure();
-//                break;
-//            default:
-//                distanceMeasure = new AngleMeasure();
-//                break;
-//        }
-//        switch(selectorType) {
-//            case MAX:
-//                selector = new MaxSelector(distanceMeasure);
-//                break;
-//            case MEAN:
-//                selector = new MeanSelector(distanceMeasure);
-//                break;
-//            default:
-//                selector = new MeanSelector(distanceMeasure);
-//                break;
-//        }
-//        
-//    }
+    
+    public Control() {
+        try {
+            try{
+                controllableObjectRegistry = new SynchronizableRegistryImpl<>();
+            } catch (InstantiationException ex) {
+                throw new InstantiationException(controllableObjectRegistry, ex);
+            }
+            try {
+                registryFlags = JPService.getProperty(JPPscUnitFilterList.class).getValue();
+                threshold = JPService.getProperty(JPThreshold.class).getValue();
+                
+                initializeRegistryConnection();
+
+                rsbConnection = new RSBConnection(this);
+            } catch (CouldNotPerformException | JPNotAvailableException | InterruptedException ex) {
+//                selectableObjectRegistrySynchronizer.deactivate();
+                throw ex;
+            }
+            try {
+                // Wait for events.
+                while (true) {
+                    Thread.sleep(1);
+                }
+            } finally {
+                // Deactivate the listener after use.
+                rsbConnection.deactivate();
+            }
+        } catch (Exception ex) { 
+            ExceptionPrinter.printHistory(new CouldNotPerformException("Control failed", ex), LOGGER);
+            System.exit(255);
+        }
+    }
+
+    private void initializeRegistryConnection() throws InterruptedException, CouldNotPerformException {
+        try {
+            LOGGER.info("Initializing Registry synchronization.");
+            Registries.getUnitRegistry().waitForData(3, TimeUnit.SECONDS);
+            
+            this.controllableObjectRegistrySynchronizer = new RegistrySynchronizer<String, ControllableObject, UnitConfigType.UnitConfig, UnitConfigType.UnitConfig.Builder>(
+                    controllableObjectRegistry, getUnitRegistry().getUnitConfigRemoteRegistry(), ControllableObjectFactory.getInstance()) {
+                @Override
+                public boolean verifyConfig(UnitConfigType.UnitConfig config) throws VerificationFailedException {
+                    try {
+                        return PointingUnitChecker.isPointingControlUnit(config, registryFlags);
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                        ExceptionPrinter.printHistory(ex, logger, LogLevel.ERROR);
+                        return false;
+                    } catch (CouldNotPerformException ex) {
+                        ExceptionPrinter.printHistory(ex, logger, LogLevel.WARN);
+                        return false;
+                    }
+                }
+            };
+            
+            Registries.waitForData(); 
+            controllableObjectRegistrySynchronizer.activate();
+        } catch (NotAvailableException ex) {
+            throw new CouldNotPerformException("Could not connect to the registry.", ex);
+        } catch (CouldNotPerformException ex) {
+            throw new CouldNotPerformException("The RegistrySynchronization could not be activated although connection to the registry is possible.", ex);
+        }
+    }
     
     public static void main(String[] args) throws InterruptedException {
-//        /* Setup JPService */
-//        JPService.setApplicationName(Control.class);
-//        JPService.registerProperty(JPRegistryFlags.class);
-//        JPService.registerProperty(JPThreshold.class);
-//        JPService.registerProperty(JPSelectorType.class);
-//        JPService.registerProperty(JPDistanceType.class);
-//        JPService.registerProperty(JPInScope.class);
-//        JPService.registerProperty(JPLocalInput.class);
-//        JPService.parseAndExitOnError(args);
-//        
-//        Control app = new Control();
+        /* Setup JPService */
+        JPService.setApplicationName(Control.class);
+        JPService.registerProperty(JPPscUnitFilterList.class);
+        JPService.registerProperty(JPThreshold.class);
+        JPService.registerProperty(JPCooldownTime.class);
+        JPService.registerProperty(JPSelectedUnitScope.class);
+        JPService.registerProperty(JPLocalInput.class);
+        JPService.parseAndExitOnError(args);
+        
+        Control app = new Control();
     }
 }

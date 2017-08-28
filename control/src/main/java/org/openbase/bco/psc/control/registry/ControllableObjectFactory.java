@@ -1,8 +1,8 @@
-package org.openbase.bco.psc.identification.registry;
+package org.openbase.bco.psc.control.registry;
 
 /*-
  * #%L
- * BCO PSC Identification
+ * BCO PSC Control
  * %%
  * Copyright (C) 2016 - 2017 openbase.org
  * %%
@@ -22,38 +22,65 @@ package org.openbase.bco.psc.identification.registry;
  * #L%
  */
 
+import org.openbase.bco.psc.control.jp.JPCooldownTime;
+import org.openbase.jps.core.JPService;
+import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InstantiationException;
 import org.openbase.jul.pattern.Factory;
 import rst.domotic.unit.UnitConfigType;
 
 /**
- *
+ * A factory used for the creation of <code>ControllableObject</code>s.
+ * 
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class SelectableObjectFactory implements Factory<SelectableObject, UnitConfigType.UnitConfig>  {
-    public static SelectableObjectFactory instance;
+public class ControllableObjectFactory implements Factory<ControllableObject, UnitConfigType.UnitConfig>  {
+    /** Singleton instance. */
+    public static ControllableObjectFactory instance;
+    /** Cooldown time used to initialize the <code>ControllableObject</code>s. */
+    private final long cooldownTime;
     
-    private SelectableObjectFactory(){}
+    /**
+     * Constructor.
+     * 
+     * @throws InstantiationException Is thrown, if the factory could not be instantiated.
+     */
+    private ControllableObjectFactory() throws InstantiationException {
+        try {
+            cooldownTime = JPService.getProperty(JPCooldownTime.class).getValue();
+        } catch (JPNotAvailableException ex) {
+            throw new InstantiationException(ControllableObjectFactory.class, ex);
+        }
+    }
 
     /**
-     * Method returns a new singelton instance of the unit factory.
+     * Method returns a singelton instance of the unit factory.
      *
-     * @return
+     * @return The singleton instance of the factory.
+     * @throws org.openbase.jul.exception.InstantiationException Is thrown if the factory could not be instantiated.
      */
-    public synchronized static SelectableObjectFactory getInstance() {
+    public synchronized static ControllableObjectFactory getInstance() throws InstantiationException {
         if (instance == null) {
-            instance = new SelectableObjectFactory();
+            instance = new ControllableObjectFactory();
         }
         return instance;
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @param config {@inheritDoc}
+     * @return {@inheritDoc}
+     * @throws InstantiationException {@inheritDoc}
+     * @throws InterruptedException {@inheritDoc}
+     */
     @Override
-    public SelectableObject newInstance(UnitConfigType.UnitConfig config) throws InstantiationException, InterruptedException {
+    public ControllableObject newInstance(UnitConfigType.UnitConfig config) throws InstantiationException, InterruptedException {
         try {
-            SelectableObject box = new SelectableObject();
-            box.applyConfigUpdate(config);
-            return box;
+            ControllableObject object = new ControllableObject(cooldownTime);
+            object.applyConfigUpdate(config);
+            return object;
         } catch (CouldNotPerformException ex) {
             throw new InstantiationException("SelectableObjectInstance", ex);
         }
