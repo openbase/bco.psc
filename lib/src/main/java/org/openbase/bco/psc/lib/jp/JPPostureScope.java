@@ -57,6 +57,6 @@ public class JPPostureScope extends AbstractJPScope {
      */
     @Override
     protected Scope getPropertyDefaultValue() throws JPNotAvailableException {
-        return new Scope("/skeleton/merged");
+        return new Scope("/pointing/skeleton/merged");
     }
 }

@@ -57,6 +57,6 @@ public class JPRayScope extends AbstractJPScope {
      */
     @Override
     protected Scope getPropertyDefaultValue() throws JPNotAvailableException {
-        return new Scope("/pointing_rays");
+        return new Scope("/pointing/rays");
     }
 }

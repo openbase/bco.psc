@@ -57,7 +57,7 @@ public class JPSelectedUnitScope extends AbstractJPScope {
      */
     @Override
     protected Scope getPropertyDefaultValue() throws JPNotAvailableException {
-        return new Scope("/selected_units");
+        return new Scope("/pointing/selected_units");
     }
     
 }
