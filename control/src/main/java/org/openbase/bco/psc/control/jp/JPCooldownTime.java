@@ -21,18 +21,20 @@ package org.openbase.bco.psc.control.jp;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jps.preset.AbstractJPLong;
 
 /**
- * JavaProperty used to specify the cooldown time in milliseconds required before 
- * an object can be turned on/off again after it has been switched.
+ * JavaProperty used to specify the cooldown time in milliseconds required
+ * before an object can be turned on/off again after it has been switched.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPCooldownTime extends AbstractJPLong{
-    /** The identifiers that can be used in front of the command line argument. */
+public class JPCooldownTime extends AbstractJPLong {
+
+    /**
+     * The identifiers that can be used in front of the command line argument.
+     */
     public final static String[] COMMAND_IDENTIFIERS = {"--ct", "--cooldown-time"};
 
     /**
@@ -44,7 +46,7 @@ public class JPCooldownTime extends AbstractJPLong{
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return {@inheritDoc}
      * @throws JPNotAvailableException {@inheritDoc}
      */
@@ -55,12 +57,12 @@ public class JPCooldownTime extends AbstractJPLong{
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return {@inheritDoc}
      */
     @Override
     public String getDescription() {
         return "Time in milliseconds required to pass after switching the power state of an object before switching it again.";
     }
-    
+
 }

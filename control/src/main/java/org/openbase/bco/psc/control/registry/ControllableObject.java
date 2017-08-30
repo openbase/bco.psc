@@ -21,7 +21,6 @@ package org.openbase.bco.psc.control.registry;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import org.openbase.bco.dal.remote.service.PowerStateServiceRemote;
 import org.openbase.bco.dal.remote.service.ServiceRemoteFactoryImpl;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -34,42 +33,57 @@ import rst.domotic.unit.UnitConfigType.UnitConfig;
 
 /**
  * This class represents a Unit which whose power state can be controlled.
- * 
+ *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class ControllableObject implements Configurable<String, UnitConfig> {
-    /** Logger instance. */
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ControllableObject.class);
-    /** Cooldown time that is required before the power state can be switched again. */
-    private final long cooldownTime;
-    /** UnitConfig of the corresponding Unit. */
-    private UnitConfig config;
-    /** PowerStateServiceRemote used to control the power state. */
-    private PowerStateServiceRemote serviceRemote;
-    /** Timestamp of the last power switch action. */
-    private long lastSwitch = 0;
-    
+
     /**
-     * Constructor. 
-     * 
-     * @param cooldownTime Cooldown time that is required before the power state can be switched again.
+     * Logger instance.
+     */
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ControllableObject.class);
+    /**
+     * Cooldown time that is required before the power state can be switched
+     * again.
+     */
+    private final long cooldownTime;
+    /**
+     * UnitConfig of the corresponding Unit.
+     */
+    private UnitConfig config;
+    /**
+     * PowerStateServiceRemote used to control the power state.
+     */
+    private PowerStateServiceRemote serviceRemote;
+    /**
+     * Timestamp of the last power switch action.
+     */
+    private long lastSwitch = 0;
+
+    /**
+     * Constructor.
+     *
+     * @param cooldownTime Cooldown time that is required before the power state
+     * can be switched again.
      */
     public ControllableObject(final long cooldownTime) {
         this.cooldownTime = cooldownTime;
     }
-    
+
     /**
-     * Switches the power state of the corresponding unit (from off to on and vice versa).
-     * 
+     * Switches the power state of the corresponding unit (from off to on and
+     * vice versa).
+     *
      * @return true, if the power switch was successful.
-     * @throws CouldNotPerformException is thrown if something goes wrong during the power switch.
+     * @throws CouldNotPerformException is thrown if something goes wrong during
+     * the power switch.
      */
-    public synchronized boolean switchPowerState() throws CouldNotPerformException{
+    public synchronized boolean switchPowerState() throws CouldNotPerformException {
         long currentTime = System.currentTimeMillis();
-        if(currentTime - lastSwitch > cooldownTime) {
+        if (currentTime - lastSwitch > cooldownTime) {
             PowerState.State newState;
             try {
-                switch(serviceRemote.getPowerState().getValue()) {
+                switch (serviceRemote.getPowerState().getValue()) {
                     case OFF:
                     case UNKNOWN:
                     default:
@@ -92,7 +106,7 @@ public class ControllableObject implements Configurable<String, UnitConfig> {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @param config {@inheritDoc}
      * @return {@inheritDoc}
      * @throws CouldNotPerformException {@inheritDoc}
@@ -102,10 +116,9 @@ public class ControllableObject implements Configurable<String, UnitConfig> {
     public synchronized UnitConfig applyConfigUpdate(UnitConfig config) throws CouldNotPerformException, InterruptedException {
         this.config = config;
         try {
-            serviceRemote = (PowerStateServiceRemote)
-                    ServiceRemoteFactoryImpl.getInstance().newInitializedInstance(
-                            ServiceTemplateType.ServiceTemplate.ServiceType.POWER_STATE_SERVICE,
-                            config);
+            serviceRemote = (PowerStateServiceRemote) ServiceRemoteFactoryImpl.getInstance().newInitializedInstance(
+                    ServiceTemplateType.ServiceTemplate.ServiceType.POWER_STATE_SERVICE,
+                    config);
             serviceRemote.activate();
             System.out.println(serviceRemote.getPowerState());
         } catch (CouldNotPerformException ex) {
@@ -116,25 +129,29 @@ public class ControllableObject implements Configurable<String, UnitConfig> {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return {@inheritDoc}
      * @throws NotAvailableException {@inheritDoc}
      */
     @Override
     public synchronized String getId() throws NotAvailableException {
-        if(config == null) throw new NotAvailableException("Id");
+        if (config == null) {
+            throw new NotAvailableException("Id");
+        }
         return config.getId();
     }
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return {@inheritDoc}
      * @throws NotAvailableException {@inheritDoc}
      */
     @Override
     public synchronized UnitConfig getConfig() throws NotAvailableException {
-        if(config == null) throw new NotAvailableException("Config");
+        if (config == null) {
+            throw new NotAvailableException("Config");
+        }
         return config;
     }
 }

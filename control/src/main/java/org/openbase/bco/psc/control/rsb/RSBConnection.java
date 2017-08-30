@@ -21,7 +21,6 @@ package org.openbase.bco.psc.control.rsb;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import org.openbase.bco.psc.lib.jp.JPLocalInput;
 import org.openbase.bco.psc.lib.jp.JPSelectedUnitScope;
 import org.openbase.jps.core.JPService;
@@ -45,67 +44,76 @@ import rst.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class RSBConnection {
-    /** Logger instance. */
+
+    /**
+     * Logger instance.
+     */
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(RSBConnection.class);
-    /** RSB Listener used to receive selected unit events. */
+    /**
+     * RSB Listener used to receive selected unit events.
+     */
     private Listener selectedUnitListener;
-    
+
     /**
      * Constructor.
-     * 
+     *
      * @param handler is used to handle incoming events.
-     * @throws CouldNotPerformException is thrown, if the initialization of the class fails.
-     * @throws InterruptedException is thrown in case of an external interruption.
+     * @throws CouldNotPerformException is thrown, if the initialization of the
+     * class fails.
+     * @throws InterruptedException is thrown in case of an external
+     * interruption.
      */
     public RSBConnection(AbstractEventHandler handler) throws CouldNotPerformException, InterruptedException {
         LOGGER.info("Initializing RSB connection.");
-       initializeListener(handler);
+        initializeListener(handler);
     }
-    
+
     /**
      * Deactivates the RSB connection.
-     * 
+     *
      * @throws CouldNotPerformException is thrown, if the deactivation fails.
-     * @throws InterruptedException is thrown in case of an external interruption.
+     * @throws InterruptedException is thrown in case of an external
+     * interruption.
      */
-    public void deactivate() throws CouldNotPerformException, InterruptedException{
+    public void deactivate() throws CouldNotPerformException, InterruptedException {
         LOGGER.info("Deactivating RSB connection.");
-        try{
+        try {
             selectedUnitListener.deactivate();
         } catch (RSBException ex) {
             throw new CouldNotPerformException("Could not deactivate informer and listener.", ex);
-        } 
+        }
     }
-    
+
     /**
      * Initializes the RSB Listeners.
-     * 
+     *
      * @param handler is used to handle incoming events.
-     * @throws CouldNotPerformException is thrown, if the initialization of the Listeners fails.
-     * @throws InterruptedException is thrown in case of an external interruption.
+     * @throws CouldNotPerformException is thrown, if the initialization of the
+     * Listeners fails.
+     * @throws InterruptedException is thrown in case of an external
+     * interruption.
      */
-    private void initializeListener(AbstractEventHandler handler) throws CouldNotPerformException, InterruptedException{
+    private void initializeListener(AbstractEventHandler handler) throws CouldNotPerformException, InterruptedException {
         LOGGER.debug("Registering converter.");
         final ProtocolBufferConverter<UnitProbabilityCollection> selectedUnitConverter = new ProtocolBufferConverter<>(
-                    UnitProbabilityCollection.getDefaultInstance());
+                UnitProbabilityCollection.getDefaultInstance());
         DefaultConverterRepository.getDefaultConverterRepository()
-            .addConverter(selectedUnitConverter);
-        
-        
+                .addConverter(selectedUnitConverter);
+
         try {
             Scope selectedUnitScope = JPService.getProperty(JPSelectedUnitScope.class).getValue();
             LOGGER.info("Initializing RSB Selected Unit Listener on scope: " + selectedUnitScope);
-            if(JPService.getProperty(JPLocalInput.class).getValue()){
+            if (JPService.getProperty(JPLocalInput.class).getValue()) {
                 LOGGER.warn("RSB input set to socket and localhost.");
                 selectedUnitListener = Factory.getInstance().createListener(selectedUnitScope, getLocalConfig());
             } else {
                 selectedUnitListener = Factory.getInstance().createListener(selectedUnitScope);
             }
             selectedUnitListener.activate();
-            
+
             // Add an EventHandler.
             selectedUnitListener.addHandler(handler, true);
-            
+
         } catch (JPNotAvailableException | RSBException ex) {
             throw new CouldNotPerformException("RSB listener could not be initialized.", ex);
         }
@@ -113,7 +121,7 @@ public class RSBConnection {
 
     /**
      * Creates an RSB configuration for connecting via socket and localhost.
-     * 
+     *
      * @return the local communication configuration.
      */
     private ParticipantConfig getLocalConfig() {
