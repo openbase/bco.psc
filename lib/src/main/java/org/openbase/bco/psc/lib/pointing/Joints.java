@@ -21,7 +21,6 @@ package org.openbase.bco.psc.lib.pointing;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 /**
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
@@ -59,6 +58,8 @@ public enum Joints {
         value = newValue;
     }
 
-    public int getValue() { return value; }
-    
+    public int getValue() {
+        return value;
+    }
+
 }

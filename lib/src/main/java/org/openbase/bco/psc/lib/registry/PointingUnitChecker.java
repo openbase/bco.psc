@@ -21,7 +21,6 @@ package org.openbase.bco.psc.lib.registry;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import java.util.List;
 import org.openbase.bco.dal.remote.unit.AbstractUnitRemote;
 import org.openbase.bco.dal.remote.unit.Units;
@@ -40,15 +39,16 @@ import rst.domotic.unit.UnitTemplateType.UnitTemplate.UnitType;
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class PointingUnitChecker {
+
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(PointingUnitChecker.class);
-    
+
     public static boolean isPointingControlUnit(UnitConfig config, List<String> registryFlags) throws InterruptedException, CouldNotPerformException {
         if (config != null && isRegistryFlagSet(config.getMetaConfig(), registryFlags)) {
             return hasPowerStateService(config) && isDalOrGroupWithLocation(config);
         }
         return false;
     }
-  
+
     public static boolean isDalOrGroupWithLocation(UnitConfig config) throws InterruptedException, CouldNotPerformException {
         try {
             if (config != null && (config.getType() == UnitType.UNIT_GROUP || UnitConfigProcessor.isDalUnit(config))) {
@@ -59,7 +59,7 @@ public class PointingUnitChecker {
         }
         return false;
     }
-    
+
     private static boolean hasLocationData(UnitConfig config) throws InterruptedException {
         try {
             AbstractUnitRemote unitRemote = (AbstractUnitRemote) Units.getUnit(config, false);
@@ -70,7 +70,7 @@ public class PointingUnitChecker {
             return false;
         }
     }
-    
+
     private static boolean hasPowerStateService(UnitConfig config) throws InterruptedException {
         for (ServiceConfig sc : config.getServiceConfigList()) {
             ServiceTemplate.ServiceType type;
@@ -78,7 +78,7 @@ public class PointingUnitChecker {
                 type = getUnitRegistry().getServiceTemplateById(sc.getServiceDescription().getServiceTemplateId()).getType();
             } catch (CouldNotPerformException ex) {
                 type = sc.getServiceDescription().getType();
-            } 
+            }
             if (ServiceTemplate.ServiceType.POWER_STATE_SERVICE == type
                     && ServiceTemplate.ServicePattern.OPERATION == sc.getServiceDescription().getPattern()) {
                 return true;
@@ -86,10 +86,11 @@ public class PointingUnitChecker {
         }
         return false;
     }
-    
+
     private static boolean isRegistryFlagSet(MetaConfig meta, List<String> registryFlags) {
-        if(meta == null || meta.getEntryList() == null) 
+        if (meta == null || meta.getEntryList() == null) {
             return false;
+        }
         return meta.getEntryList().stream().anyMatch((entry) -> (registryFlags.contains(entry.getKey())));
     }
 }
