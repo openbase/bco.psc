@@ -3,7 +3,7 @@
 
     <groupId>org.openbase.bco</groupId>
     <artifactId>psc</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.4-SNAPSHOT</version>
 
     <name>BCO PSC</name>
     <inceptionYear>2016</inceptionYear>
