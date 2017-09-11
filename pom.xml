@@ -170,6 +170,7 @@
 
     <modules>
         <module>lib</module>
+        <module>skeleton-merging</module>
         <module>identification</module>
         <module>control</module>
     </modules>
