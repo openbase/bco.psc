@@ -10,12 +10,12 @@ package org.openbase.bco.psc.control.rsb;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -26,11 +26,15 @@ import org.openbase.bco.psc.lib.jp.JPSelectedUnitScope;
 import org.openbase.jps.core.JPService;
 import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.exception.CouldNotPerformException;
+import org.openbase.jul.exception.InitializationException;
+import org.openbase.jul.extension.rsb.com.RSBFactoryImpl;
+import org.openbase.jul.extension.rsb.iface.RSBListener;
+import org.openbase.jul.iface.Launchable;
+import org.openbase.jul.iface.VoidInitializable;
+import org.openbase.jul.schedule.WatchDog;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Factory;
-import rsb.Listener;
-import rsb.RSBException;
 import rsb.Scope;
 import rsb.config.ParticipantConfig;
 import rsb.converter.DefaultConverterRepository;
@@ -43,57 +47,40 @@ import rst.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class RSBConnection {
+public class RSBConnection implements Launchable<Void>, VoidInitializable {
 
     /**
      * Logger instance.
      */
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(RSBConnection.class);
+
+    private final AbstractEventHandler handler;
     /**
      * RSB Listener used to receive selected unit events.
      */
-    private Listener selectedUnitListener;
+    private RSBListener selectedUnitListener;
+
+    private WatchDog listenerWatchDog;
 
     /**
      * Constructor.
      *
      * @param handler is used to handle incoming events.
-     * @throws CouldNotPerformException is thrown, if the initialization of the
-     * class fails.
-     * @throws InterruptedException is thrown in case of an external
-     * interruption.
      */
-    public RSBConnection(AbstractEventHandler handler) throws CouldNotPerformException, InterruptedException {
-        LOGGER.info("Initializing RSB connection.");
-        initializeListener(handler);
-    }
-
-    /**
-     * Deactivates the RSB connection.
-     *
-     * @throws CouldNotPerformException is thrown, if the deactivation fails.
-     * @throws InterruptedException is thrown in case of an external
-     * interruption.
-     */
-    public void deactivate() throws CouldNotPerformException, InterruptedException {
-        LOGGER.info("Deactivating RSB connection.");
-        try {
-            selectedUnitListener.deactivate();
-        } catch (RSBException ex) {
-            throw new CouldNotPerformException("Could not deactivate informer and listener.", ex);
-        }
+    public RSBConnection(final AbstractEventHandler handler) {
+        this.handler = handler;
     }
 
     /**
      * Initializes the RSB Listeners.
      *
      * @param handler is used to handle incoming events.
-     * @throws CouldNotPerformException is thrown, if the initialization of the
+     * @throws InitializationException is thrown, if the initialization of the
      * Listeners fails.
      * @throws InterruptedException is thrown in case of an external
      * interruption.
      */
-    private void initializeListener(AbstractEventHandler handler) throws CouldNotPerformException, InterruptedException {
+    private void initializeListener(AbstractEventHandler handler) throws InitializationException, InterruptedException {
         LOGGER.debug("Registering converter.");
         final ProtocolBufferConverter<UnitProbabilityCollection> selectedUnitConverter = new ProtocolBufferConverter<>(
                 UnitProbabilityCollection.getDefaultInstance());
@@ -105,17 +92,18 @@ public class RSBConnection {
             LOGGER.info("Initializing RSB Selected Unit Listener on scope: " + selectedUnitScope);
             if (JPService.getProperty(JPLocalInput.class).getValue()) {
                 LOGGER.warn("RSB input set to socket and localhost.");
-                selectedUnitListener = Factory.getInstance().createListener(selectedUnitScope, getLocalConfig());
+                RSBListener l;
+                selectedUnitListener = RSBFactoryImpl.getInstance().createSynchronizedListener(selectedUnitScope, getLocalConfig());
             } else {
-                selectedUnitListener = Factory.getInstance().createListener(selectedUnitScope);
+                selectedUnitListener = RSBFactoryImpl.getInstance().createSynchronizedListener(selectedUnitScope);
             }
-            selectedUnitListener.activate();
 
             // Add an EventHandler.
             selectedUnitListener.addHandler(handler, true);
+            listenerWatchDog = new WatchDog(selectedUnitListener, "unitListener");
 
-        } catch (JPNotAvailableException | RSBException ex) {
-            throw new CouldNotPerformException("RSB listener could not be initialized.", ex);
+        } catch (CouldNotPerformException | JPNotAvailableException ex) {
+            throw new InitializationException(RSBConnection.class, ex);
         }
     }
 
@@ -134,5 +122,51 @@ public class RSBConnection {
         localConfig.getOrCreateTransport("socket").setEnabled(true);
         localConfig.getOrCreateTransport("socket").setOptions(localProperties);
         return localConfig;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @throws InitializationException {@inheritDoc}
+     * @throws InterruptedException {@inheritDoc}
+     */
+    @Override
+    public void init() throws InitializationException, InterruptedException {
+        LOGGER.info("Initializing RSB connection.");
+        initializeListener(handler);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @throws CouldNotPerformException {@inheritDoc}
+     * @throws InterruptedException {@inheritDoc}
+     */
+    @Override
+    public void activate() throws CouldNotPerformException, InterruptedException {
+        LOGGER.info("Activating RSB connection.");
+        listenerWatchDog.activate();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @throws CouldNotPerformException {@inheritDoc}
+     * @throws InterruptedException {@inheritDoc}
+     */
+    @Override
+    public void deactivate() throws CouldNotPerformException, InterruptedException {
+        LOGGER.info("Deactivating RSB connection.");
+        listenerWatchDog.deactivate();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     */
+    @Override
+    public boolean isActive() {
+        return listenerWatchDog.isActive();
     }
 }
