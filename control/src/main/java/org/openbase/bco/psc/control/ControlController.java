@@ -23,8 +23,6 @@ package org.openbase.bco.psc.control;
  */
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openbase.bco.psc.control.registry.ControllableObject;
 import org.openbase.bco.psc.control.registry.ControllableObjectFactory;
 import org.openbase.bco.psc.control.rsb.RSBConnection;
@@ -55,7 +53,7 @@ import rst.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class ControlController extends AbstractEventHandler implements Launchable<Void>, VoidInitializable {
+public class ControlController extends AbstractEventHandler implements Control, Launchable<Void>, VoidInitializable {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Control.class);
 
@@ -109,10 +107,8 @@ public class ControlController extends AbstractEventHandler implements Launchabl
 
                 rsbConnection = new RSBConnection(this);
                 rsbConnection.init();
-//                addShutdownHook();
-                // Wait for events.
             } catch (JPNotAvailableException | CouldNotPerformException ex) {
-                Logger.getLogger(ControlController.class.getName()).log(Level.SEVERE, null, ex);
+                throw new InitializationException(ControlController.class, ex);
             }
         }
     }
@@ -138,8 +134,6 @@ public class ControlController extends AbstractEventHandler implements Launchabl
                     }
                 }
             };
-
-            Registries.waitForData();
         } catch (NotAvailableException ex) {
             throw new CouldNotPerformException("Could not connect to the registry.", ex);
         } catch (CouldNotPerformException ex) {
@@ -157,6 +151,7 @@ public class ControlController extends AbstractEventHandler implements Launchabl
             throw new CouldNotPerformException("Activate can only be called after init.");
         }
         active = true;
+        Registries.waitForData();
         LOGGER.info("Activating Registry synchronization.");
         controllableObjectRegistrySynchronizer.activate();
         rsbConnection.activate();

@@ -1,11 +1,5 @@
 package org.openbase.bco.psc.sm;
 
-import org.openbase.bco.psc.sm.jp.JPBaseScope;
-import org.openbase.bco.psc.sm.jp.JPOutScope;
-import org.openbase.bco.psc.sm.jp.JPRegistryIds;
-import org.openbase.bco.psc.sm.jp.JPTransformFiles;
-import org.openbase.bco.psc.sm.registry.RegistryTransformerFactory;
-import org.openbase.bco.psc.sm.rsb.RSBConnection;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +10,12 @@ import org.openbase.bco.dal.remote.unit.AbstractUnitRemote;
 import org.openbase.bco.dal.remote.unit.Units;
 import org.openbase.bco.psc.lib.jp.JPLocalInput;
 import org.openbase.bco.psc.lib.jp.JPLocalOutput;
+import org.openbase.bco.psc.sm.jp.JPBaseScope;
+import org.openbase.bco.psc.sm.jp.JPOutScope;
+import org.openbase.bco.psc.sm.jp.JPRegistryIds;
+import org.openbase.bco.psc.sm.jp.JPTransformFiles;
+import org.openbase.bco.psc.sm.registry.RegistryTransformerFactory;
+import org.openbase.bco.psc.sm.rsb.RSBConnection;
 import org.openbase.bco.registry.remote.Registries;
 import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
 import org.openbase.jps.core.JPService;
@@ -57,40 +57,41 @@ import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 /**
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class SkeletonMerging extends AbstractEventHandler {
+
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(SkeletonMerging.class);
-    
+
     private RegistrySynchronizer<String, RegistryTransformer, UnitConfigType.UnitConfig, UnitConfigType.UnitConfig.Builder> selectableObjectRegistrySynchronizer;
     private SynchronizableRegistryImpl<String, RegistryTransformer> registryTransformerRegistry;
     private Map<Scope, String> scopeIdMap = new HashMap<>();
     private Map<Scope, FileTransformer> scopeFileTransformerMap = new HashMap<>();
     private boolean merging_required = false;
-    
+
     private RSBConnection rsbConnection;
 
     @Override
     public void handleEvent(final Event event) {
-        if(!(event.getData() instanceof TrackedPostures3DFloat) || rsbConnection.getOutScope().equals(event.getScope()))
+        if (!(event.getData() instanceof TrackedPostures3DFloat) || rsbConnection.getOutScope().equals(event.getScope())) {
             return;
+        }
         LOGGER.trace("New TrackedPostures3DFloat event received on scope " + event.getScope().toString());
         Optional<Scope> bestScope = event.getScope().superScopes(true).stream()
-                .filter(s->scopeIdMap.containsKey(s) || scopeFileTransformerMap.containsKey(s))
+                .filter(s -> scopeIdMap.containsKey(s) || scopeFileTransformerMap.containsKey(s))
                 .sorted((o1, o2) -> o2.toString().length() - o1.toString().length())
                 .findFirst();
-        if(!bestScope.isPresent()){
-            ExceptionPrinter.printHistory(new CouldNotPerformException("No Transformer registered for the event's scope " + event.getScope().toString()), 
+        if (!bestScope.isPresent()) {
+            ExceptionPrinter.printHistory(new CouldNotPerformException("No Transformer registered for the event's scope " + event.getScope().toString()),
                     LOGGER, LogLevel.TRACE);
             return;
         }
-        try{
+        try {
             Transformer currentTransformer;
             Scope scope = bestScope.get();
-            if(scopeIdMap.containsKey(scope)){
+            if (scopeIdMap.containsKey(scope)) {
                 LOGGER.trace("Using scope " + scope.toString() + " unit " + scopeIdMap.get(scope));
                 currentTransformer = registryTransformerRegistry.get(scopeIdMap.get(scope));
             } else {
@@ -100,12 +101,12 @@ public class SkeletonMerging extends AbstractEventHandler {
 
             TrackedPostures3DFloat postures = (TrackedPostures3DFloat) event.getData();
             TrackedPostures3DFloat transformedPostures = currentTransformer.transform(postures);
-            
-            if(merging_required){
+
+            if (merging_required) {
                 //TODO merge the data here!
 //                return;
             }
-            
+
             LOGGER.trace("Creating transformed event.");
             Event transformedEvent = copyEventMetaData(event);
             transformedEvent.setData(transformedPostures);
@@ -118,8 +119,8 @@ public class SkeletonMerging extends AbstractEventHandler {
             ExceptionPrinter.printHistory(new CouldNotPerformException("Could not transform the postures.", ex), LOGGER, LogLevel.WARN);
         }
     }
-    
-    private Event copyEventMetaData(Event event){
+
+    private Event copyEventMetaData(Event event) {
         Event copy = new Event(event.getData().getClass());
         MetaData meta = event.getMetaData();
         MetaData cMeta = copy.getMetaData();
@@ -133,11 +134,11 @@ public class SkeletonMerging extends AbstractEventHandler {
         cMeta.setSendTime(meta.getSendTime());
         return copy;
     }
-    
-    public SkeletonMerging(){
+
+    public SkeletonMerging() {
         try {
             registryTransformerRegistry = new SynchronizableRegistryImpl<>();
-            
+
             handleJPArguments();
             addShutdownHook();
             // Wait for events.
@@ -149,7 +150,7 @@ public class SkeletonMerging extends AbstractEventHandler {
             System.exit(255);
         }
     }
-    
+
     private void addShutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
@@ -157,71 +158,76 @@ public class SkeletonMerging extends AbstractEventHandler {
             } catch (CouldNotPerformException ex) {
                 ExceptionPrinter.printHistory(ex, LOGGER);
             } catch (InterruptedException ex) {
-                LOGGER.error("Interruption during deactivation of rsb connection.");
                 Thread.currentThread().interrupt();
+                ExceptionPrinter.printHistory(ex, LOGGER);
             }
         }));
     }
-    
-    private void handleJPArguments() throws JPValidationException, JPNotAvailableException, CouldNotPerformException, InterruptedException{
+
+    private void handleJPArguments() throws JPValidationException, JPNotAvailableException, CouldNotPerformException, InterruptedException {
         //TODO: remove this as soon as merging is enabled!
-        if(JPService.getProperty(JPTransformFiles.class).isParsed() && JPService.getProperty(JPRegistryIds.class).isParsed() || 
-                JPService.getProperty(JPTransformFiles.class).isParsed() && JPService.getProperty(JPTransformFiles.class).getValue().size() > 1 || 
-                JPService.getProperty(JPRegistryIds.class).isParsed() && JPService.getProperty(JPRegistryIds.class).getValue().size() > 1){
+        if (JPService.getProperty(JPTransformFiles.class).isParsed() && JPService.getProperty(JPRegistryIds.class).isParsed()
+                || JPService.getProperty(JPTransformFiles.class).isParsed() && JPService.getProperty(JPTransformFiles.class).getValue().size() > 1
+                || JPService.getProperty(JPRegistryIds.class).isParsed() && JPService.getProperty(JPRegistryIds.class).getValue().size() > 1) {
             throw new JPValidationException("So far, only one transformer can be specified via -r or -f, as merging is not yet implemented.");
         }
-        
+
         Scope baseScope = JPService.getProperty(JPBaseScope.class).getValue();
         Scope outScope = baseScope.concat(JPService.getProperty(JPOutScope.class).getValue());
         boolean registryRequired = false;
-        if(!(JPService.getProperty(JPTransformFiles.class).isParsed() || JPService.getProperty(JPRegistryIds.class).isParsed())){
+        if (!(JPService.getProperty(JPTransformFiles.class).isParsed() || JPService.getProperty(JPRegistryIds.class).isParsed())) {
             //TODO: Add config file or so?!
             throw new JPValidationException("At least one of --registry-id or --transform-file has to be specified");
         }
-        
-        if(JPService.getProperty(JPTransformFiles.class).isParsed()){
-            for(Entry<Scope, File> entry : JPService.getProperty(JPTransformFiles.class).getValue().entrySet()){
+
+        if (JPService.getProperty(JPTransformFiles.class).isParsed()) {
+            for (Entry<Scope, File> entry : JPService.getProperty(JPTransformFiles.class).getValue().entrySet()) {
                 Scope scope = baseScope.concat(entry.getKey());
                 scopeFileTransformerMap.put(scope, new FileTransformer(entry.getValue()));
-                LOGGER.info("Registering on scope "+scope.toString()+" Transformer from file " + entry.getValue().getAbsolutePath());
+                LOGGER.info("Registering on scope " + scope.toString() + " Transformer from file " + entry.getValue().getAbsolutePath());
             }
-        } if (JPService.getProperty(JPRegistryIds.class).isParsed()){
+        }
+        if (JPService.getProperty(JPRegistryIds.class).isParsed()) {
             registryRequired = true;
-            for(Entry<Scope, String> entry : JPService.getProperty(JPRegistryIds.class).getValue().entrySet()){
+            for (Entry<Scope, String> entry : JPService.getProperty(JPRegistryIds.class).getValue().entrySet()) {
                 Scope scope = baseScope.concat(entry.getKey());
                 scopeIdMap.put(scope, entry.getValue());
-                LOGGER.info("Registering on scope "+scope.toString()+" Unit with id " + entry.getValue());
+                LOGGER.info("Registering on scope " + scope.toString() + " Unit with id " + entry.getValue());
             }
         }
-        if(registryRequired){
-            if(scopeIdMap.keySet().stream().anyMatch(k -> scopeFileTransformerMap.containsKey(k)) || 
-                    scopeFileTransformerMap.keySet().stream().anyMatch(k -> scopeIdMap.containsKey(k)))
+        if (registryRequired) {
+            if (scopeIdMap.keySet().stream().anyMatch(k -> scopeFileTransformerMap.containsKey(k))
+                    || scopeFileTransformerMap.keySet().stream().anyMatch(k -> scopeIdMap.containsKey(k))) {
                 throw new JPValidationException("The same scope appeared in the -f and the -r arguments, which is invalid.");
+            }
             initializeRegistryConnection();
         }
-        
-        if(scopeIdMap.size() + scopeFileTransformerMap.size() > 1)
+
+        if (scopeIdMap.size() + scopeFileTransformerMap.size() > 1) {
             merging_required = true;
-        
+        }
+
         rsbConnection = new RSBConnection(this, baseScope, outScope);
     }
 
-    private void initializeRegistryConnection() throws InterruptedException, CouldNotPerformException{
+    private void initializeRegistryConnection() throws InterruptedException, CouldNotPerformException {
         try {
             LOGGER.info("Initializing Registry synchronization.");
             Registries.getUnitRegistry().waitForData(3, TimeUnit.SECONDS);
-            
+
             this.selectableObjectRegistrySynchronizer = new RegistrySynchronizer<String, RegistryTransformer, UnitConfigType.UnitConfig, UnitConfigType.UnitConfig.Builder>(
                     registryTransformerRegistry, getUnitRegistry().getUnitConfigRemoteRegistry(), RegistryTransformerFactory.getInstance()) {
                 @Override
                 public boolean verifyConfig(UnitConfigType.UnitConfig config) throws VerificationFailedException {
-                    if(!scopeIdMap.values().contains(config.getId()))
+                    if (!scopeIdMap.values().contains(config.getId())) {
                         return false;
+                    }
                     try {
-                        if(hasLocationData(config))
+                        if (hasLocationData(config)) {
                             return true;
-                        else
+                        } else {
                             throw new CouldNotPerformException("Registry Id found in the arguments, but no location data available.");
+                        }
                     } catch (InterruptedException ex) {
                         Thread.currentThread().interrupt();
                         ExceptionPrinter.printHistory(ex, logger, LogLevel.ERROR);
@@ -232,8 +238,8 @@ public class SkeletonMerging extends AbstractEventHandler {
                     }
                 }
             };
-            
-            Registries.waitForData(); 
+
+            Registries.waitForData();
             selectableObjectRegistrySynchronizer.activate();
         } catch (NotAvailableException ex) {
             throw new CouldNotPerformException("Could not connect to the registry.", ex);
@@ -241,8 +247,8 @@ public class SkeletonMerging extends AbstractEventHandler {
             throw new CouldNotPerformException("The RegistrySynchronization could not be activated although connection to the registry is possible.", ex);
         }
     }
-    
-    public static boolean hasLocationData(UnitConfigType.UnitConfig config) throws InterruptedException{
+
+    public static boolean hasLocationData(UnitConfigType.UnitConfig config) throws InterruptedException {
         try {
             AbstractUnitRemote unitRemote = (AbstractUnitRemote) Units.getUnit(config, false);
             unitRemote.getTransform3D();
@@ -252,7 +258,7 @@ public class SkeletonMerging extends AbstractEventHandler {
             return false;
         }
     }
-    
+
     public static void main(String[] args) throws InterruptedException {
         /* Setup JPService */
         JPService.setApplicationName(SkeletonMerging.class);
@@ -265,7 +271,7 @@ public class SkeletonMerging extends AbstractEventHandler {
 //        JPService.registerProperty(JPRegistryId.class);
         JPService.parseAndExitOnError(args);
 //        JPService.printHelp();
-        
+
         SkeletonMerging app = new SkeletonMerging();
     }
 }

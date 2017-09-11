@@ -1,36 +1,36 @@
 package org.openbase.bco.psc.re;
 
-import org.openbase.bco.psc.re.jp.JPExtractorType;
-import org.openbase.bco.psc.re.jp.JPSelectorType;
-import org.openbase.bco.psc.re.pointing.SimpleExtractor;
-import org.openbase.bco.psc.re.rsb.RSBConnection;
-import org.openbase.jps.core.JPService;
-import org.openbase.jul.exception.CouldNotPerformException;
-import org.openbase.jul.exception.printer.ExceptionPrinter;
-import org.slf4j.LoggerFactory;
-import rsb.AbstractEventHandler;
-import rsb.Event;
-import rst.tracking.PointingRay3DFloatType.PointingRay3DFloat.PointingType;
-import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
-import org.openbase.bco.psc.re.pointing.ArmPostureExtractor;
-import org.openbase.bco.psc.re.pointing.ExtractorType;
-import org.openbase.bco.psc.re.pointing.selectors.ChoiceSelector;
-import org.openbase.bco.psc.re.pointing.selectors.PolynomialOrNeckSelector5;
-import org.openbase.bco.psc.re.pointing.selectors.PolynomialSelectorDegree3;
-import org.openbase.bco.psc.re.pointing.selectors.PolynomialSelectorDegree5;
-import org.openbase.bco.psc.re.pointing.selectors.RaySelectorInterface;
-import org.openbase.bco.psc.re.pointing.selectors.SelectorType;
 import java.util.Arrays;
-import org.openbase.bco.psc.re.pointing.RayExtractorInterface;
-import org.openbase.bco.psc.re.pointing.selectors.DistributedSelector;
 import java.util.stream.Collectors;
 import org.openbase.bco.psc.lib.jp.JPLocalInput;
 import org.openbase.bco.psc.lib.jp.JPLocalOutput;
 import org.openbase.bco.psc.lib.jp.JPPostureScope;
 import org.openbase.bco.psc.lib.jp.JPRayScope;
 import org.openbase.bco.psc.lib.jp.JPThreshold;
+import org.openbase.bco.psc.re.jp.JPExtractorType;
+import org.openbase.bco.psc.re.jp.JPSelectorType;
+import org.openbase.bco.psc.re.pointing.ArmPostureExtractor;
+import org.openbase.bco.psc.re.pointing.ExtractorType;
+import org.openbase.bco.psc.re.pointing.RayExtractorInterface;
+import org.openbase.bco.psc.re.pointing.SimpleExtractor;
+import org.openbase.bco.psc.re.pointing.selectors.ChoiceSelector;
+import org.openbase.bco.psc.re.pointing.selectors.DistributedSelector;
+import org.openbase.bco.psc.re.pointing.selectors.PolynomialOrNeckSelector5;
+import org.openbase.bco.psc.re.pointing.selectors.PolynomialSelectorDegree3;
+import org.openbase.bco.psc.re.pointing.selectors.PolynomialSelectorDegree5;
+import org.openbase.bco.psc.re.pointing.selectors.RaySelectorInterface;
+import org.openbase.bco.psc.re.pointing.selectors.SelectorType;
+import org.openbase.bco.psc.re.rsb.RSBConnection;
+import org.openbase.jps.core.JPService;
 import org.openbase.jps.exception.JPNotAvailableException;
+import org.openbase.jul.exception.CouldNotPerformException;
+import org.openbase.jul.exception.printer.ExceptionPrinter;
+import org.slf4j.LoggerFactory;
+import rsb.AbstractEventHandler;
+import rsb.Event;
 import rst.tracking.PointingRay3DFloatDistributionCollectionType.PointingRay3DFloatDistributionCollection;
+import rst.tracking.PointingRay3DFloatType.PointingRay3DFloat.PointingType;
+import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
 
 /*
  * #%L
@@ -53,7 +53,6 @@ import rst.tracking.PointingRay3DFloatDistributionCollectionType.PointingRay3DFl
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 /**
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
@@ -67,30 +66,31 @@ public class RayExtractor extends AbstractEventHandler {
 
     @Override
     public void handleEvent(final Event event) {
-        if(!(event.getData() instanceof TrackedPostures3DFloat))
+        if (!(event.getData() instanceof TrackedPostures3DFloat)) {
             return;
+        }
         LOGGER.trace("New TrackedPostures3DFloat event received.");
         TrackedPostures3DFloat postures = (TrackedPostures3DFloat) event.getData();
         pointingExtractor.updatePostures(postures);
         try {
             LOGGER.trace("Getting pointing rays.");
             //TODO: Include the quality of the skeletons into the calculation of probabilities!!!
-            
-            //TODO add either posture id to pointingRays or make a PointingRayCollectionList possible! 
+
+            //TODO add either posture id to pointingRays or make a PointingRayCollectionList possible!
             // Maybe even PointingRays3DFloat + Collection including ID?!aswell!!
             rsbConnection.sendPointingRays(PointingRay3DFloatDistributionCollection.newBuilder()
                     .addAllElement(pointingExtractor.getPointingRays().stream()
                             .filter(rd -> rd.getRayList().stream()
-                                    .map(r -> r.getCertainty())
-                                    .reduce(0.0f, Float::sum) >= threshold)
+                            .map(r -> r.getCertainty())
+                            .reduce(0.0f, Float::sum) >= threshold)
                             .collect(Collectors.toList()))
                     .build());
         } catch (CouldNotPerformException ex) {
             ExceptionPrinter.printHistory(new CouldNotPerformException("Could not send the pointing rays.", ex), LOGGER);
         }
     }
-    
-    private void initExtractor() throws JPNotAvailableException{
+
+    private void initExtractor() throws JPNotAvailableException {
         ExtractorType extractorType = JPService.getProperty(JPExtractorType.class).getValue();
         LOGGER.info("Selected Extractor implementation: " + extractorType.name());
         SelectorType selectorType = JPService.getProperty(JPSelectorType.class).getValue();
@@ -98,7 +98,7 @@ public class RayExtractor extends AbstractEventHandler {
         threshold = JPService.getProperty(JPThreshold.class).getValue();
         LOGGER.info("Selected threshold: " + threshold);
         RaySelectorInterface raySelector;
-        switch(selectorType){
+        switch (selectorType) {
             case CHOICE:
                 raySelector = new ChoiceSelector(Arrays.asList(new PointingType[]{PointingType.HEAD_HAND, PointingType.SHOULDER_HAND}));
                 break;
@@ -118,7 +118,7 @@ public class RayExtractor extends AbstractEventHandler {
                 raySelector = new ChoiceSelector(Arrays.asList(new PointingType[]{PointingType.HEAD_HAND, PointingType.SHOULDER_HAND}));
                 break;
         }
-        switch(extractorType){
+        switch (extractorType) {
             case SIMPLE:
                 pointingExtractor = new SimpleExtractor(raySelector);
                 break;
@@ -130,8 +130,8 @@ public class RayExtractor extends AbstractEventHandler {
                 break;
         }
     }
-    
-    public RayExtractor(){
+
+    public RayExtractor() {
         try {
             initExtractor();
             rsbConnection = new RSBConnection(this);
@@ -145,7 +145,7 @@ public class RayExtractor extends AbstractEventHandler {
             System.exit(255);
         }
     }
-    
+
     private void addShutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
@@ -153,12 +153,12 @@ public class RayExtractor extends AbstractEventHandler {
             } catch (CouldNotPerformException ex) {
                 ExceptionPrinter.printHistory(ex, LOGGER);
             } catch (InterruptedException ex) {
-                LOGGER.error("Interruption during deactivation of rsb connection.");
                 Thread.currentThread().interrupt();
+                ExceptionPrinter.printHistory(ex, LOGGER);
             }
         }));
     }
-    
+
     public static void main(String[] args) throws InterruptedException {
         /* Setup JPService */
         JPService.setApplicationName(RayExtractor.class);
@@ -171,7 +171,7 @@ public class RayExtractor extends AbstractEventHandler {
         JPService.registerProperty(JPThreshold.class);
         JPService.parseAndExitOnError(args);
 //        JPService.printHelp();
-        
+
         RayExtractor app = new RayExtractor();
     }
 }
