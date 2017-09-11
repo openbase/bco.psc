@@ -21,7 +21,6 @@ package org.openbase.bco.psc.identification;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.openbase.bco.psc.identification.jp.JPDistanceType;
@@ -42,31 +41,31 @@ import org.openbase.bco.psc.identification.selection.distance.OrthogonalVsMaxMea
 import org.openbase.bco.psc.identification.selection.distance.PearsonMeasure;
 import org.openbase.bco.psc.lib.jp.JPLocalInput;
 import org.openbase.bco.psc.lib.jp.JPLocalOutput;
-import org.openbase.bco.psc.lib.jp.JPRayScope;
 import org.openbase.bco.psc.lib.jp.JPPscUnitFilterList;
+import org.openbase.bco.psc.lib.jp.JPRayScope;
 import org.openbase.bco.psc.lib.jp.JPSelectedUnitScope;
 import org.openbase.bco.psc.lib.jp.JPThreshold;
 import org.openbase.bco.psc.lib.registry.PointingUnitChecker;
-import org.openbase.jps.core.JPService;
-import org.openbase.jul.exception.CouldNotPerformException;
-import org.openbase.jul.exception.printer.ExceptionPrinter;
-import org.slf4j.LoggerFactory;
-import rsb.AbstractEventHandler;
-import rsb.Event;
 import org.openbase.bco.registry.remote.Registries;
 import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
+import org.openbase.jps.core.JPService;
 import org.openbase.jps.exception.JPNotAvailableException;
+import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InstantiationException;
 import org.openbase.jul.exception.NotAvailableException;
 import org.openbase.jul.exception.VerificationFailedException;
+import org.openbase.jul.exception.printer.ExceptionPrinter;
 import org.openbase.jul.exception.printer.LogLevel;
 import org.openbase.jul.storage.registry.RegistrySynchronizer;
+import org.slf4j.LoggerFactory;
+import rsb.AbstractEventHandler;
+import rsb.Event;
 import rst.domotic.unit.UnitConfigType;
 import rst.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
 import rst.tracking.PointingRay3DFloatDistributionCollectionType.PointingRay3DFloatDistributionCollection;
 
 /**
- * 
+ *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class Identification extends AbstractEventHandler {
@@ -74,14 +73,13 @@ public class Identification extends AbstractEventHandler {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Identification.class);
     private AbstractSelector selector;
     private RSBConnection rsbConnection;
-    
+
     private RegistrySynchronizer<String, SelectableObject, UnitConfigType.UnitConfig, UnitConfigType.UnitConfig.Builder> selectableObjectRegistrySynchronizer;
-    
+
     private List<String> registryFlags;
-    
+
     // TODO list:
     //-decide for double or float! (Single unitConfig/unitProbabilityDistribution)
-
     @Override
     public void handleEvent(final Event event) {
 //        LOGGER.trace(event.toString());
@@ -95,13 +93,13 @@ public class Identification extends AbstractEventHandler {
             }
         }
     }
-    
+
     public Identification() {
         try {
             initSelector();
             try {
                 registryFlags = JPService.getProperty(JPPscUnitFilterList.class).getValue();
-                
+
                 initializeRegistryConnection();
 
                 rsbConnection = new RSBConnection(this);
@@ -109,35 +107,45 @@ public class Identification extends AbstractEventHandler {
                 selectableObjectRegistrySynchronizer.deactivate();
                 throw ex;
             }
-            try {
-                // Wait for events.
-                while (true) {
-                    Thread.sleep(1);
-                }
-            } finally {
-                // Deactivate the listener after use.
-                rsbConnection.deactivate();
+            addShutdownHook();
+            // Wait for events.
+            while (true) {
+                Thread.sleep(1000);
             }
-            
+
             //TODO: Remove this!
 //            rsbConnection = new RSBConnection(this);
 //            rsbConnection.sendUnitProbabilities(UnitProbabilityCollection.newBuilder().addElement(
-////                    UnitProbability.newBuilder().setId("c8b2bfb5-45d9-4a2b-9994-d4062ab19cab").setProbability(1.0f)
-////                    UnitProbability.newBuilder().setId("c8b2bfb5-45da9-4a2b-9994-d4062ab19cab").setProbability(1.0f)
-//                    UnitProbability.newBuilder().setId("2c95255e-a491-46d7-a6a6-f66d5e6c2d3b").setProbability(1.0f)
+//                    //                    UnitProbability.newBuilder().setId("c8b2bfb5-45d9-4a2b-9994-d4062ab19cab").setProbability(1.0f)
+//                    //                    UnitProbability.newBuilder().setId("c8b2bfb5-45da9-4a2b-9994-d4062ab19cab").setProbability(1.0f)
+//                    //                    UnitProbability.newBuilder().setId("2c95255e-a491-46d7-a6a6-f66d5e6c2d3b").setProbability(1.0f)
+//                    UnitProbability.newBuilder().setId("8f7b2513-4f33-4e8d-8b7e-eced4d54108c").setProbability(0.66f)
 //            ).build());
 //            rsbConnection.deactivate();
-        } catch (Exception ex) { 
+        } catch (Exception ex) {
             ExceptionPrinter.printHistory(new CouldNotPerformException("PSC Identification failed", ex), LOGGER);
             System.exit(255);
         }
     }
 
-    private void initializeRegistryConnection() throws InterruptedException, CouldNotPerformException{
+    private void addShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                rsbConnection.deactivate();
+            } catch (CouldNotPerformException ex) {
+                ExceptionPrinter.printHistory(ex, LOGGER);
+            } catch (InterruptedException ex) {
+                LOGGER.error("Interruption during deactivation of rsb connection.");
+                Thread.currentThread().interrupt();
+            }
+        }));
+    }
+
+    private void initializeRegistryConnection() throws InterruptedException, CouldNotPerformException {
         try {
             LOGGER.info("Initializing Registry synchronization.");
             Registries.getUnitRegistry().waitForData(3, TimeUnit.SECONDS);
-            
+
             this.selectableObjectRegistrySynchronizer = new RegistrySynchronizer<String, SelectableObject, UnitConfigType.UnitConfig, UnitConfigType.UnitConfig.Builder>(
                     selector.getSelectedObjectRegistry(), getUnitRegistry().getUnitConfigRemoteRegistry(), SelectableObjectFactory.getInstance()) {
                 @Override
@@ -154,8 +162,8 @@ public class Identification extends AbstractEventHandler {
                     }
                 }
             };
-            
-            Registries.waitForData(); 
+
+            Registries.waitForData();
             selectableObjectRegistrySynchronizer.activate();
         } catch (NotAvailableException ex) {
             throw new CouldNotPerformException("Could not connect to the registry.", ex);
@@ -163,8 +171,8 @@ public class Identification extends AbstractEventHandler {
             throw new CouldNotPerformException("The RegistrySynchronization could not be activated although connection to the registry is possible.", ex);
         }
     }
-    
-    private void initSelector() throws JPNotAvailableException, InstantiationException{
+
+    private void initSelector() throws JPNotAvailableException, InstantiationException {
         SelectorType selectorType = JPService.getProperty(JPSelectorType.class).getValue();
         LOGGER.info("Selected Selector implementation: " + selectorType.name());
         DistanceType distanceType = JPService.getProperty(JPDistanceType.class).getValue();
@@ -172,7 +180,7 @@ public class Identification extends AbstractEventHandler {
         double threshold = JPService.getProperty(JPThreshold.class).getValue();
         LOGGER.info("Selected threshold: " + threshold);
         AbstractDistanceMeasure distanceMeasure;
-        switch(distanceType) {
+        switch (distanceType) {
             case ANGLE:
                 distanceMeasure = new AngleMeasure();
                 break;
@@ -192,7 +200,7 @@ public class Identification extends AbstractEventHandler {
                 distanceMeasure = new AngleMeasure();
                 break;
         }
-        switch(selectorType) {
+        switch (selectorType) {
             case MAX:
                 selector = new MaxSelector(threshold, distanceMeasure);
                 break;
@@ -203,9 +211,9 @@ public class Identification extends AbstractEventHandler {
                 selector = new MeanSelector(threshold, distanceMeasure);
                 break;
         }
-        
+
     }
-    
+
     public static void main(String[] args) throws InterruptedException {
         /* Setup JPService */
         JPService.setApplicationName(Identification.class);
@@ -218,7 +226,7 @@ public class Identification extends AbstractEventHandler {
         JPService.registerProperty(JPLocalInput.class);
         JPService.registerProperty(JPLocalOutput.class);
         JPService.parseAndExitOnError(args);
-        
+
         Identification app = new Identification();
     }
 }

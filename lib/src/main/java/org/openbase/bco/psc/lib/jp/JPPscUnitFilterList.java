@@ -49,7 +49,6 @@ public class JPPscUnitFilterList extends AbstractJavaProperty<List<String>> {
     public JPPscUnitFilterList() {
         super(COMMAND_IDENTIFIERS);
     }
-    //TODO: Rename to Filter PSC Units
 
     /**
      * {@inheritDoc}

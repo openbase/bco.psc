@@ -21,20 +21,23 @@ package org.openbase.bco.psc.identification.registry;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InstantiationException;
 import org.openbase.jul.pattern.Factory;
+import org.slf4j.LoggerFactory;
 import rst.domotic.unit.UnitConfigType;
 
 /**
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class SelectableObjectFactory implements Factory<SelectableObject, UnitConfigType.UnitConfig>  {
+public class SelectableObjectFactory implements Factory<SelectableObject, UnitConfigType.UnitConfig> {
+
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(SelectableObjectFactory.class);
     public static SelectableObjectFactory instance;
-    
-    private SelectableObjectFactory(){}
+
+    private SelectableObjectFactory() {
+    }
 
     /**
      * Method returns a new singelton instance of the unit factory.
@@ -50,7 +53,7 @@ public class SelectableObjectFactory implements Factory<SelectableObject, UnitCo
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @param config {@inheritDoc}
      * @return {@inheritDoc}
      * @throws InstantiationException {@inheritDoc}
@@ -61,10 +64,11 @@ public class SelectableObjectFactory implements Factory<SelectableObject, UnitCo
         try {
             SelectableObject box = new SelectableObject();
             box.applyConfigUpdate(config);
+            LOGGER.info("Created selectable object for unit " + config.getLabel() + " with id " + config.getId());
             return box;
         } catch (CouldNotPerformException ex) {
             throw new InstantiationException("SelectableObjectInstance", ex);
         }
     }
-    
+
 }

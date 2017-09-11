@@ -41,7 +41,7 @@ import rsb.converter.DefaultConverterRepository;
 import rsb.converter.ProtocolBufferConverter;
 import rsb.util.Properties;
 import rst.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
-import rst.tracking.PointingRay3DFloatCollectionType;
+import rst.tracking.PointingRay3DFloatDistributionCollectionType.PointingRay3DFloatDistributionCollection;
 
 /**
  * This class handles the RSB connections of the project.
@@ -92,8 +92,8 @@ public class RSBConnection {
      * @throws InterruptedException is thrown in case of an external interruption.
      */
     private void initializeListener(AbstractEventHandler handler) throws CouldNotPerformException, InterruptedException{
-        final ProtocolBufferConverter<PointingRay3DFloatCollectionType.PointingRay3DFloatCollection> converter = new ProtocolBufferConverter<>(
-                    PointingRay3DFloatCollectionType.PointingRay3DFloatCollection.getDefaultInstance());
+        final ProtocolBufferConverter<PointingRay3DFloatDistributionCollection> converter = new ProtocolBufferConverter<>(
+                    PointingRay3DFloatDistributionCollection.getDefaultInstance());
 
         DefaultConverterRepository.getDefaultConverterRepository()
             .addConverter(converter);

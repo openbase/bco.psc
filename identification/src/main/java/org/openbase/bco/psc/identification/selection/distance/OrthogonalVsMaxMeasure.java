@@ -21,7 +21,6 @@ package org.openbase.bco.psc.identification.selection.distance;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -31,6 +30,16 @@ import javax.vecmath.Vector3d;
  */
 public class OrthogonalVsMaxMeasure extends AbstractDistanceMeasure {
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param origin {@inheritDoc}
+     * @param direction {@inheritDoc}
+     * @param width {@inheritDoc}
+     * @param depth {@inheritDoc}
+     * @param height {@inheritDoc}
+     * @return {@inheritDoc}
+     */
     @Override
     protected double distanceProbability(Point3d origin, Vector3d direction, float width, float depth, float height) {
         double distance = getClosestPoint(origin, direction).distance(ZERO_POINT);
@@ -40,5 +49,5 @@ public class OrthogonalVsMaxMeasure extends AbstractDistanceMeasure {
         //TODO: Calculate probability:
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
 }

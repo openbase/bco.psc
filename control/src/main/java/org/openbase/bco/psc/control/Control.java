@@ -66,7 +66,6 @@ public class Control extends AbstractEventHandler {
 
     @Override
     public void handleEvent(final Event event) {
-        //TODO: Test program with unit group!!
         LOGGER.trace(event.toString());
         if ((event.getData() instanceof UnitProbabilityCollection)) {
             UnitProbabilityCollection collection = (UnitProbabilityCollection) event.getData();

@@ -21,7 +21,6 @@ package org.openbase.bco.psc.identification;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 import static org.junit.Assert.assertEquals;
@@ -31,22 +30,23 @@ import static org.junit.Assert.assertEquals;
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class Testing {
-    public static void assertAlmostEquals(Vector3d vector1, Vector3d vector2, double delta){
+
+    public static void assertAlmostEquals(Vector3d vector1, Vector3d vector2, double delta) {
         assertEquals(vector1.x, vector2.x, delta);
         assertEquals(vector1.y, vector2.y, delta);
         assertEquals(vector1.z, vector2.z, delta);
     }
-    
+
     public static void assertAlmostEquals(Vector3d vector1, Vector3d vector2) {
         assertAlmostEquals(vector1, vector2, 0.00000000000001);
     }
-    
-    public static void assertAlmostEquals(Point3d point1, Point3d point2, double delta){
+
+    public static void assertAlmostEquals(Point3d point1, Point3d point2, double delta) {
         assertEquals(point1.x, point2.x, delta);
         assertEquals(point1.y, point2.y, delta);
         assertEquals(point1.z, point2.z, delta);
     }
-    
+
     public static void assertAlmostEquals(Point3d point1, Point3d point2) {
         assertAlmostEquals(point1, point2, 0.00000000000001);
     }

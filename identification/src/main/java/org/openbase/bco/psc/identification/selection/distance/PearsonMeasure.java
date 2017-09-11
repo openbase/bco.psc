@@ -21,7 +21,6 @@ package org.openbase.bco.psc.identification.selection.distance;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -31,14 +30,27 @@ import javax.vecmath.Vector3d;
  */
 public class PearsonMeasure extends AbstractDistanceMeasure {
     //TODO: Not really a probability here...
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param origin {@inheritDoc}
+     * @param direction {@inheritDoc}
+     * @param width {@inheritDoc}
+     * @param depth {@inheritDoc}
+     * @param height {@inheritDoc}
+     * @return {@inheritDoc}
+     */
     @Override
     protected double distanceProbability(Point3d origin, Vector3d direction, float width, float depth, float height) {
         Point3d closestPoint = getClosestPoint(origin, direction);
-        if(closestPoint == null) return Double.MAX_VALUE;
+        if (closestPoint == null) {
+            return Double.MAX_VALUE;
+        }
         return pearsonLength(new Vector3d(closestPoint), new Vector3d(width, depth, height));
     }
-    
-    private double pearsonLength(final Vector3d vector, final Vector3d size){
-        return Math.sqrt((vector.x*vector.x)/(size.x*size.x) + (vector.y*vector.y)/(size.y*size.y) + (vector.z*vector.z)/(size.z*size.z));
+
+    private double pearsonLength(final Vector3d vector, final Vector3d size) {
+        return Math.sqrt((vector.x * vector.x) / (size.x * size.x) + (vector.y * vector.y) / (size.y * size.y) + (vector.z * vector.z) / (size.z * size.z));
     }
 }

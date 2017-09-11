@@ -21,7 +21,6 @@ package org.openbase.bco.psc.identification.selection;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import java.util.stream.Collectors;
 import org.openbase.bco.psc.identification.registry.SelectableObject;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -41,15 +40,16 @@ import rst.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistrib
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public abstract class AbstractSelector {
+
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AbstractSelector.class);
     private final double threshold;
     //TODO: Ideas: maximal bounding box and kdtree first.
     // Then rating by distances
     // Maybe fast enough for required numbers
-    
+
     private SynchronizableRegistryImpl<String, SelectableObject> selectedObjectRegistry;
-    
-    public AbstractSelector(double threshold) throws InstantiationException{
+
+    public AbstractSelector(double threshold) throws InstantiationException {
         this.threshold = threshold;
         try {
             this.selectedObjectRegistry = new SynchronizableRegistryImpl<>();
@@ -57,23 +57,25 @@ public abstract class AbstractSelector {
             throw new InstantiationException(this, ex);
         }
     }
-    
-    public SynchronizableRegistryImpl<String, SelectableObject> getSelectedObjectRegistry(){
+
+    public SynchronizableRegistryImpl<String, SelectableObject> getSelectedObjectRegistry() {
         return selectedObjectRegistry;
     }
-    
-    public UnitProbabilityCollection getUnitProbabilities(PointingRay3DFloatDistributionCollection pointingRays) throws CouldNotPerformException{
+
+    public UnitProbabilityCollection getUnitProbabilities(PointingRay3DFloatDistributionCollection pointingRays) throws CouldNotPerformException {
         UnitProbabilityCollection.Builder collectionBuilder = UnitProbabilityCollection.newBuilder();
+        //TODO: Invert this here! first iterate the distributions, then the objects!
         collectionBuilder.addAllElement(selectedObjectRegistry.getEntries().stream()
-                .map(entry -> pointingRays.getElementList().stream()
-                        .map(rayDist -> getUnitProbability(entry, rayDist))
-                        .min((u1, u2) -> Float.compare(u1.getProbability(), u2.getProbability())))
+                .map(
+                        entry -> pointingRays.getElementList().stream()
+                                .map(rayDist -> getUnitProbability(entry, rayDist))
+                                .max((u1, u2) -> Float.compare(u1.getProbability(), u2.getProbability())))
                 .filter(u -> u.isPresent() && u.get().getProbability() >= threshold)
                 .map(u -> u.get())
                 .collect(Collectors.toList()));
         return collectionBuilder.build();
     }
-    
+
     private UnitProbability getUnitProbability(SelectableObject object, PointingRay3DFloatDistribution rayDistribution) {
         try {
             float prob = calculateProbability(object.getBoundingBox(), rayDistribution);
@@ -83,6 +85,6 @@ public abstract class AbstractSelector {
             return UnitProbability.newBuilder().setProbability(Float.NEGATIVE_INFINITY).build();
         }
     }
-    
+
     protected abstract float calculateProbability(BoundingBox boundingBox, PointingRay3DFloatDistribution pointingRays);
 }
