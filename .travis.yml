@@ -29,13 +29,13 @@ deploy:
   - provider: script
     script: .travis/deploy.sh
     on:
-        repo: openbase/bco.pointing-smart-control
+        repo: openbase/bco.psc
         branch: master
         jdk: oraclejdk8
   - provider: script
     script: .travis/deploy.sh
     on:
-        repo: openbase/bco.pointing-smart-control
+        repo: openbase/bco.psc
         tags: true
         jdk: oraclejdk8
         
