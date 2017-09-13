@@ -6,10 +6,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import org.openbase.bco.dal.remote.unit.AbstractUnitRemote;
-import org.openbase.bco.dal.remote.unit.Units;
 import org.openbase.bco.psc.lib.jp.JPLocalInput;
 import org.openbase.bco.psc.lib.jp.JPLocalOutput;
+import org.openbase.bco.psc.lib.registry.PointingUnitChecker;
 import org.openbase.bco.psc.sm.jp.JPBaseScope;
 import org.openbase.bco.psc.sm.jp.JPOutScope;
 import org.openbase.bco.psc.sm.jp.JPRegistryIds;
@@ -223,7 +222,7 @@ public class SkeletonMerging extends AbstractEventHandler {
                         return false;
                     }
                     try {
-                        if (hasLocationData(config)) {
+                        if (PointingUnitChecker.hasLocationDataAndBoundingBox(config)) {
                             return true;
                         } else {
                             throw new CouldNotPerformException("Registry Id found in the arguments, but no location data available.");
@@ -245,17 +244,6 @@ public class SkeletonMerging extends AbstractEventHandler {
             throw new CouldNotPerformException("Could not connect to the registry.", ex);
         } catch (CouldNotPerformException ex) {
             throw new CouldNotPerformException("The RegistrySynchronization could not be activated although connection to the registry is possible.", ex);
-        }
-    }
-
-    public static boolean hasLocationData(UnitConfigType.UnitConfig config) throws InterruptedException {
-        try {
-            AbstractUnitRemote unitRemote = (AbstractUnitRemote) Units.getUnit(config, false);
-            unitRemote.getTransform3D();
-            return true;
-        } catch (CouldNotPerformException ex) {
-            ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.WARN);
-            return false;
         }
     }
 
