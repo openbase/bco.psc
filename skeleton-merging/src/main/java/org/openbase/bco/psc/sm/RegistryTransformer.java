@@ -21,12 +21,8 @@ package org.openbase.bco.psc.sm;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import javax.media.j3d.Transform3D;
-import org.openbase.bco.dal.remote.unit.Units;
+import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
 import org.openbase.jul.iface.Configurable;
@@ -34,18 +30,25 @@ import org.slf4j.LoggerFactory;
 import rst.domotic.unit.UnitConfigType.UnitConfig;
 
 /**
- * This class creates a <code>Transformer</code> for a specific device registered in the bco-unit-registry. 
- * The <code>RegistryTransformer</code> is used to transform the coordinates of <code>TrackedPosture3dFloat</code>-objects 
- * and can be synchronized with the data in the registry.
- * 
+ * This class creates a <code>Transformer</code> for a specific device
+ * registered in the bco-unit-registry. The <code>RegistryTransformer</code> is
+ * used to transform the coordinates of
+ * <code>TrackedPosture3dFloat</code>-objects and can be synchronized with the
+ * data in the registry.
+ *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class RegistryTransformer extends Transformer implements Configurable<String, UnitConfig>{
-    /** Logger instance. */
+public class RegistryTransformer extends Transformer implements Configurable<String, UnitConfig> {
+
+    /**
+     * Logger instance.
+     */
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(RegistryTransformer.class);
-    /** UnitConfig of the registry object. */
+    /**
+     * UnitConfig of the registry object.
+     */
     private UnitConfig config;
-    
+
     @Override
     public synchronized UnitConfig applyConfigUpdate(UnitConfig config) throws CouldNotPerformException, InterruptedException {
         this.config = config;
@@ -53,26 +56,29 @@ public class RegistryTransformer extends Transformer implements Configurable<Str
 //        Registries.waitForData();
         Transform3D transform;
         try {
-            transform = Units.getUnitTransformation(config).get(1, TimeUnit.SECONDS).getTransform();
-        } catch (TimeoutException | ExecutionException ex) {
+            transform = Registries.getLocationRegistry(true).getUnitToRootTransform3D(config);
+        } catch (CouldNotPerformException ex) {
             throw new CouldNotPerformException("Could not get the transformation.", ex);
         }
-        transform.invert();
 //        System.out.println(transform);
         setTransform(transform);
-        LOGGER.debug("RegistryTransformer for id "+config.getId() + " updated.");
+        LOGGER.debug("RegistryTransformer for id " + config.getId() + " updated.");
         return this.config;
     }
 
     @Override
     public synchronized String getId() throws NotAvailableException {
-        if(config == null) throw new NotAvailableException("Id");
+        if (config == null) {
+            throw new NotAvailableException("Id");
+        }
         return config.getId();
     }
 
     @Override
     public synchronized UnitConfig getConfig() throws NotAvailableException {
-        if(config == null) throw new NotAvailableException("Config");
+        if (config == null) {
+            throw new NotAvailableException("Config");
+        }
         return config;
     }
 }

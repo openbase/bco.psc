@@ -22,9 +22,11 @@ package org.openbase.bco.psc.lib.registry;
  * #L%
  */
 import java.util.List;
-import org.openbase.bco.dal.remote.unit.AbstractUnitRemote;
-import org.openbase.bco.dal.remote.unit.Units;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.openbase.bco.registry.lib.util.UnitConfigProcessor;
+import org.openbase.bco.registry.remote.Registries;
 import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.slf4j.LoggerFactory;
@@ -52,7 +54,7 @@ public class PointingUnitChecker {
     public static boolean isDalOrGroupWithLocation(UnitConfig config) throws InterruptedException, CouldNotPerformException {
         try {
             if (config != null && (config.getType() == UnitType.UNIT_GROUP || UnitConfigProcessor.isDalUnit(config))) {
-                return hasLocationData(config);
+                return hasLocationDataAndBoundingBox(config);
             }
         } catch (CouldNotPerformException ex) {
             throw new CouldNotPerformException("Could not check if unit " + config.getLabel() + " is dal unit.", ex);
@@ -60,15 +62,27 @@ public class PointingUnitChecker {
         return false;
     }
 
-    private static boolean hasLocationData(UnitConfig config) throws InterruptedException {
-        try {
-            AbstractUnitRemote unitRemote = (AbstractUnitRemote) Units.getUnit(config, false);
-            unitRemote.getGlobalBoundingBoxCenterPoint3d();
-            return true;
-        } catch (CouldNotPerformException ex) {
-//            ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.WARN);
+    public static boolean hasLocationDataAndBoundingBox(UnitConfig config) throws InterruptedException, CouldNotPerformException {
+        if (!hasLocationData(config)) {
             return false;
         }
+        try {
+            Registries.getLocationRegistry(true).getUnitBoundingBoxCenterGlobalPoint3d(config);
+            return true;
+        } catch (CouldNotPerformException ex) {
+            return false;
+        }
+    }
+
+    public static boolean hasLocationData(UnitConfig config) throws InterruptedException, CouldNotPerformException {
+        try {
+            Registries.getLocationRegistry(true).getUnitToRootTransformationFuture(config).get(10000, TimeUnit.SECONDS);
+        } catch (CouldNotPerformException | TimeoutException ex) {
+            throw new CouldNotPerformException("GlobalTransformReceiver not available.", ex);
+        } catch (ExecutionException ex) {
+            return false;
+        }
+        return true;
     }
 
     private static boolean hasPowerStateService(UnitConfig config) throws InterruptedException {

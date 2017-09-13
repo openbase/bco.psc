@@ -22,10 +22,9 @@ package org.openbase.bco.psc.identification.registry;
  * #L%
  */
 import javax.media.j3d.Transform3D;
-import org.openbase.bco.dal.remote.unit.AbstractUnitRemote;
-import org.openbase.bco.dal.remote.unit.Units;
 import org.openbase.bco.psc.identification.selection.AbstractSelectable;
 import org.openbase.bco.psc.identification.selection.BoundingBox;
+import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
 import org.openbase.jul.iface.Configurable;
@@ -54,8 +53,8 @@ public class SelectableObject implements Configurable<String, UnitConfig>, Abstr
     @Override
     public synchronized UnitConfig applyConfigUpdate(UnitConfig config) throws CouldNotPerformException, InterruptedException {
         this.config = config;
-        Transform3D transform3Dinv = ((AbstractUnitRemote) Units.getUnit(config, false)).getTransform3DInverse();
-        boundingBox = new BoundingBox(transform3Dinv, config.getPlacementConfig().getShape().getBoundingBox());
+        Transform3D unitToRootTransform = Registries.getLocationRegistry(true).getUnitToRootTransform3D(config);
+        boundingBox = new BoundingBox(unitToRootTransform, config.getPlacementConfig().getShape().getBoundingBox());
         return this.config;
     }
 
