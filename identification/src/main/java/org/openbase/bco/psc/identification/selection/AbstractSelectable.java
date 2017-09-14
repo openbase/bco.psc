@@ -28,5 +28,6 @@ import org.openbase.jul.exception.NotAvailableException;
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public interface AbstractSelectable {
+
     public BoundingBox getBoundingBox() throws NotAvailableException;
 }

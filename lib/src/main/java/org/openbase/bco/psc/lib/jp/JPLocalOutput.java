@@ -21,31 +21,37 @@ package org.openbase.bco.psc.lib.jp;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import org.openbase.jps.preset.AbstractJPBoolean;
 
 /**
- * JavaProperty used to specify the use of a local RSB config for outgoing events.
+ * JavaProperty used to specify the use of a local RSB config for outgoing
+ * events.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPLocalOutput extends AbstractJPBoolean{
-    /** The identifier can be used as an command line argument to activate the use of a local RSB config. */
+public class JPLocalOutput extends AbstractJPBoolean {
+
+    /**
+     * The identifier can be used as an command line argument to activate the
+     * use of a local RSB config.
+     */
     public final static String[] COMMAND_IDENTIFIERS = {"--lo", "--local-output"};
 
-    /** Constructor. */
+    /**
+     * Constructor.
+     */
     public JPLocalOutput() {
         super(COMMAND_IDENTIFIERS);
     }
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return {@inheritDoc}
      */
     @Override
     public String getDescription() {
         return "If true, the program will try to send the Output via socket and localhost.";
     }
-    
+
 }

@@ -21,11 +21,9 @@ package org.openbase.bco.psc.control;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.openbase.bco.psc.control.jp.JPCooldownTime;
-import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
 import org.openbase.bco.psc.control.registry.ControllableObject;
 import org.openbase.bco.psc.control.registry.ControllableObjectFactory;
 import org.openbase.bco.psc.control.rsb.RSBConnection;
@@ -35,10 +33,9 @@ import org.openbase.bco.psc.lib.jp.JPSelectedUnitScope;
 import org.openbase.bco.psc.lib.jp.JPThreshold;
 import org.openbase.bco.psc.lib.registry.PointingUnitChecker;
 import org.openbase.bco.registry.remote.Registries;
+import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
 import org.openbase.jps.core.JPService;
-import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.exception.CouldNotPerformException;
-import org.openbase.jul.exception.InstantiationException;
 import org.openbase.jul.exception.NotAvailableException;
 import org.openbase.jul.exception.VerificationFailedException;
 import org.openbase.jul.exception.printer.ExceptionPrinter;
@@ -52,34 +49,34 @@ import rst.domotic.unit.UnitConfigType;
 import rst.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
 
 /**
- * 
+ *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class Control extends AbstractEventHandler {
+
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Control.class);
-    
+
     private RSBConnection rsbConnection;
-    
+
     private RegistrySynchronizer<String, ControllableObject, UnitConfigType.UnitConfig, UnitConfigType.UnitConfig.Builder> controllableObjectRegistrySynchronizer;
     private SynchronizableRegistryImpl<String, ControllableObject> controllableObjectRegistry;
-    
+
     private List<String> registryFlags;
     private double threshold;
-    
+
     @Override
     public void handleEvent(final Event event) {
-        //TODO: Test program with unit group!!
         LOGGER.trace(event.toString());
         if ((event.getData() instanceof UnitProbabilityCollection)) {
             UnitProbabilityCollection collection = (UnitProbabilityCollection) event.getData();
             collection.getElementList().stream().filter(x -> x.getProbability() >= threshold).forEach(x -> {
                 try {
-                    if(controllableObjectRegistry.contains(x.getId())){
+                    if (controllableObjectRegistry.contains(x.getId())) {
                         try {
-                            if(controllableObjectRegistry.get(x.getId()).switchPowerState()) {
-                                LOGGER.info("Switched power state of unit "+controllableObjectRegistry.get(x.getId()).getConfig().getLabel() +" with id " + x.getId());
+                            if (controllableObjectRegistry.get(x.getId()).switchPowerState()) {
+                                LOGGER.info("Switched power state of unit " + controllableObjectRegistry.get(x.getId()).getConfig().getLabel() + " with id " + x.getId());
                             } else {
-                                LOGGER.info("Did not switch power state of unit "+controllableObjectRegistry.get(x.getId()).getConfig().getLabel() +" with id " + x.getId());
+                                LOGGER.info("Did not switch power state of unit " + controllableObjectRegistry.get(x.getId()).getConfig().getLabel() + " with id " + x.getId());
                             }
                         } catch (CouldNotPerformException ex) {
                             ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
@@ -91,45 +88,45 @@ public class Control extends AbstractEventHandler {
             });
         }
     }
-    
+
     public Control() {
         try {
-            try{
-                controllableObjectRegistry = new SynchronizableRegistryImpl<>();
-            } catch (InstantiationException ex) {
-                throw new InstantiationException(controllableObjectRegistry, ex);
-            }
-            try {
-                registryFlags = JPService.getProperty(JPPscUnitFilterList.class).getValue();
-                threshold = JPService.getProperty(JPThreshold.class).getValue();
-                
-                initializeRegistryConnection();
+            controllableObjectRegistry = new SynchronizableRegistryImpl<>();
+            registryFlags = JPService.getProperty(JPPscUnitFilterList.class).getValue();
+            threshold = JPService.getProperty(JPThreshold.class).getValue();
 
-                rsbConnection = new RSBConnection(this);
-            } catch (CouldNotPerformException | JPNotAvailableException | InterruptedException ex) {
-//                selectableObjectRegistrySynchronizer.deactivate();
-                throw ex;
+            initializeRegistryConnection();
+
+            rsbConnection = new RSBConnection(this);
+            addShutdownHook();
+            // Wait for events.
+            while (true) {
+                Thread.sleep(1);
             }
-            try {
-                // Wait for events.
-                while (true) {
-                    Thread.sleep(1);
-                }
-            } finally {
-                // Deactivate the listener after use.
-                rsbConnection.deactivate();
-            }
-        } catch (Exception ex) { 
+        } catch (Exception ex) {
             ExceptionPrinter.printHistory(new CouldNotPerformException("Control failed", ex), LOGGER);
             System.exit(255);
         }
+    }
+
+    private void addShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                rsbConnection.deactivate();
+            } catch (CouldNotPerformException ex) {
+                ExceptionPrinter.printHistory(ex, LOGGER);
+            } catch (InterruptedException ex) {
+                LOGGER.error("Interruption during deactivation of rsb connection.");
+                Thread.currentThread().interrupt();
+            }
+        }));
     }
 
     private void initializeRegistryConnection() throws InterruptedException, CouldNotPerformException {
         try {
             LOGGER.info("Initializing Registry synchronization.");
             Registries.getUnitRegistry().waitForData(3, TimeUnit.SECONDS);
-            
+
             this.controllableObjectRegistrySynchronizer = new RegistrySynchronizer<String, ControllableObject, UnitConfigType.UnitConfig, UnitConfigType.UnitConfig.Builder>(
                     controllableObjectRegistry, getUnitRegistry().getUnitConfigRemoteRegistry(), ControllableObjectFactory.getInstance()) {
                 @Override
@@ -146,8 +143,8 @@ public class Control extends AbstractEventHandler {
                     }
                 }
             };
-            
-            Registries.waitForData(); 
+
+            Registries.waitForData();
             controllableObjectRegistrySynchronizer.activate();
         } catch (NotAvailableException ex) {
             throw new CouldNotPerformException("Could not connect to the registry.", ex);
@@ -155,7 +152,7 @@ public class Control extends AbstractEventHandler {
             throw new CouldNotPerformException("The RegistrySynchronization could not be activated although connection to the registry is possible.", ex);
         }
     }
-    
+
     public static void main(String[] args) throws InterruptedException {
         /* Setup JPService */
         JPService.setApplicationName(Control.class);
@@ -165,7 +162,7 @@ public class Control extends AbstractEventHandler {
         JPService.registerProperty(JPSelectedUnitScope.class);
         JPService.registerProperty(JPLocalInput.class);
         JPService.parseAndExitOnError(args);
-        
+
         Control app = new Control();
     }
 }

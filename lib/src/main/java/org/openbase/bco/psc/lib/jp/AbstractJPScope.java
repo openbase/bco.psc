@@ -21,7 +21,6 @@ package org.openbase.bco.psc.lib.jp;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import java.util.List;
 import org.openbase.jps.core.AbstractJavaProperty;
 import org.openbase.jps.exception.JPBadArgumentException;
@@ -29,17 +28,21 @@ import rsb.Scope;
 
 /**
  * JavaProperty used to parse an RSB Scope from a command line argument.
- * 
+ *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public abstract class AbstractJPScope extends AbstractJavaProperty<Scope> {
-    /** String identifying the type of the argument. */
+
+    /**
+     * String identifying the type of the argument.
+     */
     public final static String[] ARGUMENT_IDENTIFIERS = {"SCOPE"};
-    
+
     /**
      * Constructor.
-     * 
-     * @param commandIdentifiers the identifiers used before the property in the command line arguments.
+     *
+     * @param commandIdentifiers the identifiers used before the property in the
+     * command line arguments.
      */
     public AbstractJPScope(String[] commandIdentifiers) {
         super(commandIdentifiers);
@@ -47,7 +50,7 @@ public abstract class AbstractJPScope extends AbstractJavaProperty<Scope> {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return {@inheritDoc}
      */
     @Override
@@ -57,7 +60,7 @@ public abstract class AbstractJPScope extends AbstractJavaProperty<Scope> {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @param arguments {@inheritDoc}
      * @return {@inheritDoc}
      * @throws JPBadArgumentException {@inheritDoc}
@@ -67,7 +70,7 @@ public abstract class AbstractJPScope extends AbstractJavaProperty<Scope> {
         String oneArgumentResult = getOneArgumentResult();
         try {
             return new Scope(oneArgumentResult);
-        } catch(IllegalArgumentException ex){
+        } catch (IllegalArgumentException ex) {
             throw new JPBadArgumentException("Given Scope[" + oneArgumentResult + "] is not a Scope.", ex);
         }
     }

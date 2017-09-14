@@ -21,7 +21,6 @@ package org.openbase.bco.psc.identification.jp;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import org.openbase.bco.psc.identification.selection.SelectorType;
 import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jps.preset.AbstractJPEnum;
@@ -32,21 +31,30 @@ import org.openbase.jps.preset.AbstractJPEnum;
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class JPSelectorType extends AbstractJPEnum<SelectorType> {
-    /** The identifiers that can be used in front of the command line argument. */
+
+    /**
+     * The identifiers that can be used in front of the command line argument.
+     */
     public final static String[] COMMAND_IDENTIFIERS = {"-s", "--selector-type"};
-    /** Names of the enum values. */
+    /**
+     * Names of the enum values.
+     */
     private String typeNames;
 
-    /** Constructor. */
+    /**
+     * Constructor.
+     */
     public JPSelectorType() {
         super(COMMAND_IDENTIFIERS);
         SelectorType[] types = SelectorType.values();
         typeNames = "[";
-        for(int i = 0; i < types.length; i++){
-            if (i != 0) typeNames += ", ";
+        for (int i = 0; i < types.length; i++) {
+            if (i != 0) {
+                typeNames += ", ";
+            }
             typeNames += types[i].name();
         }
-        typeNames+="]";
+        typeNames += "]";
     }
 
     @Override

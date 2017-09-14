@@ -9,7 +9,7 @@
     <inceptionYear>2016</inceptionYear>
     <description>This project allows the smart control by 3d pointing rays.</description>
     
-    <url>https://github.com/openbase/bco.pointing-smart-control/wiki</url>
+    <url>https://github.com/openbase/bco.psc/wiki</url>
     
     <organization>
         <name>openbase.org</name>
@@ -54,11 +54,10 @@
     <packaging>pom</packaging>
 
     <scm>
-        <connection>scm:git:https://github.com/openbase/bco.pointing-smart-control.git</connection>
-        <developerConnection>scm:git:https://github.com/openbase/bco.pointing-smart-control.git</developerConnection>
-        <url>https://github.com/openbase/bco.pointing-smart-control.git</url>
-      <tag>HEAD</tag>
-  </scm>
+        <connection>scm:git:https://github.com/openbase/bco.psc.git</connection>
+        <developerConnection>scm:git:https://github.com/openbase/bco.psc.git</developerConnection>
+        <url>https://github.com/openbase/bco.psc.git</url>
+    </scm>
     
     <build>
         <plugins>
@@ -171,6 +170,8 @@
 
     <modules>
         <module>lib</module>
+        <module>skeleton-merging</module>
+        <module>ray-extractor</module>
         <module>identification</module>
         <module>control</module>
     </modules>

@@ -21,7 +21,6 @@ package org.openbase.bco.psc.control.registry;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import org.openbase.bco.psc.control.jp.JPCooldownTime;
 import org.openbase.jps.core.JPService;
 import org.openbase.jps.exception.JPNotAvailableException;
@@ -32,19 +31,25 @@ import rst.domotic.unit.UnitConfigType;
 
 /**
  * A factory used for the creation of <code>ControllableObject</code>s.
- * 
+ *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class ControllableObjectFactory implements Factory<ControllableObject, UnitConfigType.UnitConfig>  {
-    /** Singleton instance. */
+public class ControllableObjectFactory implements Factory<ControllableObject, UnitConfigType.UnitConfig> {
+
+    /**
+     * Singleton instance.
+     */
     public static ControllableObjectFactory instance;
-    /** Cooldown time used to initialize the <code>ControllableObject</code>s. */
+    /**
+     * Cooldown time used to initialize the <code>ControllableObject</code>s.
+     */
     private final long cooldownTime;
-    
+
     /**
      * Constructor.
-     * 
-     * @throws InstantiationException Is thrown, if the factory could not be instantiated.
+     *
+     * @throws InstantiationException Is thrown, if the factory could not be
+     * instantiated.
      */
     private ControllableObjectFactory() throws InstantiationException {
         try {
@@ -58,7 +63,8 @@ public class ControllableObjectFactory implements Factory<ControllableObject, Un
      * Method returns a singelton instance of the unit factory.
      *
      * @return The singleton instance of the factory.
-     * @throws org.openbase.jul.exception.InstantiationException Is thrown if the factory could not be instantiated.
+     * @throws org.openbase.jul.exception.InstantiationException Is thrown if
+     * the factory could not be instantiated.
      */
     public synchronized static ControllableObjectFactory getInstance() throws InstantiationException {
         if (instance == null) {
@@ -69,7 +75,7 @@ public class ControllableObjectFactory implements Factory<ControllableObject, Un
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @param config {@inheritDoc}
      * @return {@inheritDoc}
      * @throws InstantiationException {@inheritDoc}
@@ -85,5 +91,5 @@ public class ControllableObjectFactory implements Factory<ControllableObject, Un
             throw new InstantiationException("SelectableObjectInstance", ex);
         }
     }
-    
+
 }

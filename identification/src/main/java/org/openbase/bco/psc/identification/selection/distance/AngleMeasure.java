@@ -21,7 +21,6 @@ package org.openbase.bco.psc.identification.selection.distance;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -30,17 +29,27 @@ import javax.vecmath.Vector3d;
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class AngleMeasure extends AbstractDistanceMeasure {
-    //TODO: This is wrong!
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param origin {@inheritDoc}
+     * @param direction {@inheritDoc}
+     * @param width {@inheritDoc}
+     * @param depth {@inheritDoc}
+     * @param height {@inheritDoc}
+     * @return {@inheritDoc}
+     */
     @Override
     public double distanceProbability(Point3d origin, Vector3d direction, float width, float depth, float height) {
         Vector3d toCenter = new Vector3d(origin);
         toCenter.scale(-1.0);
         double angle = getAngle(toCenter, direction);
-        if(angle > Math.PI/2) return 0;
-        //TODO: Calculate probability:
-        double prob = Math.pow(Math.max(1 - angle*4/Math.PI, 0), .5);
-        System.out.println(angle / Math.PI);
-        System.out.println(prob);
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (angle > Math.PI / 2) {
+            return 0;
+        }
+        //TODO: Check for better solutions?:
+        double prob = Math.pow(Math.max(1 - angle * 2 / Math.PI, 0), .5);
+        return prob;
     }
 }

@@ -21,32 +21,38 @@ package org.openbase.bco.psc.lib.jp;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import java.util.Arrays;
 import java.util.List;
 import org.openbase.jps.core.AbstractJavaProperty;
 import org.openbase.jps.exception.JPNotAvailableException;
 
 /**
- * JavaProperty used to specify flags by which controllable objects are selected from the registry.
+ * JavaProperty used to specify flags by which controllable objects are selected
+ * from the registry.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPPscUnitFilterList extends AbstractJavaProperty<List<String>>{
-    /** String identifying the type of the argument. */
+public class JPPscUnitFilterList extends AbstractJavaProperty<List<String>> {
+
+    /**
+     * String identifying the type of the argument.
+     */
     public final static String[] ARGUMENT_IDENTIFIERS = {"STRING-LIST"};
-    /** The identifiers that can be used in front of the command line argument. */
+    /**
+     * The identifiers that can be used in front of the command line argument.
+     */
     public final static String[] COMMAND_IDENTIFIERS = {"--fl", "--filter-list"};
 
-    /** Constructor. */
+    /**
+     * Constructor.
+     */
     public JPPscUnitFilterList() {
         super(COMMAND_IDENTIFIERS);
     }
-    //TODO: Rename to Filter PSC Units
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return {@inheritDoc}
      */
     @Override
@@ -56,7 +62,7 @@ public class JPPscUnitFilterList extends AbstractJavaProperty<List<String>>{
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return {@inheritDoc}
      * @throws JPNotAvailableException {@inheritDoc}
      */
@@ -67,7 +73,7 @@ public class JPPscUnitFilterList extends AbstractJavaProperty<List<String>>{
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @param arguments {@inheritDoc}
      * @return {@inheritDoc}
      * @throws Exception {@inheritDoc}
@@ -84,7 +90,7 @@ public class JPPscUnitFilterList extends AbstractJavaProperty<List<String>>{
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return {@inheritDoc}
      */
     @Override

@@ -21,28 +21,30 @@ package org.openbase.bco.psc.identification.registry;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import javax.media.j3d.Transform3D;
-import org.openbase.bco.dal.remote.unit.AbstractUnitRemote;
-import org.openbase.bco.dal.remote.unit.Units;
 import org.openbase.bco.psc.identification.selection.AbstractSelectable;
 import org.openbase.bco.psc.identification.selection.BoundingBox;
+import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
 import org.openbase.jul.iface.Configurable;
+import org.slf4j.LoggerFactory;
 import rst.domotic.unit.UnitConfigType.UnitConfig;
 
 /**
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class SelectableObject implements Configurable<String, UnitConfig>, AbstractSelectable{
+public class SelectableObject implements Configurable<String, UnitConfig>, AbstractSelectable {
+
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(SelectableObject.class);
+
     private UnitConfig config;
     private BoundingBox boundingBox;
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @param config {@inheritDoc}
      * @return {@inheritDoc}
      * @throws CouldNotPerformException {@inheritDoc}
@@ -51,45 +53,47 @@ public class SelectableObject implements Configurable<String, UnitConfig>, Abstr
     @Override
     public synchronized UnitConfig applyConfigUpdate(UnitConfig config) throws CouldNotPerformException, InterruptedException {
         this.config = config;
-        //TODO check this again and follow through bounding box... this may now be done in a better fashion.
-        Transform3D transform3D = ((AbstractUnitRemote)Units.getUnit(config, false)).getTransform3D();
-        boundingBox = new BoundingBox(transform3D, config.getPlacementConfig().getShape().getBoundingBox());
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//        return this.config;
+        Transform3D unitToRootTransform = Registries.getLocationRegistry(true).getUnitToRootTransform3D(config);
+        boundingBox = new BoundingBox(unitToRootTransform, config.getPlacementConfig().getShape().getBoundingBox());
+        return this.config;
     }
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return {@inheritDoc}
      * @throws NotAvailableException {@inheritDoc}
      */
     @Override
     public synchronized String getId() throws NotAvailableException {
-        if(config == null) throw new NotAvailableException("Id");
+        if (config == null) {
+            throw new NotAvailableException("Id");
+        }
         return config.getId();
     }
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return {@inheritDoc}
      * @throws NotAvailableException {@inheritDoc}
      */
     @Override
     public synchronized UnitConfig getConfig() throws NotAvailableException {
-        if(config == null) throw new NotAvailableException("Config");
+        if (config == null) {
+            throw new NotAvailableException("Config");
+        }
         return config;
     }
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return {@inheritDoc}
      * @throws NotAvailableException {@inheritDoc}
      */
     @Override
     public synchronized BoundingBox getBoundingBox() throws NotAvailableException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.boundingBox;
     }
 }

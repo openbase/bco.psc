@@ -21,32 +21,41 @@ package org.openbase.bco.psc.identification.jp;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import org.openbase.bco.psc.identification.selection.distance.DistanceType;
 import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jps.preset.AbstractJPEnum;
 
 /**
- * JavaProperty used to specify the AbstractDistanceMeasure implementation to be used.
+ * JavaProperty used to specify the AbstractDistanceMeasure implementation to be
+ * used.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class JPDistanceType extends AbstractJPEnum<DistanceType> {
-    /** The identifiers that can be used in front of the command line argument. */
+
+    /**
+     * The identifiers that can be used in front of the command line argument.
+     */
     public final static String[] COMMAND_IDENTIFIERS = {"-d", "--distance-type"};
-    /** Names of the enum values. */
+    /**
+     * Names of the enum values.
+     */
     private String typeNames;
 
-    /** Constructor. */
+    /**
+     * Constructor.
+     */
     public JPDistanceType() {
         super(COMMAND_IDENTIFIERS);
         DistanceType[] types = DistanceType.values();
         typeNames = "[";
-        for(int i = 0; i < types.length; i++){
-            if (i != 0) typeNames += ", ";
+        for (int i = 0; i < types.length; i++) {
+            if (i != 0) {
+                typeNames += ", ";
+            }
             typeNames += types[i].name();
         }
-        typeNames+="]";
+        typeNames += "]";
     }
 
     @Override
@@ -58,5 +67,5 @@ public class JPDistanceType extends AbstractJPEnum<DistanceType> {
     public String getDescription() {
         return "Defines which implementation of the AbstractDistanceProbabilityMeasure is used. Possible choices are: " + typeNames;
     }
-    
+
 }

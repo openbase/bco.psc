@@ -21,30 +21,29 @@ package org.openbase.bco.psc.identification.selection;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import org.openbase.bco.psc.identification.selection.distance.AbstractDistanceMeasure;
 import org.openbase.jul.exception.InstantiationException;
 import rst.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
-import rst.tracking.PointingRay3DFloatType.PointingRay3DFloat;
 
 /**
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class MeanSelector extends AbstractSelector {
+
     private final AbstractDistanceMeasure distance;
-    
-    public MeanSelector(double threshold, AbstractDistanceMeasure distance) throws InstantiationException{
+
+    public MeanSelector(double threshold, AbstractDistanceMeasure distance) throws InstantiationException {
         super(threshold);
         this.distance = distance;
     }
 
     @Override
     protected float calculateProbability(BoundingBox boundingBox, PointingRay3DFloatDistribution pointingRays) {
-        float totalProb = 0.0f;
-        for (PointingRay3DFloat pointingRay : pointingRays.getRayList()) {
-            totalProb += (float) (distance.probability(pointingRay.getRay(), boundingBox) * pointingRay.getCertainty());
-        }
-        return totalProb;
+        float p = pointingRays.getRayList().stream()
+                .map((pointingRay) -> (float) (distance.probability(pointingRay.getRay(), boundingBox) * pointingRay.getCertainty()))
+                .reduce(0.0f, (accumulator, _item) -> accumulator + _item);
+//        System.out.println("mean prob: " + p);
+        return p;
     }
 }
