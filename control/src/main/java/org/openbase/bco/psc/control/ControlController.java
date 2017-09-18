@@ -144,29 +144,27 @@ public class ControlController extends AbstractEventHandler implements Control, 
     @Override
     public void activate() throws CouldNotPerformException, InterruptedException {
         LOGGER.info("Activating ControlController.");
-        if (active) {
-            throw new CouldNotPerformException("Activate must only be called if not active.");
-        }
         if (!initialized) {
             throw new CouldNotPerformException("Activate can only be called after init.");
         }
-        active = true;
-        Registries.waitForData();
-        LOGGER.info("Activating Registry synchronization.");
-        controllableObjectRegistrySynchronizer.activate();
-        rsbConnection.activate();
+        if (!active) {
+            active = true;
+            Registries.waitForData();
+            LOGGER.info("Activating Registry synchronization.");
+            controllableObjectRegistrySynchronizer.activate();
+            rsbConnection.activate();
+        }
     }
 
     @Override
     public void deactivate() throws CouldNotPerformException, InterruptedException {
         LOGGER.info("Deactivating ControlController.");
-        if (!active) {
-            throw new CouldNotPerformException("Deactivate should only be called if active.");
+        if (active) {
+            active = false;
+            rsbConnection.deactivate();
+            LOGGER.info("Deactivating Registry synchronization.");
+            controllableObjectRegistrySynchronizer.deactivate();
         }
-        active = false;
-        rsbConnection.deactivate();
-        LOGGER.info("Deactivating Registry synchronization.");
-        controllableObjectRegistrySynchronizer.deactivate();
     }
 
     @Override

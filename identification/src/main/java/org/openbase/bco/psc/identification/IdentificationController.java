@@ -202,29 +202,27 @@ public class IdentificationController extends AbstractEventHandler implements Id
     @Override
     public void activate() throws CouldNotPerformException, InterruptedException {
         LOGGER.info("Activating IdentificationController.");
-        if (active) {
-            throw new CouldNotPerformException("Activate must only be called if not active.");
-        }
         if (!initialized) {
             throw new CouldNotPerformException("Activate can only be called after init.");
         }
-        active = true;
-        Registries.waitForData();
-        LOGGER.info("Activating Registry synchronization.");
-        selectableObjectRegistrySynchronizer.activate();
-        rsbConnection.activate();
+        if (!active) {
+            active = true;
+            Registries.waitForData();
+            LOGGER.info("Activating Registry synchronization.");
+            selectableObjectRegistrySynchronizer.activate();
+            rsbConnection.activate();
+        }
     }
 
     @Override
     public void deactivate() throws CouldNotPerformException, InterruptedException {
         LOGGER.info("Deactivating IdentificationController.");
-        if (!active) {
-            throw new CouldNotPerformException("Deactivate should only be called if active.");
+        if (active) {
+            active = false;
+            rsbConnection.deactivate();
+            LOGGER.info("Deactivating Registry synchronization.");
+            selectableObjectRegistrySynchronizer.deactivate();
         }
-        active = false;
-        rsbConnection.deactivate();
-        LOGGER.info("Deactivating Registry synchronization.");
-        selectableObjectRegistrySynchronizer.deactivate();
     }
 
     @Override
