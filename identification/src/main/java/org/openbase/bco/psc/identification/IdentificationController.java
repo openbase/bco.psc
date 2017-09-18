@@ -71,7 +71,7 @@ import rst.tracking.PointingRay3DFloatDistributionCollectionType.PointingRay3DFl
  */
 public class IdentificationController extends AbstractEventHandler implements Identification, Launchable<Void>, VoidInitializable {
 
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(IdentificationLauncher.class);
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(IdentificationController.class);
     private AbstractSelector selector;
     private RSBConnection rsbConnection;
 
@@ -201,7 +201,7 @@ public class IdentificationController extends AbstractEventHandler implements Id
 
     @Override
     public void activate() throws CouldNotPerformException, InterruptedException {
-        LOGGER.info("Activating IdentificationController.");
+        LOGGER.info("Activating " + getClass().getName() + ".");
         if (!initialized) {
             throw new CouldNotPerformException("Activate can only be called after init.");
         }
@@ -216,7 +216,7 @@ public class IdentificationController extends AbstractEventHandler implements Id
 
     @Override
     public void deactivate() throws CouldNotPerformException, InterruptedException {
-        LOGGER.info("Deactivating IdentificationController.");
+        LOGGER.info("Deactivating " + getClass().getName() + ".");
         if (active) {
             active = false;
             rsbConnection.deactivate();

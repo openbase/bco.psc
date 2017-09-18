@@ -64,7 +64,7 @@ import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
  */
 public class SkeletonMergingController extends AbstractEventHandler implements SkeletonMerging, Launchable<Void>, VoidInitializable {
 
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(SkeletonMergingLauncher.class);
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(SkeletonMergingController.class);
 
     private final Map<Scope, String> scopeIdMap = new HashMap<>();
     private final Map<Scope, FileTransformer> scopeFileTransformerMap = new HashMap<>();
@@ -120,7 +120,7 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
             ExceptionPrinter.printHistory(new CouldNotPerformException("Processing the postures failed.", ex), LOGGER, LogLevel.WARN);
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
-            ExceptionPrinter.printHistory(new CouldNotPerformException("Processing the postures failed.", ex), LOGGER, LogLevel.ERROR);
+            ExceptionPrinter.printHistory(new CouldNotPerformException("Sending the postures failed.", ex), LOGGER, LogLevel.ERROR);
         }
     }
 
@@ -238,7 +238,7 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
 
     @Override
     public void activate() throws CouldNotPerformException, InterruptedException {
-        LOGGER.info("Activating SkeletonMergingController.");
+        LOGGER.info("Activating " + getClass().getName() + ".");
         if (!initialized) {
             throw new CouldNotPerformException("Activate can only be called after init.");
         }
@@ -253,7 +253,7 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
 
     @Override
     public void deactivate() throws CouldNotPerformException, InterruptedException {
-        LOGGER.info("Deactivating SkeletonMergingController.");
+        LOGGER.info("Deactivating " + getClass().getName() + ".");
         if (active) {
             active = false;
             rsbConnection.deactivate();

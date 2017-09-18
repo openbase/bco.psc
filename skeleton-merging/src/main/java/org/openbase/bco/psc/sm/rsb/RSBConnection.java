@@ -154,7 +154,7 @@ public class RSBConnection implements Launchable<Void>, VoidInitializable {
             } else {
                 mergedInformer = RSBFactoryImpl.getInstance().createSynchronizedInformer(outScope, TrackedPostures3DFloat.class);
             }
-            informerWatchDog = new WatchDog(mergedInformer, "informer");
+            informerWatchDog = new WatchDog(mergedInformer, "mergedInformer");
         } catch (CouldNotPerformException | JPNotAvailableException ex) {
             throw new InitializationException(RSBConnection.class, ex);
         }
@@ -203,6 +203,8 @@ public class RSBConnection implements Launchable<Void>, VoidInitializable {
      * @return the local communication configuration.
      */
     private ParticipantConfig getLocalConfig() {
+        //TODO: get a super interface implementing this function.
+        //TODO: maybe use inprocess communication in case of starting via single launcher.
         ParticipantConfig localConfig = Factory.getInstance().getDefaultParticipantConfig().copy();
         Properties localProperties = new Properties();
         localProperties.setProperty("transport.socket.host", "localhost");

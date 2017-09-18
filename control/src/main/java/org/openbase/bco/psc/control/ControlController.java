@@ -55,7 +55,7 @@ import rst.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
  */
 public class ControlController extends AbstractEventHandler implements Control, Launchable<Void>, VoidInitializable {
 
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Control.class);
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ControlController.class);
 
     private RSBConnection rsbConnection;
 
@@ -143,7 +143,7 @@ public class ControlController extends AbstractEventHandler implements Control, 
 
     @Override
     public void activate() throws CouldNotPerformException, InterruptedException {
-        LOGGER.info("Activating ControlController.");
+        LOGGER.info("Activating " + getClass().getName() + ".");
         if (!initialized) {
             throw new CouldNotPerformException("Activate can only be called after init.");
         }
@@ -158,7 +158,7 @@ public class ControlController extends AbstractEventHandler implements Control, 
 
     @Override
     public void deactivate() throws CouldNotPerformException, InterruptedException {
-        LOGGER.info("Deactivating ControlController.");
+        LOGGER.info("Deactivating " + getClass().getName() + ".");
         if (active) {
             active = false;
             rsbConnection.deactivate();
