@@ -23,11 +23,11 @@ package org.openbase.bco.psc.control;
  */
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.openbase.bco.psc.control.jp.JPControlThreshold;
 import org.openbase.bco.psc.control.registry.ControllableObject;
 import org.openbase.bco.psc.control.registry.ControllableObjectFactory;
 import org.openbase.bco.psc.control.rsb.RSBConnection;
 import org.openbase.bco.psc.lib.jp.JPPscUnitFilterList;
-import org.openbase.bco.psc.lib.jp.JPThreshold;
 import org.openbase.bco.psc.lib.registry.PointingUnitChecker;
 import org.openbase.bco.registry.remote.Registries;
 import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
@@ -101,7 +101,7 @@ public class ControlController extends AbstractEventHandler implements Control, 
 
                 controllableObjectRegistry = new SynchronizableRegistryImpl<>();
                 registryFlags = JPService.getProperty(JPPscUnitFilterList.class).getValue();
-                threshold = JPService.getProperty(JPThreshold.class).getValue();
+                threshold = JPService.getProperty(JPControlThreshold.class).getValue();
 
                 initializeRegistryConnection();
 

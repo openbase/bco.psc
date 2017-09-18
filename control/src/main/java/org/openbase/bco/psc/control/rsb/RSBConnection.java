@@ -22,6 +22,7 @@ package org.openbase.bco.psc.control.rsb;
  * #L%
  */
 import org.openbase.bco.psc.lib.jp.JPLocalInput;
+import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
 import org.openbase.bco.psc.lib.jp.JPSelectedUnitScope;
 import org.openbase.jps.core.JPService;
 import org.openbase.jps.exception.JPNotAvailableException;
@@ -88,7 +89,7 @@ public class RSBConnection implements Launchable<Void>, VoidInitializable {
                 .addConverter(selectedUnitConverter);
 
         try {
-            Scope selectedUnitScope = JPService.getProperty(JPSelectedUnitScope.class).getValue();
+            Scope selectedUnitScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPSelectedUnitScope.class).getValue());
             LOGGER.info("Initializing RSB Selected Unit Listener on scope: " + selectedUnitScope);
             if (JPService.getProperty(JPLocalInput.class).getValue()) {
                 LOGGER.warn("RSB input set to socket and localhost.");

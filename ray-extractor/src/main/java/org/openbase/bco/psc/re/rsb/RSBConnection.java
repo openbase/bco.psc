@@ -23,6 +23,7 @@ package org.openbase.bco.psc.re.rsb;
  */
 import org.openbase.bco.psc.lib.jp.JPLocalInput;
 import org.openbase.bco.psc.lib.jp.JPLocalOutput;
+import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
 import org.openbase.bco.psc.lib.jp.JPPostureScope;
 import org.openbase.bco.psc.lib.jp.JPRayScope;
 import org.openbase.jps.core.JPService;
@@ -102,7 +103,7 @@ public class RSBConnection implements Launchable<Void>, VoidInitializable {
                 .addConverter(converter);
 
         try {
-            Scope inScope = JPService.getProperty(JPPostureScope.class).getValue();
+            Scope inScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPPostureScope.class).getValue());
             LOGGER.info("Initializing RSB Listener on scope: " + inScope);
             if (JPService.getProperty(JPLocalInput.class).getValue()) {
                 LOGGER.warn("RSB input set to socket and localhost.");
@@ -137,7 +138,7 @@ public class RSBConnection implements Launchable<Void>, VoidInitializable {
                 .addConverter(converter);
 
         try {
-            Scope outScope = JPService.getProperty(JPRayScope.class).getValue();
+            Scope outScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPRayScope.class).getValue());
             LOGGER.info("Initializing RSB Informer on scope: " + outScope);
             if (JPService.getProperty(JPLocalOutput.class).getValue()) {
                 LOGGER.warn("RSB output set to socket and localhost.");

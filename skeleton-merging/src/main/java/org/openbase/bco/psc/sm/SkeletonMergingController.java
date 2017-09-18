@@ -27,11 +27,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
+import org.openbase.bco.psc.lib.jp.JPPostureScope;
 import org.openbase.bco.psc.lib.registry.PointingUnitChecker;
-import org.openbase.bco.psc.sm.jp.JPBaseScope;
-import org.openbase.bco.psc.sm.jp.JPOutScope;
-import org.openbase.bco.psc.sm.jp.JPRegistryIds;
-import org.openbase.bco.psc.sm.jp.JPTransformFiles;
+import org.openbase.bco.psc.sm.jp.JPRawPostureBaseScope;
+import org.openbase.bco.psc.sm.jp.JPRegistryTransformers;
+import org.openbase.bco.psc.sm.jp.JPFileTransformers;
 import org.openbase.bco.psc.sm.registry.RegistryTransformerFactory;
 import org.openbase.bco.psc.sm.rsb.RSBConnection;
 import org.openbase.bco.registry.remote.Registries;
@@ -157,30 +158,31 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
 
     private void handleJPArguments() throws JPValidationException, JPNotAvailableException, CouldNotPerformException, InterruptedException {
         //TODO: remove this as soon as merging is enabled!
-        if (JPService.getProperty(JPTransformFiles.class).isParsed() && JPService.getProperty(JPRegistryIds.class).isParsed()
-                || JPService.getProperty(JPTransformFiles.class).isParsed() && JPService.getProperty(JPTransformFiles.class).getValue().size() > 1
-                || JPService.getProperty(JPRegistryIds.class).isParsed() && JPService.getProperty(JPRegistryIds.class).getValue().size() > 1) {
+        if (JPService.getProperty(JPFileTransformers.class).isParsed() && JPService.getProperty(JPRegistryTransformers.class).isParsed()
+                || JPService.getProperty(JPFileTransformers.class).isParsed() && JPService.getProperty(JPFileTransformers.class).getValue().size() > 1
+                || JPService.getProperty(JPRegistryTransformers.class).isParsed() && JPService.getProperty(JPRegistryTransformers.class).getValue().size() > 1) {
             throw new JPValidationException("So far, only one transformer can be specified via -r or -f, as merging is not yet implemented.");
         }
 
-        Scope baseScope = JPService.getProperty(JPBaseScope.class).getValue();
-        Scope outScope = baseScope.concat(JPService.getProperty(JPOutScope.class).getValue());
+        Scope pscBaseScope = JPService.getProperty(JPPSCBaseScope.class).getValue();
+        Scope baseScope = JPService.getProperty(JPRawPostureBaseScope.class).getValue();
+        Scope outScope = pscBaseScope.concat(JPService.getProperty(JPPostureScope.class).getValue());
         boolean registryRequired = false;
-        if (!(JPService.getProperty(JPTransformFiles.class).isParsed() || JPService.getProperty(JPRegistryIds.class).isParsed())) {
+        if (!(JPService.getProperty(JPFileTransformers.class).isParsed() || JPService.getProperty(JPRegistryTransformers.class).isParsed())) {
             //TODO: Add config file or so?!
             throw new JPValidationException("At least one of --registry-id or --transform-file has to be specified");
         }
 
-        if (JPService.getProperty(JPTransformFiles.class).isParsed()) {
-            for (Entry<Scope, File> entry : JPService.getProperty(JPTransformFiles.class).getValue().entrySet()) {
+        if (JPService.getProperty(JPFileTransformers.class).isParsed()) {
+            for (Entry<Scope, File> entry : JPService.getProperty(JPFileTransformers.class).getValue().entrySet()) {
                 Scope scope = baseScope.concat(entry.getKey());
                 scopeFileTransformerMap.put(scope, new FileTransformer(entry.getValue()));
                 LOGGER.info("Registering on scope " + scope.toString() + " Transformer from file " + entry.getValue().getAbsolutePath());
             }
         }
-        if (JPService.getProperty(JPRegistryIds.class).isParsed()) {
+        if (JPService.getProperty(JPRegistryTransformers.class).isParsed()) {
             registryRequired = true;
-            for (Entry<Scope, String> entry : JPService.getProperty(JPRegistryIds.class).getValue().entrySet()) {
+            for (Entry<Scope, String> entry : JPService.getProperty(JPRegistryTransformers.class).getValue().entrySet()) {
                 Scope scope = baseScope.concat(entry.getKey());
                 scopeIdMap.put(scope, entry.getValue());
                 LOGGER.info("Registering on scope " + scope.toString() + " Unit with id " + entry.getValue());

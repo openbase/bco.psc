@@ -25,8 +25,8 @@ import org.openbase.jps.exception.JPNotAvailableException;
 import rsb.Scope;
 
 /**
- * JPScope used to parse the scope used for receiving posture events from a
- * command line argument.
+ * JPScope used to parse the subscope used for sending and receiving the events
+ * produced by skeleton-merging.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
@@ -35,7 +35,7 @@ public class JPPostureScope extends AbstractJPScope {
     /**
      * The identifiers that can be used in front of the command line argument.
      */
-    public final static String[] COMMAND_IDENTIFIERS = {"--ps", "--posture-scope"};
+    public final static String[] COMMAND_IDENTIFIERS = {"--scope-for-merged-postures"};
 
     /**
      * Constructor.
@@ -51,7 +51,7 @@ public class JPPostureScope extends AbstractJPScope {
      */
     @Override
     public String getDescription() {
-        return "Defines the scope used to send or receive posture data.";
+        return "Defines the subscope under the psc base scope used to send or receive posture data created by skeleton-merging.";
     }
 
     /**
@@ -62,6 +62,6 @@ public class JPPostureScope extends AbstractJPScope {
      */
     @Override
     protected Scope getPropertyDefaultValue() throws JPNotAvailableException {
-        return new Scope("/pointing/skeleton/merged");
+        return new Scope("/skeleton/merged");
     }
 }

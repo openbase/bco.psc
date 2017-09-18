@@ -21,12 +21,11 @@ package org.openbase.bco.psc.re;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import java.util.Arrays;
 import java.util.stream.Collectors;
-import org.openbase.bco.psc.lib.jp.JPThreshold;
-import org.openbase.bco.psc.re.jp.JPExtractorType;
-import org.openbase.bco.psc.re.jp.JPSelectorType;
+import org.openbase.bco.psc.re.jp.JPRayExtractorType;
+import org.openbase.bco.psc.re.jp.JPRayExtractorThreshold;
+import org.openbase.bco.psc.re.jp.JPRaySelectorType;
 import org.openbase.bco.psc.re.pointing.ArmPostureExtractor;
 import org.openbase.bco.psc.re.pointing.ExtractorType;
 import static org.openbase.bco.psc.re.pointing.ExtractorType.*;
@@ -115,11 +114,11 @@ public class RayExtractorController extends AbstractEventHandler implements RayE
     }
 
     private void initExtractor() throws JPNotAvailableException {
-        ExtractorType extractorType = JPService.getProperty(JPExtractorType.class).getValue();
+        ExtractorType extractorType = JPService.getProperty(JPRayExtractorType.class).getValue();
         LOGGER.info("Selected Extractor implementation: " + extractorType.name());
-        SelectorType selectorType = JPService.getProperty(JPSelectorType.class).getValue();
+        SelectorType selectorType = JPService.getProperty(JPRaySelectorType.class).getValue();
         LOGGER.info("Selected Selector implementation: " + selectorType.name());
-        threshold = JPService.getProperty(JPThreshold.class).getValue();
+        threshold = JPService.getProperty(JPRayExtractorThreshold.class).getValue();
         LOGGER.info("Selected threshold: " + threshold);
         RaySelectorInterface raySelector;
         switch (selectorType) {

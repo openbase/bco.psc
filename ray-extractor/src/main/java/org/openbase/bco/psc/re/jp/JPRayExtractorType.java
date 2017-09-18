@@ -21,42 +21,62 @@ package org.openbase.bco.psc.re.jp;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
-import org.openbase.bco.psc.re.pointing.selectors.SelectorType;
+import org.openbase.bco.psc.re.pointing.ExtractorType;
 import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jps.preset.AbstractJPEnum;
 
 /**
- * JavaProperty used to specify the RaySelectorInterface implementation to be used.
+ * JavaProperty used to specify the RayExtractorInterface implementation to be
+ * used.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPSelectorType extends AbstractJPEnum<SelectorType> {
-    /** The identifiers that can be used in front of the command line argument. */
-    public final static String[] COMMAND_IDENTIFIERS = {"-s", "--selector-type"};
-    /** Names of the enum values. */
+public class JPRayExtractorType extends AbstractJPEnum<ExtractorType> {
+
+    /**
+     * The identifiers that can be used in front of the command line argument.
+     */
+    public final static String[] COMMAND_IDENTIFIERS = {"--re-extractor"};
+    /**
+     * Names of the enum values.
+     */
     private String typeNames;
 
-    /** Constructor. */
-    public JPSelectorType() {
+    /**
+     * Constructor.
+     */
+    public JPRayExtractorType() {
         super(COMMAND_IDENTIFIERS);
-        SelectorType[] types = SelectorType.values();
+        ExtractorType[] types = ExtractorType.values();
         typeNames = "[";
-        for(int i = 0; i < types.length; i++){
-            if (i != 0) typeNames += ", ";
+        for (int i = 0; i < types.length; i++) {
+            if (i != 0) {
+                typeNames += ", ";
+            }
             typeNames += types[i].name();
         }
-        typeNames+="]";
+        typeNames += "]";
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     * @throws JPNotAvailableException {@inheritDoc}
+     */
     @Override
-    protected SelectorType getPropertyDefaultValue() throws JPNotAvailableException {
-        return SelectorType.CHOICE;
+    protected ExtractorType getPropertyDefaultValue() throws JPNotAvailableException {
+        return ExtractorType.SIMPLE;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     */
     @Override
     public String getDescription() {
-        return "Defines which implementation of the RaySelectorInterface is used. Possible choices are: " + typeNames;
+        return "Defines which implementation of the RayExtractorInterface is used. Possible choices are: " + typeNames;
     }
-    
+
 }

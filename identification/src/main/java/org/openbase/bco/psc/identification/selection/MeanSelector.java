@@ -29,7 +29,7 @@ import rst.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistrib
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class MeanSelector extends AbstractSelector {
+public class MeanSelector extends AbstractUnitSelector {
 
     private final AbstractDistanceMeasure distance;
 

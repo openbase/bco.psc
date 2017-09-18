@@ -35,7 +35,7 @@ public class JPCooldownTime extends AbstractJPLong {
     /**
      * The identifiers that can be used in front of the command line argument.
      */
-    public final static String[] COMMAND_IDENTIFIERS = {"--ct", "--cooldown-time"};
+    public final static String[] COMMAND_IDENTIFIERS = {"--control-cooldown-time"};
 
     /**
      * Constructor.
@@ -62,7 +62,7 @@ public class JPCooldownTime extends AbstractJPLong {
      */
     @Override
     public String getDescription() {
-        return "Time in milliseconds required to pass after switching the power state of an object before switching it again.";
+        return "Time in milliseconds required to pass after switching the power state of an object before it can be switched again.";
     }
 
 }

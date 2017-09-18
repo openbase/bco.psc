@@ -21,12 +21,12 @@ package org.openbase.bco.psc.control;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
+import org.openbase.bco.psc.control.jp.JPControlThreshold;
 import org.openbase.bco.psc.control.jp.JPCooldownTime;
 import org.openbase.bco.psc.lib.jp.JPLocalInput;
+import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
 import org.openbase.bco.psc.lib.jp.JPPscUnitFilterList;
 import org.openbase.bco.psc.lib.jp.JPSelectedUnitScope;
-import org.openbase.bco.psc.lib.jp.JPThreshold;
 import org.openbase.bco.registry.lib.BCO;
 import org.openbase.jps.core.JPService;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -45,10 +45,20 @@ public class ControlLauncher extends AbstractLauncher<ControlController> {
 
     @Override
     protected void loadProperties() {
-        JPService.registerProperty(JPPscUnitFilterList.class);
-        JPService.registerProperty(JPThreshold.class);
-        JPService.registerProperty(JPCooldownTime.class);
+        // Scopes
+        JPService.registerProperty(JPPSCBaseScope.class);
         JPService.registerProperty(JPSelectedUnitScope.class);
+
+        // Threshold
+        JPService.registerProperty(JPControlThreshold.class);
+
+        // Unit filter
+        JPService.registerProperty(JPPscUnitFilterList.class);
+
+        // Component specific
+        JPService.registerProperty(JPCooldownTime.class);
+
+        // Transport specification
         JPService.registerProperty(JPLocalInput.class);
     }
 

@@ -21,7 +21,6 @@ package org.openbase.bco.psc.sm.jp;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collections;
 import java.util.List;
@@ -36,56 +35,88 @@ import org.openbase.jps.exception.JPParsingException;
 import rsb.Scope;
 
 /**
- * JavaProperty used to specify RSB Scopes(optional) and registry ids of the used Skeleton Sensors (Kinect).
- * 
+ * JavaProperty used to specify RSB Scopes(optional) and registry ids of the
+ * used Skeleton Sensors (Kinect).
+ *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPRegistryIds extends AbstractJavaProperty<Map<Scope, String>> {
-    /** The identifiers that can be used in front of the command line argument. */
-    public final static String[] COMMAND_IDENTIFIERS = {"-r", "--registry-ids"};
-    
+public class JPRegistryTransformers extends AbstractJavaProperty<Map<Scope, String>> {
+
+    /**
+     * The identifiers that can be used in front of the command line argument.
+     */
+    public final static String[] COMMAND_IDENTIFIERS = {"--sm-registry-transformers"};
+
     private final static String HEXA_REGEX = "[0-9a-fA-F]";
-    private final static String UNIT_ID_REGEX = HEXA_REGEX+"{8}-"+HEXA_REGEX+"{4}-"+HEXA_REGEX+"{4}-"+HEXA_REGEX+"{4}-"+HEXA_REGEX+"{12}";
-    private final static String FULL_REGEX = "(([^:]+):)?("+UNIT_ID_REGEX+")";
+    private final static String UNIT_ID_REGEX = HEXA_REGEX + "{8}-" + HEXA_REGEX + "{4}-" + HEXA_REGEX + "{4}-" + HEXA_REGEX + "{4}-" + HEXA_REGEX + "{12}";
+    private final static String FULL_REGEX = "(([^:]+):)?(" + UNIT_ID_REGEX + ")";
     private final static Pattern PATTERN = Pattern.compile(FULL_REGEX);
-    
+
     private final static String KEY_VALUE_SEPARATOR = ":";
     private final static String KEY_IDENTIFIER = "SCOPE";
     private final static String VALUE_IDENTIFIER = "STRING";
-   
-    /** String identifying the type of the argument. */
-    public final static String[] ARGUMENT_IDENTIFIERS = {"("+KEY_IDENTIFIER+KEY_VALUE_SEPARATOR+")"+VALUE_IDENTIFIER};
 
-    /** Constructor. */
-    public JPRegistryIds() {
+    /**
+     * String identifying the type of the argument.
+     */
+    public final static String[] ARGUMENT_IDENTIFIERS = {"(" + KEY_IDENTIFIER + KEY_VALUE_SEPARATOR + ")" + VALUE_IDENTIFIER};
+
+    /**
+     * Constructor.
+     */
+    public JPRegistryTransformers() {
         super(COMMAND_IDENTIFIERS);
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     */
     @Override
     protected String[] generateArgumentIdentifiers() {
         return ARGUMENT_IDENTIFIERS;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     */
     @Override
     public String getDescription() {
         return "RSB Scopes(optional) and registry ids of the used Skeleton Sensors (Kinect). The registry should contain placement information. "
-                + "One of this or the \"-f\" parameter have to be used.";
+                + "One of this or the \"--sm-file-transformers\" parameter have to be used.";
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     * @throws JPNotAvailableException {@inheritDoc}
+     */
     @Override
     protected Map<Scope, String> getPropertyDefaultValue() throws JPNotAvailableException {
         return Collections.emptyMap();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param arguments {@inheritDoc}
+     * @return {@inheritDoc}
+     * @throws Exception {@inheritDoc}
+     */
     @Override
     protected Map<Scope, String> parse(List<String> arguments) throws Exception {
-        if(arguments.stream().anyMatch(s -> !s.matches(FULL_REGEX))) 
-            throw new JPParsingException("Every argument of " + COMMAND_IDENTIFIERS[1] + " has to be of type " + ARGUMENT_IDENTIFIERS[0] + 
-                    " and thus match \"" + FULL_REGEX + "\".");
+        if (arguments.stream().anyMatch(s -> !s.matches(FULL_REGEX))) {
+            throw new JPParsingException("Every argument of " + COMMAND_IDENTIFIERS[1] + " has to be of type " + ARGUMENT_IDENTIFIERS[0]
+                    + " and thus match \"" + FULL_REGEX + "\".");
+        }
         return arguments.stream().map(s -> {
             Matcher m = PATTERN.matcher(s);
             m.matches();
-            return new SimpleEntry<>((m.group(2) != null) ? new Scope(m.group(2)): new Scope("/"), m.group(3));
+            return new SimpleEntry<>((m.group(2) != null) ? new Scope(m.group(2)) : new Scope("/"), m.group(3));
         }).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-   }
+    }
 }

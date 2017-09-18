@@ -39,9 +39,9 @@ import rst.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistrib
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public abstract class AbstractSelector {
+public abstract class AbstractUnitSelector {
 
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AbstractSelector.class);
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AbstractUnitSelector.class);
     private final double threshold;
     //TODO: Ideas: maximal bounding box and kdtree first.
     // Then rating by distances
@@ -49,7 +49,7 @@ public abstract class AbstractSelector {
 
     private SynchronizableRegistryImpl<String, SelectableObject> selectedObjectRegistry;
 
-    public AbstractSelector(double threshold) throws InstantiationException {
+    public AbstractUnitSelector(double threshold) throws InstantiationException {
         this.threshold = threshold;
         try {
             this.selectedObjectRegistry = new SynchronizableRegistryImpl<>();

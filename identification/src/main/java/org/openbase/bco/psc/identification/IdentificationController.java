@@ -24,11 +24,12 @@ package org.openbase.bco.psc.identification;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.openbase.bco.psc.identification.jp.JPDistanceType;
-import org.openbase.bco.psc.identification.jp.JPSelectorType;
+import org.openbase.bco.psc.identification.jp.JPIdentificationThreshold;
+import org.openbase.bco.psc.identification.jp.JPUnitSelectorType;
 import org.openbase.bco.psc.identification.registry.SelectableObject;
 import org.openbase.bco.psc.identification.registry.SelectableObjectFactory;
 import org.openbase.bco.psc.identification.rsb.RSBConnection;
-import org.openbase.bco.psc.identification.selection.AbstractSelector;
+import org.openbase.bco.psc.identification.selection.AbstractUnitSelector;
 import org.openbase.bco.psc.identification.selection.MaxSelector;
 import org.openbase.bco.psc.identification.selection.MeanSelector;
 import org.openbase.bco.psc.identification.selection.SelectorType;
@@ -42,7 +43,6 @@ import org.openbase.bco.psc.identification.selection.distance.OrthogonalMeasure;
 import org.openbase.bco.psc.identification.selection.distance.OrthogonalVsMaxMeasure;
 import org.openbase.bco.psc.identification.selection.distance.PearsonMeasure;
 import org.openbase.bco.psc.lib.jp.JPPscUnitFilterList;
-import org.openbase.bco.psc.lib.jp.JPThreshold;
 import org.openbase.bco.psc.lib.registry.PointingUnitChecker;
 import org.openbase.bco.registry.remote.Registries;
 import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
@@ -72,7 +72,7 @@ import rst.tracking.PointingRay3DFloatDistributionCollectionType.PointingRay3DFl
 public class IdentificationController extends AbstractEventHandler implements Identification, Launchable<Void>, VoidInitializable {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(IdentificationController.class);
-    private AbstractSelector selector;
+    private AbstractUnitSelector selector;
     private RSBConnection rsbConnection;
 
     private RegistrySynchronizer<String, SelectableObject, UnitConfig, UnitConfig.Builder> selectableObjectRegistrySynchronizer;
@@ -130,11 +130,11 @@ public class IdentificationController extends AbstractEventHandler implements Id
     }
 
     private void initSelector() throws JPNotAvailableException, InstantiationException {
-        SelectorType selectorType = JPService.getProperty(JPSelectorType.class).getValue();
+        SelectorType selectorType = JPService.getProperty(JPUnitSelectorType.class).getValue();
         LOGGER.info("Selected Selector implementation: " + selectorType.name());
         DistanceType distanceType = JPService.getProperty(JPDistanceType.class).getValue();
         LOGGER.info("Selected Distance implementation: " + distanceType.name());
-        double threshold = JPService.getProperty(JPThreshold.class).getValue();
+        double threshold = JPService.getProperty(JPIdentificationThreshold.class).getValue();
         LOGGER.info("Selected threshold: " + threshold);
         AbstractDistanceMeasure distanceMeasure;
         switch (distanceType) {

@@ -1,8 +1,8 @@
-package org.openbase.bco.psc.lib.jp;
+package org.openbase.bco.psc.identification.jp;
 
 /*-
  * #%L
- * BCO PSC Library
+ * BCO PSC Identification
  * %%
  * Copyright (C) 2016 - 2017 openbase.org
  * %%
@@ -21,26 +21,26 @@ package org.openbase.bco.psc.lib.jp;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import org.openbase.jps.exception.JPNotAvailableException;
-import rsb.Scope;
+import org.openbase.bco.psc.lib.jp.AbstractJPProbabilityThreshold;
 
 /**
- * JPScope used to parse the subscope used for used for sending and receiving
- * the events produced by the identification.
+ * JavaProperty used to specify the probability threshold defining how big the
+ * probability of a selected unit has to be, to be sent by the identification
+ * component.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPSelectedUnitScope extends AbstractJPScope {
+public class JPIdentificationThreshold extends AbstractJPProbabilityThreshold {
 
     /**
      * The identifiers that can be used in front of the command line argument.
      */
-    public final static String[] COMMAND_IDENTIFIERS = {"--scope-for-units"};
+    public final static String[] COMMAND_IDENTIFIERS = {"--identification-threshold"};
 
     /**
      * Constructor.
      */
-    public JPSelectedUnitScope() {
+    public JPIdentificationThreshold() {
         super(COMMAND_IDENTIFIERS);
     }
 
@@ -51,18 +51,7 @@ public class JPSelectedUnitScope extends AbstractJPScope {
      */
     @Override
     public String getDescription() {
-        return "Defines the subscope under the psc base scope used to send or receive unit probability data created by identification.";
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return {@inheritDoc}
-     * @throws JPNotAvailableException {@inheritDoc}
-     */
-    @Override
-    protected Scope getPropertyDefaultValue() throws JPNotAvailableException {
-        return new Scope("/selected_units");
+        return "Probability threshold defining how big the probability of a selected unit has to be, to be sent by the identification component.";
     }
 
 }

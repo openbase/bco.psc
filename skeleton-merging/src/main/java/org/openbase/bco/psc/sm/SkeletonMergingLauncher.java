@@ -2,10 +2,11 @@ package org.openbase.bco.psc.sm;
 
 import org.openbase.bco.psc.lib.jp.JPLocalInput;
 import org.openbase.bco.psc.lib.jp.JPLocalOutput;
-import org.openbase.bco.psc.sm.jp.JPBaseScope;
-import org.openbase.bco.psc.sm.jp.JPOutScope;
-import org.openbase.bco.psc.sm.jp.JPRegistryIds;
-import org.openbase.bco.psc.sm.jp.JPTransformFiles;
+import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
+import org.openbase.bco.psc.lib.jp.JPPostureScope;
+import org.openbase.bco.psc.sm.jp.JPRawPostureBaseScope;
+import org.openbase.bco.psc.sm.jp.JPRegistryTransformers;
+import org.openbase.bco.psc.sm.jp.JPFileTransformers;
 import org.openbase.bco.registry.lib.BCO;
 import org.openbase.jps.core.JPService;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -45,12 +46,18 @@ public class SkeletonMergingLauncher extends AbstractLauncher<SkeletonMergingCon
 
     @Override
     protected void loadProperties() {
-        JPService.registerProperty(JPBaseScope.class);
-        JPService.registerProperty(JPOutScope.class);
+        // Scopes
+        JPService.registerProperty(JPPSCBaseScope.class);
+        JPService.registerProperty(JPRawPostureBaseScope.class);
+        JPService.registerProperty(JPPostureScope.class);
+
+        // Component specific
+        JPService.registerProperty(JPFileTransformers.class);
+        JPService.registerProperty(JPRegistryTransformers.class);
+
+        // Transport specification
         JPService.registerProperty(JPLocalInput.class);
         JPService.registerProperty(JPLocalOutput.class);
-        JPService.registerProperty(JPTransformFiles.class);
-        JPService.registerProperty(JPRegistryIds.class);
     }
 
     /**

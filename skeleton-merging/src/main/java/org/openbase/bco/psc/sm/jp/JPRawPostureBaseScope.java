@@ -21,30 +21,45 @@ package org.openbase.bco.psc.sm.jp;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import org.openbase.bco.psc.lib.jp.AbstractJPScope;
 import org.openbase.jps.exception.JPNotAvailableException;
 import rsb.Scope;
 
 /**
- * JPScope used to parse the baseScope for receiving events from a command line argument.
- * 
+ * JPScope representing the base scope for receiving raw posture data.
+ *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPBaseScope extends AbstractJPScope {
-    /** The identifiers that can be used in front of the command line argument. */
-    public final static String[] COMMAND_IDENTIFIERS = {"--bs", "--base-scope"};
-    
-    /** Constructor. */
-    public JPBaseScope(){
+public class JPRawPostureBaseScope extends AbstractJPScope {
+
+    /**
+     * The identifiers that can be used in front of the command line argument.
+     */
+    public final static String[] COMMAND_IDENTIFIERS = {"--scope-base-raw-postures"};
+
+    /**
+     * Constructor.
+     */
+    public JPRawPostureBaseScope() {
         super(COMMAND_IDENTIFIERS);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     */
     @Override
     public String getDescription() {
-        return "Defines the base scope used to receive and send incoming data.";
+        return "Defines the base scope used to receive the raw posture data created by tracking units like the Kinect.";
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     * @throws JPNotAvailableException {@inheritDoc}
+     */
     @Override
     protected Scope getPropertyDefaultValue() throws JPNotAvailableException {
         return new Scope("/pointing/skeleton");

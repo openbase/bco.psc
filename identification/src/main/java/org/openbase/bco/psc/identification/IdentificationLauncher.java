@@ -22,13 +22,14 @@ package org.openbase.bco.psc.identification;
  * #L%
  */
 import org.openbase.bco.psc.identification.jp.JPDistanceType;
-import org.openbase.bco.psc.identification.jp.JPSelectorType;
+import org.openbase.bco.psc.identification.jp.JPIdentificationThreshold;
+import org.openbase.bco.psc.identification.jp.JPUnitSelectorType;
 import org.openbase.bco.psc.lib.jp.JPLocalInput;
 import org.openbase.bco.psc.lib.jp.JPLocalOutput;
+import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
 import org.openbase.bco.psc.lib.jp.JPPscUnitFilterList;
 import org.openbase.bco.psc.lib.jp.JPRayScope;
 import org.openbase.bco.psc.lib.jp.JPSelectedUnitScope;
-import org.openbase.bco.psc.lib.jp.JPThreshold;
 import org.openbase.bco.registry.lib.BCO;
 import org.openbase.jps.core.JPService;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -47,12 +48,22 @@ public class IdentificationLauncher extends AbstractLauncher<IdentificationContr
 
     @Override
     protected void loadProperties() {
-        JPService.registerProperty(JPPscUnitFilterList.class);
-        JPService.registerProperty(JPThreshold.class);
-        JPService.registerProperty(JPSelectorType.class);
-        JPService.registerProperty(JPDistanceType.class);
+        // Scopes
+        JPService.registerProperty(JPPSCBaseScope.class);
         JPService.registerProperty(JPRayScope.class);
         JPService.registerProperty(JPSelectedUnitScope.class);
+
+        // Threshold
+        JPService.registerProperty(JPIdentificationThreshold.class);
+
+        // Unit filter
+        JPService.registerProperty(JPPscUnitFilterList.class);
+
+        // Component specific
+        JPService.registerProperty(JPUnitSelectorType.class);
+        JPService.registerProperty(JPDistanceType.class);
+
+        // Transport specification
         JPService.registerProperty(JPLocalInput.class);
         JPService.registerProperty(JPLocalOutput.class);
     }

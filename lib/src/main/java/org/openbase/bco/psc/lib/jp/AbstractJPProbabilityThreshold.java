@@ -32,18 +32,10 @@ import org.openbase.jps.preset.AbstractJPFloat;
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPThreshold extends AbstractJPFloat {
+public abstract class AbstractJPProbabilityThreshold extends AbstractJPFloat {
 
-    /**
-     * The identifiers that can be used in front of the command line argument.
-     */
-    public final static String[] COMMAND_IDENTIFIERS = {"-t", "--threshold"};
-
-    /**
-     * Constructor.
-     */
-    public JPThreshold() {
-        super(COMMAND_IDENTIFIERS);
+    public AbstractJPProbabilityThreshold(String[] commandIdentifier) {
+        super(commandIdentifier);
     }
 
     /**
@@ -60,13 +52,10 @@ public class JPThreshold extends AbstractJPFloat {
     /**
      * {@inheritDoc}
      *
+     * @param arguments {@inheritDoc}
      * @return {@inheritDoc}
+     * @throws JPBadArgumentException {@inheritDoc}
      */
-    @Override
-    public String getDescription() {
-        return "Probability threshold defining how big the probability has to be, to trigger its corresponding action.";
-    }
-
     @Override
     protected Float parse(List<String> arguments) throws JPBadArgumentException {
         Float f = super.parse(arguments);
