@@ -10,12 +10,12 @@ package org.openbase.bco.psc.identification.registry;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -30,6 +30,7 @@ import org.openbase.jul.exception.NotAvailableException;
 import org.openbase.jul.iface.Configurable;
 import org.slf4j.LoggerFactory;
 import rst.domotic.unit.UnitConfigType.UnitConfig;
+import rst.geometry.AxisAlignedBoundingBox3DFloatType.AxisAlignedBoundingBox3DFloat;
 
 /**
  *
@@ -54,7 +55,8 @@ public class SelectableObject implements Configurable<String, UnitConfig>, Abstr
     public synchronized UnitConfig applyConfigUpdate(UnitConfig config) throws CouldNotPerformException, InterruptedException {
         this.config = config;
         Transform3D unitToRootTransform = Registries.getLocationRegistry(true).getUnitToRootTransform3D(config);
-        boundingBox = new BoundingBox(unitToRootTransform, config.getPlacementConfig().getShape().getBoundingBox());
+        AxisAlignedBoundingBox3DFloat aabb = Registries.getLocationRegistry().getUnitShape(config).getBoundingBox();
+        boundingBox = new BoundingBox(unitToRootTransform, aabb);
         return this.config;
     }
 
