@@ -66,7 +66,7 @@ public class JPRaySelectorType extends AbstractJPEnum<SelectorType> {
      */
     @Override
     protected SelectorType getPropertyDefaultValue() throws JPNotAvailableException {
-        return SelectorType.CHOICE;
+        return SelectorType.DISTRIBUTED;
     }
 
     /**

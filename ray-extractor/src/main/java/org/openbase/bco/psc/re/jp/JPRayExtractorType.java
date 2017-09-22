@@ -66,7 +66,7 @@ public class JPRayExtractorType extends AbstractJPEnum<ExtractorType> {
      */
     @Override
     protected ExtractorType getPropertyDefaultValue() throws JPNotAvailableException {
-        return ExtractorType.SIMPLE;
+        return ExtractorType.ARM_POSTURE;
     }
 
     /**
