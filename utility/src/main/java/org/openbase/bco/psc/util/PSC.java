@@ -1,8 +1,8 @@
-package org.openbase.bco.psc.sm;
+package org.openbase.bco.psc.util;
 
 /*-
  * #%L
- * BCO PSC Skeleton Merging
+ * BCO PSC Utility
  * %%
  * Copyright (C) 2016 - 2017 openbase.org
  * %%
@@ -26,5 +26,6 @@ package org.openbase.bco.psc.sm;
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public interface SkeletonMerging {
+public interface PSC {
+
 }

@@ -1,8 +1,8 @@
-package org.openbase.bco.psc.sm.jp;
+package org.openbase.bco.psc.re.jp;
 
-/*
+/*-
  * #%L
- * BCO PSC Skeleton Merging
+ * BCO PSC Ray Extractor
  * %%
  * Copyright (C) 2016 - 2017 openbase.org
  * %%
@@ -21,33 +21,37 @@ package org.openbase.bco.psc.sm.jp;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
-import org.openbase.bco.psc.lib.jp.AbstractJPScope;
-import org.openbase.jps.exception.JPNotAvailableException;
-import rsb.Scope;
+import org.openbase.bco.psc.lib.jp.AbstractJPProbabilityThreshold;
 
 /**
- * JPScope used to parse the outScope for sending events from a command line argument.
- * The actual sending scope is the concatenation of baseScope and outScope.
- * 
+ * JavaProperty used to specify the probability threshold defining how big the
+ * probability of a pointing ray distribution has to be, to be sent by the
+ * ray-extractor.
+ *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPOutScope extends AbstractJPScope {
-    /** The identifiers that can be used in front of the command line argument. */
-    public final static String[] COMMAND_IDENTIFIERS = {"--os", "--out-scope"};
-    
-    /** Constructor. */
-    public JPOutScope(){
+public class JPRayExtractorThreshold extends AbstractJPProbabilityThreshold {
+
+    /**
+     * The identifiers that can be used in front of the command line argument.
+     */
+    public final static String[] COMMAND_IDENTIFIERS = {"--re-threshold"};
+
+    /**
+     * Constructor.
+     */
+    public JPRayExtractorThreshold() {
         super(COMMAND_IDENTIFIERS);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     */
     @Override
     public String getDescription() {
-        return "Defines the subscope on which outgoing data is sent.";
+        return "Probability threshold defining how big the probability of a pointing ray distribution has to be, to be sent by the ray-extractor.";
     }
 
-    @Override
-    protected Scope getPropertyDefaultValue() throws JPNotAvailableException {
-        return new Scope("/merged");
-    }
 }

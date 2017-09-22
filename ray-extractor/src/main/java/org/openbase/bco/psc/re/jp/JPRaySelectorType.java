@@ -1,8 +1,8 @@
-package org.openbase.bco.psc.identification.jp;
+package org.openbase.bco.psc.re.jp;
 
 /*-
  * #%L
- * BCO PSC Identification
+ * BCO PSC Ray Extractor
  * %%
  * Copyright (C) 2016 - 2017 openbase.org
  * %%
@@ -21,21 +21,22 @@ package org.openbase.bco.psc.identification.jp;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import org.openbase.bco.psc.identification.selection.SelectorType;
+import org.openbase.bco.psc.re.pointing.selectors.SelectorType;
 import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jps.preset.AbstractJPEnum;
 
 /**
- * JavaProperty used to specify the AbstractSelector implementation to be used.
+ * JavaProperty used to specify the RaySelectorInterface implementation to be
+ * used.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPSelectorType extends AbstractJPEnum<SelectorType> {
+public class JPRaySelectorType extends AbstractJPEnum<SelectorType> {
 
     /**
      * The identifiers that can be used in front of the command line argument.
      */
-    public final static String[] COMMAND_IDENTIFIERS = {"-s", "--selector-type"};
+    public final static String[] COMMAND_IDENTIFIERS = {"--re-selector"};
     /**
      * Names of the enum values.
      */
@@ -44,7 +45,7 @@ public class JPSelectorType extends AbstractJPEnum<SelectorType> {
     /**
      * Constructor.
      */
-    public JPSelectorType() {
+    public JPRaySelectorType() {
         super(COMMAND_IDENTIFIERS);
         SelectorType[] types = SelectorType.values();
         typeNames = "[";
@@ -57,13 +58,25 @@ public class JPSelectorType extends AbstractJPEnum<SelectorType> {
         typeNames += "]";
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     * @throws JPNotAvailableException {@inheritDoc}
+     */
     @Override
     protected SelectorType getPropertyDefaultValue() throws JPNotAvailableException {
-        return SelectorType.MEAN;
+        return SelectorType.DISTRIBUTED;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     */
     @Override
     public String getDescription() {
-        return "Defines which implementation of the AbstractSelector is used. Possible choices are: " + typeNames;
+        return "Defines which implementation of the RaySelectorInterface is used. Possible choices are: " + typeNames;
     }
+
 }

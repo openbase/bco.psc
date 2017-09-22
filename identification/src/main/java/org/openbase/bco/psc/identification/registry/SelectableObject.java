@@ -30,6 +30,7 @@ import org.openbase.jul.exception.NotAvailableException;
 import org.openbase.jul.iface.Configurable;
 import org.slf4j.LoggerFactory;
 import rst.domotic.unit.UnitConfigType.UnitConfig;
+import rst.geometry.AxisAlignedBoundingBox3DFloatType.AxisAlignedBoundingBox3DFloat;
 
 /**
  *
@@ -54,7 +55,8 @@ public class SelectableObject implements Configurable<String, UnitConfig>, Abstr
     public synchronized UnitConfig applyConfigUpdate(UnitConfig config) throws CouldNotPerformException, InterruptedException {
         this.config = config;
         Transform3D unitToRootTransform = Registries.getLocationRegistry(true).getUnitToRootTransform3D(config);
-        boundingBox = new BoundingBox(unitToRootTransform, config.getPlacementConfig().getShape().getBoundingBox());
+        AxisAlignedBoundingBox3DFloat aabb = Registries.getLocationRegistry().getUnitShape(config).getBoundingBox();
+        boundingBox = new BoundingBox(unitToRootTransform, aabb);
         return this.config;
     }
 

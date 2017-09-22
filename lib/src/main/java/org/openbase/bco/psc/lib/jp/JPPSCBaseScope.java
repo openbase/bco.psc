@@ -1,6 +1,6 @@
 package org.openbase.bco.psc.lib.jp;
 
-/*-
+/*
  * #%L
  * BCO PSC Library
  * %%
@@ -25,22 +25,22 @@ import org.openbase.jps.exception.JPNotAvailableException;
 import rsb.Scope;
 
 /**
- * JPScope used to parse the subscope used for used for sending and receiving
- * the events produced by the identification.
+ * JPScope used to parse the base scope used for all <code>PSC</code> related
+ * events.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPSelectedUnitScope extends AbstractJPScope {
+public class JPPSCBaseScope extends AbstractJPScope {
 
     /**
      * The identifiers that can be used in front of the command line argument.
      */
-    public final static String[] COMMAND_IDENTIFIERS = {"--scope-for-units"};
+    public final static String[] COMMAND_IDENTIFIERS = {"--scope-base-psc"};
 
     /**
      * Constructor.
      */
-    public JPSelectedUnitScope() {
+    public JPPSCBaseScope() {
         super(COMMAND_IDENTIFIERS);
     }
 
@@ -51,7 +51,7 @@ public class JPSelectedUnitScope extends AbstractJPScope {
      */
     @Override
     public String getDescription() {
-        return "Defines the subscope under the psc base scope used to send or receive unit probability data created by identification.";
+        return "Defines the base scope used to send all PSC related events.";
     }
 
     /**
@@ -62,7 +62,6 @@ public class JPSelectedUnitScope extends AbstractJPScope {
      */
     @Override
     protected Scope getPropertyDefaultValue() throws JPNotAvailableException {
-        return new Scope("/selected_units");
+        return new Scope("/pointing");
     }
-
 }

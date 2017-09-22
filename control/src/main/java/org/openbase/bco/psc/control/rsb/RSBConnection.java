@@ -22,20 +22,18 @@ package org.openbase.bco.psc.control.rsb;
  * #L%
  */
 import org.openbase.bco.psc.lib.jp.JPLocalInput;
+import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
 import org.openbase.bco.psc.lib.jp.JPSelectedUnitScope;
+import org.openbase.bco.psc.lib.rsb.AbstractRSBListenerConnection;
 import org.openbase.jps.core.JPService;
 import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.exception.CouldNotPerformException;
+import org.openbase.jul.exception.InitializationException;
+import org.openbase.jul.extension.rsb.com.RSBFactoryImpl;
+import org.openbase.jul.extension.rsb.iface.RSBListener;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
-import rsb.Factory;
-import rsb.Listener;
-import rsb.RSBException;
 import rsb.Scope;
-import rsb.config.ParticipantConfig;
-import rsb.converter.DefaultConverterRepository;
-import rsb.converter.ProtocolBufferConverter;
-import rsb.util.Properties;
 import rst.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
 
 /**
@@ -43,96 +41,62 @@ import rst.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class RSBConnection {
+public class RSBConnection extends AbstractRSBListenerConnection {
 
     /**
      * Logger instance.
      */
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(RSBConnection.class);
-    /**
-     * RSB Listener used to receive selected unit events.
-     */
-    private Listener selectedUnitListener;
 
     /**
      * Constructor.
      *
      * @param handler is used to handle incoming events.
-     * @throws CouldNotPerformException is thrown, if the initialization of the
-     * class fails.
-     * @throws InterruptedException is thrown in case of an external
-     * interruption.
      */
-    public RSBConnection(AbstractEventHandler handler) throws CouldNotPerformException, InterruptedException {
-        LOGGER.info("Initializing RSB connection.");
-        initializeListener(handler);
-    }
-
-    /**
-     * Deactivates the RSB connection.
-     *
-     * @throws CouldNotPerformException is thrown, if the deactivation fails.
-     * @throws InterruptedException is thrown in case of an external
-     * interruption.
-     */
-    public void deactivate() throws CouldNotPerformException, InterruptedException {
-        LOGGER.info("Deactivating RSB connection.");
-        try {
-            selectedUnitListener.deactivate();
-        } catch (RSBException ex) {
-            throw new CouldNotPerformException("Could not deactivate informer and listener.", ex);
-        }
+    public RSBConnection(final AbstractEventHandler handler) {
+        super(handler);
     }
 
     /**
      * Initializes the RSB Listeners.
      *
      * @param handler is used to handle incoming events.
-     * @throws CouldNotPerformException is thrown, if the initialization of the
+     * @throws InitializationException is thrown, if the initialization of the
      * Listeners fails.
      * @throws InterruptedException is thrown in case of an external
      * interruption.
      */
-    private void initializeListener(AbstractEventHandler handler) throws CouldNotPerformException, InterruptedException {
-        LOGGER.debug("Registering converter.");
-        final ProtocolBufferConverter<UnitProbabilityCollection> selectedUnitConverter = new ProtocolBufferConverter<>(
-                UnitProbabilityCollection.getDefaultInstance());
-        DefaultConverterRepository.getDefaultConverterRepository()
-                .addConverter(selectedUnitConverter);
+    private void initializeListener(AbstractEventHandler handler) throws InitializationException, InterruptedException {
+    }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     * @throws InitializationException {@inheritDoc}
+     */
+    @Override
+    protected RSBListener getInitializedListener() throws InitializationException {
         try {
-            Scope selectedUnitScope = JPService.getProperty(JPSelectedUnitScope.class).getValue();
+            Scope selectedUnitScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPSelectedUnitScope.class).getValue());
             LOGGER.info("Initializing RSB Selected Unit Listener on scope: " + selectedUnitScope);
             if (JPService.getProperty(JPLocalInput.class).getValue()) {
                 LOGGER.warn("RSB input set to socket and localhost.");
-                selectedUnitListener = Factory.getInstance().createListener(selectedUnitScope, getLocalConfig());
+                return RSBFactoryImpl.getInstance().createSynchronizedListener(selectedUnitScope, getLocalConfig());
             } else {
-                selectedUnitListener = Factory.getInstance().createListener(selectedUnitScope);
+                return RSBFactoryImpl.getInstance().createSynchronizedListener(selectedUnitScope);
             }
-            selectedUnitListener.activate();
-
-            // Add an EventHandler.
-            selectedUnitListener.addHandler(handler, true);
-
-        } catch (JPNotAvailableException | RSBException ex) {
-            throw new CouldNotPerformException("RSB listener could not be initialized.", ex);
+        } catch (CouldNotPerformException | JPNotAvailableException ex) {
+            throw new InitializationException(RSBConnection.class, ex);
         }
     }
 
     /**
-     * Creates an RSB configuration for connecting via socket and localhost.
-     *
-     * @return the local communication configuration.
+     * {@inheritDoc}
      */
-    private ParticipantConfig getLocalConfig() {
-        ParticipantConfig localConfig = Factory.getInstance().getDefaultParticipantConfig().copy();
-        Properties localProperties = new Properties();
-        localProperties.setProperty("transport.socket.host", "localhost");
-        localConfig.getTransports().values().forEach((tc) -> {
-            tc.setEnabled(false);
-        });
-        localConfig.getOrCreateTransport("socket").setEnabled(true);
-        localConfig.getOrCreateTransport("socket").setOptions(localProperties);
-        return localConfig;
+    @Override
+    protected void registerConverters() {
+        LOGGER.debug("Registering UnitProbabilityCollection converter for Listener.");
+        registerConverterForType(UnitProbabilityCollection.getDefaultInstance());
     }
 }

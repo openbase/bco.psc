@@ -1,8 +1,8 @@
-package org.openbase.bco.psc.lib.jp;
+package org.openbase.bco.psc.control.jp;
 
 /*-
  * #%L
- * BCO PSC Library
+ * BCO PSC Control
  * %%
  * Copyright (C) 2016 - 2017 openbase.org
  * %%
@@ -21,37 +21,28 @@ package org.openbase.bco.psc.lib.jp;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+import org.openbase.bco.psc.lib.jp.AbstractJPProbabilityThreshold;
 import org.openbase.jps.exception.JPNotAvailableException;
-import rsb.Scope;
 
 /**
- * JPScope used to parse the subscope used for used for sending and receiving
- * the events produced by the identification.
+ * JavaProperty used to specify the probability threshold defining how big the
+ * probability of a unit has to be, to activate the power control action of the
+ * control component.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPSelectedUnitScope extends AbstractJPScope {
+public class JPControlThreshold extends AbstractJPProbabilityThreshold {
 
     /**
      * The identifiers that can be used in front of the command line argument.
      */
-    public final static String[] COMMAND_IDENTIFIERS = {"--scope-for-units"};
+    public final static String[] COMMAND_IDENTIFIERS = {"--control-threshold"};
 
     /**
      * Constructor.
      */
-    public JPSelectedUnitScope() {
+    public JPControlThreshold() {
         super(COMMAND_IDENTIFIERS);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return {@inheritDoc}
-     */
-    @Override
-    public String getDescription() {
-        return "Defines the subscope under the psc base scope used to send or receive unit probability data created by identification.";
     }
 
     /**
@@ -61,8 +52,18 @@ public class JPSelectedUnitScope extends AbstractJPScope {
      * @throws JPNotAvailableException {@inheritDoc}
      */
     @Override
-    protected Scope getPropertyDefaultValue() throws JPNotAvailableException {
-        return new Scope("/selected_units");
+    protected Float getPropertyDefaultValue() throws JPNotAvailableException {
+        return 0.9f;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     */
+    @Override
+    public String getDescription() {
+        return "Probability threshold defining how big the probability of a unit has to be, to activate the power control action of the control component.";
     }
 
 }

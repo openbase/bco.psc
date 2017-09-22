@@ -2,18 +2,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.openbase.bco</groupId>
-    <artifactId>psc.ray-extractor</artifactId>
+    <artifactId>psc.util</artifactId>
     <packaging>jar</packaging>
 
-    <name>BCO PSC Ray Extractor</name>
-    <description>This software is used to extract and publish pointing rays and their certainties from tracked postures.</description>
+    <name>BCO PSC Utility</name>
     
     <parent>
         <groupId>org.openbase.bco</groupId>
         <artifactId>psc</artifactId>
         <version>1.4-SNAPSHOT</version>
     </parent>
-    
+
     <url>https://github.com/openbase/bco.psc/wiki</url>
     
     <licenses>
@@ -23,6 +22,7 @@
         </license>
     </licenses>
     
+
     <build>
         <plugins>
             <plugin>
@@ -49,8 +49,8 @@
                 <configuration>
                     <programs>
                         <program>
-                            <mainClass>org.openbase.bco.psc.re.RayExtractorLauncher</mainClass>
-                            <id>bco-psc-ray-extractor</id>
+                            <mainClass>org.openbase.bco.psc.util.PSCLauncher</mainClass>
+                            <id>bco-psc</id>
                             <platforms>
                                 <platform>unix</platform>
                             </platforms>
@@ -79,10 +79,30 @@
         </plugins>
     </build>
 	
+    <properties>
+        <skipTests>false</skipTests>
+    </properties>
+
+
     <dependencies>
         <dependency>
             <groupId>org.openbase.bco</groupId>
-            <artifactId>psc.lib</artifactId>
+            <artifactId>psc.skeleton-merging</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openbase.bco</groupId>
+            <artifactId>psc.ray-extractor</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openbase.bco</groupId>
+            <artifactId>psc.identification</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openbase.bco</groupId>
+            <artifactId>psc.control</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
