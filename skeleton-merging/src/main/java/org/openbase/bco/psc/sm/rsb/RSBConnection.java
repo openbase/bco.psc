@@ -23,6 +23,7 @@ package org.openbase.bco.psc.sm.rsb;
  */
 import org.openbase.bco.psc.lib.jp.JPLocalInput;
 import org.openbase.bco.psc.lib.jp.JPLocalOutput;
+import org.openbase.bco.psc.lib.rsb.AbstractRSBDualConnection;
 import org.openbase.jps.core.JPService;
 import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -30,18 +31,10 @@ import org.openbase.jul.exception.InitializationException;
 import org.openbase.jul.extension.rsb.com.RSBFactoryImpl;
 import org.openbase.jul.extension.rsb.iface.RSBInformer;
 import org.openbase.jul.extension.rsb.iface.RSBListener;
-import org.openbase.jul.iface.Launchable;
-import org.openbase.jul.iface.VoidInitializable;
-import org.openbase.jul.schedule.WatchDog;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Event;
-import rsb.Factory;
 import rsb.Scope;
-import rsb.config.ParticipantConfig;
-import rsb.converter.DefaultConverterRepository;
-import rsb.converter.ProtocolBufferConverter;
-import rsb.util.Properties;
 import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
 
 /**
@@ -49,13 +42,12 @@ import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class RSBConnection implements Launchable<Void>, VoidInitializable {
+public class RSBConnection extends AbstractRSBDualConnection<TrackedPostures3DFloat> {
 
     /**
      * Logger instance.
      */
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(RSBConnection.class);
-    private final AbstractEventHandler handler;
 
     /**
      * Scope used to receive events.
@@ -65,17 +57,6 @@ public class RSBConnection implements Launchable<Void>, VoidInitializable {
      * Scope used to send events.
      */
     private final Scope outScope;
-    /**
-     * RSB Informer used to send events of type TrackedPostures3DFloat.
-     */
-    private RSBInformer<TrackedPostures3DFloat> mergedInformer;
-    /**
-     * RSB Listener used to receive events.
-     */
-    private RSBListener unmergedListener;
-
-    private WatchDog listenerWatchDog;
-    private WatchDog informerWatchDog;
 
     /**
      * Constructor.
@@ -90,93 +71,22 @@ public class RSBConnection implements Launchable<Void>, VoidInitializable {
      * interruption.
      */
     public RSBConnection(AbstractEventHandler handler, Scope baseScope, Scope outScope) throws CouldNotPerformException, InterruptedException {
-        this.handler = handler;
+        super(handler);
         this.baseScope = baseScope;
         this.outScope = outScope;
     }
 
     /**
-     * Initializes the RSB Listener.
+     * {@inheritDoc}
      *
-     * @param handler is used to handle incoming events.
-     * @throws CouldNotPerformException is thrown, if the initialization of the
-     * Listener fails.
-     * @throws InterruptedException is thrown in case of an external
-     * interruption.
+     * @param event {@inheritDoc}
+     * @throws CouldNotPerformException {@inheritDoc}
+     * @throws InterruptedException {@inheritDoc}
      */
-    private void initializeListener(AbstractEventHandler handler) throws InitializationException, InterruptedException {
-        LOGGER.debug("Registering TrackedPostures3DFloat converter for Listener.");
-        final ProtocolBufferConverter<TrackedPostures3DFloat> converter = new ProtocolBufferConverter<>(
-                TrackedPostures3DFloat.getDefaultInstance());
-
-        DefaultConverterRepository.getDefaultConverterRepository()
-                .addConverter(converter);
-
-        try {
-            LOGGER.info("Initializing RSB Listener on scope: " + baseScope);
-            if (JPService.getProperty(JPLocalInput.class).getValue()) {
-                LOGGER.warn("RSB input set to socket and localhost.");
-                unmergedListener = RSBFactoryImpl.getInstance().createSynchronizedListener(baseScope, getLocalConfig());
-            } else {
-                unmergedListener = RSBFactoryImpl.getInstance().createSynchronizedListener(baseScope);
-            }
-
-            // Add an EventHandler.
-            unmergedListener.addHandler(handler, true);
-            listenerWatchDog = new WatchDog(unmergedListener, "unmergedListener");
-
-        } catch (CouldNotPerformException | JPNotAvailableException ex) {
-            throw new InitializationException(RSBConnection.class, ex);
-        }
-    }
-
-    /**
-     * Initializes the RSB Informer.
-     *
-     * @throws CouldNotPerformException is thrown, if the initialization of the
-     * Informer fails.
-     * @throws InterruptedException is thrown in case of an external
-     * interruption.
-     */
-    private void initializeInformer() throws InitializationException {
-        LOGGER.debug("Registering TrackedPostures3DFloat converter for Informer.");
-        final ProtocolBufferConverter<TrackedPostures3DFloat> converter = new ProtocolBufferConverter<>(
-                TrackedPostures3DFloat.getDefaultInstance());
-
-        DefaultConverterRepository.getDefaultConverterRepository()
-                .addConverter(converter);
-
-        try {
-            LOGGER.info("Initializing RSB Informer on scope: " + outScope);
-            if (JPService.getProperty(JPLocalOutput.class).getValue()) {
-                LOGGER.warn("RSB output set to socket and localhost.");
-                mergedInformer = RSBFactoryImpl.getInstance().createSynchronizedInformer(outScope, TrackedPostures3DFloat.class, getLocalConfig());
-            } else {
-                mergedInformer = RSBFactoryImpl.getInstance().createSynchronizedInformer(outScope, TrackedPostures3DFloat.class);
-            }
-            informerWatchDog = new WatchDog(mergedInformer, "mergedInformer");
-        } catch (CouldNotPerformException | JPNotAvailableException ex) {
-            throw new InitializationException(RSBConnection.class, ex);
-        }
-    }
-
-    /**
-     * Sends the event via RSB on the <code>outScope</code>.
-     *
-     * @param transformedEvent event containing the transformed postures of a
-     * received event.
-     * @throws CouldNotPerformException is thrown, if sending the event fails.
-     * @throws java.lang.InterruptedException is thrown in case of an external
-     * Interruption.
-     */
-    public void sendTransformedEvent(Event transformedEvent) throws CouldNotPerformException, InterruptedException {
-        try {
-            LOGGER.trace("Sending transformed posture via RSB.");
-            transformedEvent.setScope(outScope);
-            mergedInformer.publish(transformedEvent);
-        } catch (CouldNotPerformException ex) {
-            throw new CouldNotPerformException("RSB informer could not send postures.", ex);
-        }
+    @Override
+    public void publishEvent(Event event) throws CouldNotPerformException, InterruptedException {
+        event.setScope(outScope);
+        super.publishEvent(event);
     }
 
     /**
@@ -198,71 +108,53 @@ public class RSBConnection implements Launchable<Void>, VoidInitializable {
     }
 
     /**
-     * Creates an RSB configuration for connecting via socket and localhost.
-     *
-     * @return the local communication configuration.
-     */
-    private ParticipantConfig getLocalConfig() {
-        //TODO: get a super interface implementing this function.
-        //TODO: maybe use inprocess communication in case of starting via single launcher.
-        ParticipantConfig localConfig = Factory.getInstance().getDefaultParticipantConfig().copy();
-        Properties localProperties = new Properties();
-        localProperties.setProperty("transport.socket.host", "localhost");
-        localConfig.getTransports().values().forEach((tc) -> {
-            System.out.println("transport: " + tc.toString());
-            tc.setEnabled(false);
-        });
-        localConfig.getOrCreateTransport("socket").setEnabled(true);
-        localConfig.getOrCreateTransport("socket").setOptions(localProperties);
-        return localConfig;
-    }
-
-    /**
      * {@inheritDoc}
      *
+     * @return {@inheritDoc}
      * @throws InitializationException {@inheritDoc}
-     * @throws InterruptedException {@inheritDoc}
      */
     @Override
-    public void init() throws InitializationException, InterruptedException {
-        LOGGER.info("Initializing RSB connection.");
-        initializeInformer();
-        initializeListener(handler);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @throws CouldNotPerformException {@inheritDoc}
-     * @throws InterruptedException {@inheritDoc}
-     */
-    @Override
-    public void activate() throws CouldNotPerformException, InterruptedException {
-        LOGGER.info("Activating RSB connection.");
-        informerWatchDog.activate();
-        listenerWatchDog.activate();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @throws CouldNotPerformException {@inheritDoc}
-     * @throws InterruptedException {@inheritDoc}
-     */
-    @Override
-    public void deactivate() throws CouldNotPerformException, InterruptedException {
-        LOGGER.info("Deactivating RSB connection.");
-        informerWatchDog.deactivate();
-        listenerWatchDog.deactivate();
+    protected RSBInformer<TrackedPostures3DFloat> getInitializedInformer() throws InitializationException {
+        try {
+            LOGGER.info("Initializing RSB Informer on scope: " + outScope);
+            if (JPService.getProperty(JPLocalOutput.class).getValue()) {
+                LOGGER.warn("RSB output set to socket and localhost.");
+                return RSBFactoryImpl.getInstance().createSynchronizedInformer(outScope, TrackedPostures3DFloat.class, getLocalConfig());
+            } else {
+                return RSBFactoryImpl.getInstance().createSynchronizedInformer(outScope, TrackedPostures3DFloat.class);
+            }
+        } catch (CouldNotPerformException | JPNotAvailableException ex) {
+            throw new InitializationException(RSBConnection.class, ex);
+        }
     }
 
     /**
      * {@inheritDoc}
      *
      * @return {@inheritDoc}
+     * @throws InitializationException {@inheritDoc}
      */
     @Override
-    public boolean isActive() {
-        return informerWatchDog.isActive() && listenerWatchDog.isActive();
+    protected RSBListener getInitializedListener() throws InitializationException {
+        try {
+            LOGGER.info("Initializing RSB Listener on scope: " + baseScope);
+            if (JPService.getProperty(JPLocalInput.class).getValue()) {
+                LOGGER.warn("RSB input set to socket and localhost.");
+                return RSBFactoryImpl.getInstance().createSynchronizedListener(baseScope, getLocalConfig());
+            } else {
+                return RSBFactoryImpl.getInstance().createSynchronizedListener(baseScope);
+            }
+        } catch (CouldNotPerformException | JPNotAvailableException ex) {
+            throw new InitializationException(RSBConnection.class, ex);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void registerConverters() {
+        LOGGER.debug("Registering TrackedPostures3DFloat converter for Informer and Listener.");
+        registerConverterForType(TrackedPostures3DFloat.getDefaultInstance());
     }
 }

@@ -23,8 +23,8 @@ package org.openbase.bco.psc.re;
  */
 import java.util.Arrays;
 import java.util.stream.Collectors;
-import org.openbase.bco.psc.re.jp.JPRayExtractorType;
 import org.openbase.bco.psc.re.jp.JPRayExtractorThreshold;
+import org.openbase.bco.psc.re.jp.JPRayExtractorType;
 import org.openbase.bco.psc.re.jp.JPRaySelectorType;
 import org.openbase.bco.psc.re.pointing.ArmPostureExtractor;
 import org.openbase.bco.psc.re.pointing.ExtractorType;
@@ -83,7 +83,7 @@ public class RayExtractorController extends AbstractEventHandler implements RayE
 
             //TODO add either posture id to pointingRays or make a PointingRayCollectionList possible!
             // Maybe even PointingRays3DFloat + Collection including ID?!aswell!!
-            rsbConnection.sendPointingRays(PointingRay3DFloatDistributionCollection.newBuilder()
+            rsbConnection.publishData(PointingRay3DFloatDistributionCollection.newBuilder()
                     .addAllElement(pointingExtractor.getPointingRays().stream()
                             .filter(rd -> rd.getRayList().stream()
                             .map(r -> r.getCertainty())

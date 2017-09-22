@@ -30,9 +30,9 @@ import java.util.concurrent.TimeUnit;
 import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
 import org.openbase.bco.psc.lib.jp.JPPostureScope;
 import org.openbase.bco.psc.lib.registry.PointingUnitChecker;
+import org.openbase.bco.psc.sm.jp.JPFileTransformers;
 import org.openbase.bco.psc.sm.jp.JPRawPostureBaseScope;
 import org.openbase.bco.psc.sm.jp.JPRegistryTransformers;
-import org.openbase.bco.psc.sm.jp.JPFileTransformers;
 import org.openbase.bco.psc.sm.registry.RegistryTransformerFactory;
 import org.openbase.bco.psc.sm.rsb.RSBConnection;
 import org.openbase.bco.registry.remote.Registries;
@@ -116,7 +116,7 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
             Event transformedEvent = copyEventMetaData(event);
             transformedEvent.setData(transformedPostures);
 
-            rsbConnection.sendTransformedEvent(transformedEvent);
+            rsbConnection.publishEvent(transformedEvent);
         } catch (CouldNotPerformException ex) {
             ExceptionPrinter.printHistory(new CouldNotPerformException("Processing the postures failed.", ex), LOGGER, LogLevel.WARN);
         } catch (InterruptedException ex) {
@@ -164,8 +164,8 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
             throw new JPValidationException("So far, only one transformer can be specified via -r or -f, as merging is not yet implemented.");
         }
 
+        Scope rawBaseScope = JPService.getProperty(JPRawPostureBaseScope.class).getValue();
         Scope pscBaseScope = JPService.getProperty(JPPSCBaseScope.class).getValue();
-        Scope baseScope = JPService.getProperty(JPRawPostureBaseScope.class).getValue();
         Scope outScope = pscBaseScope.concat(JPService.getProperty(JPPostureScope.class).getValue());
         boolean registryRequired = false;
         if (!(JPService.getProperty(JPFileTransformers.class).isParsed() || JPService.getProperty(JPRegistryTransformers.class).isParsed())) {
@@ -175,7 +175,7 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
 
         if (JPService.getProperty(JPFileTransformers.class).isParsed()) {
             for (Entry<Scope, File> entry : JPService.getProperty(JPFileTransformers.class).getValue().entrySet()) {
-                Scope scope = baseScope.concat(entry.getKey());
+                Scope scope = rawBaseScope.concat(entry.getKey());
                 scopeFileTransformerMap.put(scope, new FileTransformer(entry.getValue()));
                 LOGGER.info("Registering on scope " + scope.toString() + " Transformer from file " + entry.getValue().getAbsolutePath());
             }
@@ -183,7 +183,7 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
         if (JPService.getProperty(JPRegistryTransformers.class).isParsed()) {
             registryRequired = true;
             for (Entry<Scope, String> entry : JPService.getProperty(JPRegistryTransformers.class).getValue().entrySet()) {
-                Scope scope = baseScope.concat(entry.getKey());
+                Scope scope = rawBaseScope.concat(entry.getKey());
                 scopeIdMap.put(scope, entry.getValue());
                 LOGGER.info("Registering on scope " + scope.toString() + " Unit with id " + entry.getValue());
             }
@@ -200,7 +200,7 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
             merging_required = true;
         }
 
-        rsbConnection = new RSBConnection(this, baseScope, outScope);
+        rsbConnection = new RSBConnection(this, rawBaseScope, outScope);
     }
 
     private void initializeRegistryConnection() throws InterruptedException, CouldNotPerformException {

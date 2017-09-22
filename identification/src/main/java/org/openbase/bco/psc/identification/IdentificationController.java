@@ -91,7 +91,7 @@ public class IdentificationController extends AbstractEventHandler implements Id
             PointingRay3DFloatDistributionCollection collection = (PointingRay3DFloatDistributionCollection) event.getData();
             try {
                 UnitProbabilityCollection selectedUnits = selector.getUnitProbabilities(collection);
-                rsbConnection.sendUnitProbabilities(selectedUnits);
+                rsbConnection.publishData(selectedUnits);
             } catch (CouldNotPerformException ex) {
                 ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
             } catch (InterruptedException ex) {
