@@ -1,6 +1,7 @@
 package org.openbase.bco.psc.identification;
 
-/*-
+/*
+ * -
  * #%L
  * BCO PSC Identification
  * %%
@@ -13,11 +14,11 @@ package org.openbase.bco.psc.identification;
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
+ * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
@@ -180,19 +181,8 @@ public class IdentificationController extends AbstractEventHandler implements Id
                 registryFlags = JPService.getProperty(JPPscUnitFilterList.class).getValue();
 
                 initializeRegistryConnection();
-
                 rsbConnection = new RSBConnection(this);
                 rsbConnection.init();
-
-                //TODO: Remove this!
-                //            rsbConnection = new RSBConnection(this);
-                //            rsbConnection.sendUnitProbabilities(UnitProbabilityCollection.newBuilder().addElement(
-                //                    //                    UnitProbability.newBuilder().setId("c8b2bfb5-45d9-4a2b-9994-d4062ab19cab").setProbability(1.0f)
-                //                    //                    UnitProbability.newBuilder().setId("c8b2bfb5-45da9-4a2b-9994-d4062ab19cab").setProbability(1.0f)
-                //                    //                    UnitProbability.newBuilder().setId("2c95255e-a491-46d7-a6a6-f66d5e6c2d3b").setProbability(1.0f)
-                //                    UnitProbability.newBuilder().setId("8f7b2513-4f33-4e8d-8b7e-eced4d54108c").setProbability(0.66f)
-                //            ).build());
-                //            rsbConnection.deactivate();
             } catch (JPNotAvailableException | CouldNotPerformException ex) {
                 throw new InitializationException(IdentificationController.class, ex);
             }
