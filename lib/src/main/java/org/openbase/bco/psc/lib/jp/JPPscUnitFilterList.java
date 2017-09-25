@@ -27,7 +27,7 @@ import org.openbase.jps.core.AbstractJavaProperty;
 import org.openbase.jps.exception.JPNotAvailableException;
 
 /**
- * JavaProperty used to specify flags by which controllable objects are selected
+ * JavaProperty used to specify flags by which controllable objects are filtered
  * from the registry.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
@@ -41,7 +41,7 @@ public class JPPscUnitFilterList extends AbstractJavaProperty<List<String>> {
     /**
      * The identifiers that can be used in front of the command line argument.
      */
-    public final static String[] COMMAND_IDENTIFIERS = {"--fl", "--filter-list"};
+    public final static String[] COMMAND_IDENTIFIERS = {"--psc-unit-filter"};
 
     /**
      * Constructor.
@@ -95,6 +95,6 @@ public class JPPscUnitFilterList extends AbstractJavaProperty<List<String>> {
      */
     @Override
     public String getDescription() {
-        return "Filters that can be set in the Meta Data of Registry UnitConfigs, to make them controllable via pointing gestures.";
+        return "Filters that can be set in the Meta Data of Registry UnitConfigs, to make them controllable via PSC.";
     }
 }

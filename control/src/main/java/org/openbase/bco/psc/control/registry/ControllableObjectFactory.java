@@ -1,6 +1,7 @@
 package org.openbase.bco.psc.control.registry;
 
-/*-
+/*
+ * -
  * #%L
  * BCO PSC Control
  * %%
@@ -13,11 +14,11 @@ package org.openbase.bco.psc.control.registry;
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
+ * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
@@ -27,6 +28,7 @@ import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InstantiationException;
 import org.openbase.jul.pattern.Factory;
+import org.slf4j.LoggerFactory;
 import rst.domotic.unit.UnitConfigType;
 
 /**
@@ -36,6 +38,10 @@ import rst.domotic.unit.UnitConfigType;
  */
 public class ControllableObjectFactory implements Factory<ControllableObject, UnitConfigType.UnitConfig> {
 
+    /**
+     * Logger instance.
+     */
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ControllableObjectFactory.class);
     /**
      * Singleton instance.
      */
@@ -54,6 +60,7 @@ public class ControllableObjectFactory implements Factory<ControllableObject, Un
     private ControllableObjectFactory() throws InstantiationException {
         try {
             cooldownTime = JPService.getProperty(JPCooldownTime.class).getValue();
+            LOGGER.info("Selected Control cooldown time: " + cooldownTime + " milliseconds");
         } catch (JPNotAvailableException ex) {
             throw new InstantiationException(ControllableObjectFactory.class, ex);
         }

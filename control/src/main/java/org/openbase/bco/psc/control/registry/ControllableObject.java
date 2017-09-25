@@ -1,6 +1,7 @@
 package org.openbase.bco.psc.control.registry;
 
-/*-
+/*
+ * -
  * #%L
  * BCO PSC Control
  * %%
@@ -13,11 +14,11 @@ package org.openbase.bco.psc.control.registry;
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
+ * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
@@ -43,8 +44,7 @@ public class ControllableObject implements Configurable<String, UnitConfig> {
      */
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ControllableObject.class);
     /**
-     * Cooldown time that is required before the power state can be switched
-     * again.
+     * Cooldown time that is required before the power state can be switched again.
      */
     private final long cooldownTime;
     /**
@@ -63,8 +63,7 @@ public class ControllableObject implements Configurable<String, UnitConfig> {
     /**
      * Constructor.
      *
-     * @param cooldownTime Cooldown time that is required before the power state
-     * can be switched again.
+     * @param cooldownTime Cooldown time that is required before the power state can be switched again.
      */
     public ControllableObject(final long cooldownTime) {
         this.cooldownTime = cooldownTime;
@@ -75,8 +74,7 @@ public class ControllableObject implements Configurable<String, UnitConfig> {
      * vice versa).
      *
      * @return true, if the power switch was successful.
-     * @throws CouldNotPerformException is thrown if something goes wrong during
-     * the power switch.
+     * @throws CouldNotPerformException is thrown if something goes wrong during the power switch.
      */
     public synchronized boolean switchPowerState() throws CouldNotPerformException {
         long currentTime = System.currentTimeMillis();
@@ -120,7 +118,6 @@ public class ControllableObject implements Configurable<String, UnitConfig> {
                     ServiceTemplateType.ServiceTemplate.ServiceType.POWER_STATE_SERVICE,
                     config);
             serviceRemote.activate();
-            System.out.println(serviceRemote.getPowerState());
         } catch (CouldNotPerformException ex) {
             throw new CouldNotPerformException("Could not apply ConfigUpdate on ControllableObject", ex);
         }

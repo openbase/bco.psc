@@ -1,8 +1,8 @@
-package org.openbase.bco.psc.sm;
+package org.openbase.bco.psc.util;
 
 /*-
  * #%L
- * BCO PSC Skeleton Merging
+ * BCO PSC Utility
  * %%
  * Copyright (C) 2016 - 2017 openbase.org
  * %%
@@ -22,9 +22,30 @@ package org.openbase.bco.psc.sm;
  * #L%
  */
 
+import org.openbase.bco.psc.control.ControlLauncher;
+import org.openbase.bco.psc.identification.IdentificationLauncher;
+import org.openbase.bco.psc.re.RayExtractorLauncher;
+import org.openbase.bco.psc.sm.SkeletonMergingLauncher;
+import org.openbase.bco.registry.lib.BCO;
+import org.openbase.jul.pattern.launch.AbstractLauncher;
+
 /**
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public interface SkeletonMerging {
+public class PSCLauncher {
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(final String[] args) {
+        BCO.printLogo();
+        AbstractLauncher.main(args, PSC.class,
+                SkeletonMergingLauncher.class,
+                RayExtractorLauncher.class,
+                IdentificationLauncher.class,
+                ControlLauncher.class
+        );
+    }
+
 }

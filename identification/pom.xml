@@ -49,7 +49,7 @@
                 <configuration>
                     <programs>
                         <program>
-                            <mainClass>org.openbase.bco.psc.identification.Identification</mainClass>
+                            <mainClass>org.openbase.bco.psc.identification.IdentificationLauncher</mainClass>
                             <id>bco-psc-identification</id>
                             <platforms>
                                 <platform>unix</platform>

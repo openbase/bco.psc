@@ -13,15 +13,14 @@ package org.openbase.bco.psc.re.pointing;
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
+ * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import java.util.List;
 import rst.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
 import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
@@ -31,6 +30,7 @@ import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public interface RayExtractorInterface {
+
     //TODO: 1. Add implementation that checks the other arm (whole posture) aswell
     // 2. Also implementation that tracks the movement over time and increases probability.
     // 3. An implementation that consideres the arm trajectory instead of fixed angles.
@@ -38,5 +38,6 @@ public interface RayExtractorInterface {
     // Abstract methods
     //================================================================================
     public void updatePostures(TrackedPostures3DFloat postures);
+
     public List<PointingRay3DFloatDistribution> getPointingRays();
 }

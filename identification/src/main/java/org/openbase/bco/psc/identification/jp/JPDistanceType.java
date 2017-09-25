@@ -36,7 +36,7 @@ public class JPDistanceType extends AbstractJPEnum<DistanceType> {
     /**
      * The identifiers that can be used in front of the command line argument.
      */
-    public final static String[] COMMAND_IDENTIFIERS = {"-d", "--distance-type"};
+    public final static String[] COMMAND_IDENTIFIERS = {"--identification-distance-measure"};
     /**
      * Names of the enum values.
      */

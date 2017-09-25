@@ -49,7 +49,7 @@
                 <configuration>
                     <programs>
                         <program>
-                            <mainClass>org.openbase.bco.psc.sm.SkeletonMerging</mainClass>
+                            <mainClass>org.openbase.bco.psc.sm.SkeletonMergingLauncher</mainClass>
                             <id>bco-psc-skeleton-merging</id>
                             <platforms>
                                 <platform>unix</platform>

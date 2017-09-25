@@ -52,15 +52,12 @@ public class RegistryTransformer extends Transformer implements Configurable<Str
     @Override
     public synchronized UnitConfig applyConfigUpdate(UnitConfig config) throws CouldNotPerformException, InterruptedException {
         this.config = config;
-        //TODO: is a wait necessary here?!
-//        Registries.waitForData();
         Transform3D transform;
         try {
             transform = Registries.getLocationRegistry(true).getUnitToRootTransform3D(config);
         } catch (CouldNotPerformException ex) {
             throw new CouldNotPerformException("Could not get the transformation.", ex);
         }
-//        System.out.println(transform);
         setTransform(transform);
         LOGGER.debug("RegistryTransformer for id " + config.getId() + " updated.");
         return this.config;
