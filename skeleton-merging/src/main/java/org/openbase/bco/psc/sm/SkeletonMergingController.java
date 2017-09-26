@@ -1,6 +1,7 @@
 package org.openbase.bco.psc.sm;
 
-/*-
+/*
+ * -
  * #%L
  * BCO PSC Skeleton Merging
  * %%
@@ -13,11 +14,11 @@ package org.openbase.bco.psc.sm;
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
+ * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
@@ -143,13 +144,13 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
     @Override
     public void init() throws InitializationException, InterruptedException {
         if (!initialized) {
-            initialized = true;
             try {
                 registryTransformerRegistry = new SynchronizableRegistryImpl<>();
 
                 handleJPArguments();
 
                 rsbConnection.init();
+                initialized = true;
             } catch (JPValidationException | JPNotAvailableException | CouldNotPerformException ex) {
                 throw new InitializationException(SkeletonMergingController.class, ex);
             }

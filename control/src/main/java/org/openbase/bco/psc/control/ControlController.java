@@ -132,7 +132,6 @@ public class ControlController extends AbstractEventHandler implements Control, 
     @Override
     public void init() throws InitializationException, InterruptedException {
         if (!initialized) {
-            initialized = true;
             try {
                 LOGGER.info("Initializing ControlController.");
 
@@ -146,6 +145,7 @@ public class ControlController extends AbstractEventHandler implements Control, 
 
                 rsbConnection = new RSBConnection(this);
                 rsbConnection.init();
+                initialized = true;
             } catch (JPNotAvailableException | CouldNotPerformException ex) {
                 throw new InitializationException(ControlController.class, ex);
             }

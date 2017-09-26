@@ -175,7 +175,6 @@ public class IdentificationController extends AbstractEventHandler implements Id
     @Override
     public void init() throws InitializationException, InterruptedException {
         if (!initialized) {
-            initialized = true;
             try {
                 initSelector();
                 registryFlags = JPService.getProperty(JPPscUnitFilterList.class).getValue();
@@ -183,6 +182,7 @@ public class IdentificationController extends AbstractEventHandler implements Id
                 initializeRegistryConnection();
                 rsbConnection = new RSBConnection(this);
                 rsbConnection.init();
+                initialized = true;
             } catch (JPNotAvailableException | CouldNotPerformException ex) {
                 throw new InitializationException(IdentificationController.class, ex);
             }

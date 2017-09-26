@@ -248,6 +248,13 @@ public class PostureFunctions {
         return up.angle(direction);
     }
 
+    public static final double getElbowHeightAngle(TrackedPosture3DFloat posture, boolean right, boolean relative) {
+        JointPair armJoints = right ? new JointPair(Joints.ShoulderRight, Joints.ElbowRight) : new JointPair(Joints.ShoulderLeft, Joints.ElbowLeft);
+        Point3D direction = getDirection(posture, armJoints);
+        Point3D up = postureUpDirection(posture, relative);
+        return up.angle(direction);
+    }
+
     public static final double getSignedHorizontalAngle(TrackedPosture3DFloat posture, boolean right, boolean relative) {
         Joints handJoint = right ? Joints.HandRight : Joints.HandLeft;
         Point3D up = postureUpDirection(posture, relative);

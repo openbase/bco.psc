@@ -103,12 +103,12 @@ public class RayExtractorController extends AbstractEventHandler implements RayE
     @Override
     public void init() throws InitializationException, InterruptedException {
         if (!initialized) {
-            initialized = true;
             try {
 
                 initExtractor();
                 rsbConnection = new RSBConnection(this);
                 rsbConnection.init();
+                initialized = true;
             } catch (JPNotAvailableException | CouldNotPerformException ex) {
                 throw new InitializationException(RayExtractorController.class, ex);
             }
