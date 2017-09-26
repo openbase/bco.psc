@@ -21,53 +21,63 @@ package org.openbase.bco.psc.re.pointing;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.openbase.bco.psc.re.pointing.selectors.RaySelectorInterface;
 import static org.openbase.bco.psc.re.utils.PostureFunctions.*;
+import org.openbase.jul.exception.NotAvailableException;
 import rst.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
-import rst.tracking.TrackedPosture3DFloatType.TrackedPosture3DFloat;
 import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
 
 /**
+ * The simple extractor returns pointing rays that always have the probability 1 and should not be used.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
+ * @deprecated Will be removed in later versions of the software.
  */
-public class SimpleExtractor implements RayExtractorInterface {
+@Deprecated
+public class SimpleExtractor extends AbstractRayExtractor {
 
-    private final RaySelectorInterface raySelector;
+    /**
+     * The last postures provided in the updatePostures method.
+     */
     private TrackedPostures3DFloat lastPostures;
 
+    /**
+     * Constructor.
+     *
+     * @param raySelector The ray selector that is used to select the correct rays.
+     */
     public SimpleExtractor(RaySelectorInterface raySelector) {
-        this.raySelector = raySelector;
+        super(raySelector);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param postures {@inheritDoc}
+     */
     @Override
     public synchronized void updatePostures(TrackedPostures3DFloat postures) {
         lastPostures = postures;
     }
 
+    /**
+     *
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     * @throws NotAvailableException {@inheritDoc}
+     */
     @Override
-    public synchronized List<PointingRay3DFloatDistribution> getPointingRays() {
+    public synchronized List<PointingRay3DFloatDistribution> getPointingRays() throws NotAvailableException {
+        if (lastPostures == null) {
+            throw new NotAvailableException("Pointing Rays");
+        }
         return lastPostures.getPostureList().stream()
                 .filter(posture -> checkPosture(posture))
-                .map(posture -> getRays(posture))
+                .map(posture -> getRays(posture, 1, 1))
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
-    }
-
-    private List<PointingRay3DFloatDistribution> getRays(TrackedPosture3DFloat posture) {
-        List<PointingRay3DFloatDistribution> tempList = new ArrayList<>();
-        PointingRay3DFloatDistribution rightRays = raySelector.getRays(posture, true, 1);
-        if (rightRays.getRayCount() > 0) {
-            tempList.add(rightRays);
-        }
-        PointingRay3DFloatDistribution leftRays = raySelector.getRays(posture, false, 1);
-        if (leftRays.getRayCount() > 0) {
-            tempList.add(leftRays);
-        }
-        return tempList;
-        //TODO: Differentiate here later (both belong to the same posture).
     }
 }
