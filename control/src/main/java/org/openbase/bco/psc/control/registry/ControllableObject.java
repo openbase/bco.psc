@@ -91,7 +91,7 @@ public class ControllableObject implements Configurable<String, UnitConfig> {
                         newState = PowerState.State.OFF;
                         break;
                 }
-                LOGGER.info("Switching power of " + config.getLabel() + " to " + newState.toString());
+                LOGGER.debug("Switching power of " + config.getLabel() + " to " + newState.toString());
                 serviceRemote.setPowerState(PowerState.newBuilder().setValue(newState).build());
             } catch (CouldNotPerformException ex) {
                 throw new CouldNotPerformException("Could not switch power state.", ex);
