@@ -5,8 +5,12 @@ import org.openbase.bco.psc.lib.jp.JPLocalOutput;
 import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
 import org.openbase.bco.psc.lib.jp.JPPostureScope;
 import org.openbase.bco.psc.lib.jp.JPRayScope;
-import org.openbase.bco.psc.re.jp.JPRayExtractorType;
+import org.openbase.bco.psc.re.jp.JPDurationLookback;
+import org.openbase.bco.psc.re.jp.JPDurationMaximalAngle;
+import org.openbase.bco.psc.re.jp.JPDurationProbabilityThreshold;
+import org.openbase.bco.psc.re.jp.JPDurationReductionFactor;
 import org.openbase.bco.psc.re.jp.JPRayExtractorThreshold;
+import org.openbase.bco.psc.re.jp.JPRayExtractorType;
 import org.openbase.bco.psc.re.jp.JPRaySelectorType;
 import org.openbase.bco.registry.lib.BCO;
 import org.openbase.jps.core.JPService;
@@ -27,11 +31,11 @@ import org.openbase.jul.pattern.launch.AbstractLauncher;
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
+ * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
@@ -40,11 +44,11 @@ import org.openbase.jul.pattern.launch.AbstractLauncher;
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class RayExtractorLauncher extends AbstractLauncher<RayExtractorController> {
-
+    
     public RayExtractorLauncher() throws InstantiationException {
         super(RayExtractor.class, RayExtractorController.class);
     }
-
+    
     @Override
     protected void loadProperties() {
         // Scopes
@@ -58,6 +62,12 @@ public class RayExtractorLauncher extends AbstractLauncher<RayExtractorControlle
         // Component specific
         JPService.registerProperty(JPRayExtractorType.class);
         JPService.registerProperty(JPRaySelectorType.class);
+
+        // PostureHistoryExtractor stuff
+        JPService.registerProperty(JPDurationLookback.class);
+        JPService.registerProperty(JPDurationProbabilityThreshold.class);
+        JPService.registerProperty(JPDurationMaximalAngle.class);
+        JPService.registerProperty(JPDurationReductionFactor.class);
 
         // Transport specification
         JPService.registerProperty(JPLocalInput.class);

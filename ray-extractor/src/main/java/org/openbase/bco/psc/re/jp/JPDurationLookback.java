@@ -11,36 +11,49 @@ package org.openbase.bco.psc.re.jp;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import org.openbase.bco.psc.lib.jp.AbstractJPProbabilityThreshold;
+import org.openbase.bco.psc.re.pointing.ExtractorType;
+import org.openbase.jps.exception.JPNotAvailableException;
+import org.openbase.jps.preset.AbstractJPLong;
 
 /**
- * JavaProperty used to specify the probability threshold defining how big the probability of a pointing ray distribution has to be, to be sent by the ray-extractor.
+ * JavaProperty used to specify the optimal duration of a pointing gesture for the PostureHistoryExtractor.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPRayExtractorThreshold extends AbstractJPProbabilityThreshold {
+public class JPDurationLookback extends AbstractJPLong {
 
     /**
      * The identifiers that can be used in front of the command line argument.
      */
-    public final static String[] COMMAND_IDENTIFIERS = {"--re-threshold"};
+    public final static String[] COMMAND_IDENTIFIERS = {"--re-duration-lookback"};
 
     /**
      * Constructor.
      */
-    public JPRayExtractorThreshold() {
+    public JPDurationLookback() {
         super(COMMAND_IDENTIFIERS);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     * @throws JPNotAvailableException {@inheritDoc}
+     */
+    @Override
+    protected Long getPropertyDefaultValue() throws JPNotAvailableException {
+        return 1500L;
     }
 
     /**
@@ -50,7 +63,8 @@ public class JPRayExtractorThreshold extends AbstractJPProbabilityThreshold {
      */
     @Override
     public String getDescription() {
-        return "Probability threshold defining how big the probability of a pointing ray distribution has to be, to be sent by the ray-extractor.";
+        return "This is only used if the ray-extractor is " + ExtractorType.POSTURE_HISTORY.toString()
+                + ". It specifies the duration that is considered for the probability calculation of a pointing gesture.";
     }
 
 }

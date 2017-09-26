@@ -26,10 +26,17 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import static org.openbase.bco.psc.lib.pointing.PostureFunctions.*;
+import org.openbase.bco.psc.re.jp.JPDurationLookback;
+import org.openbase.bco.psc.re.jp.JPDurationMaximalAngle;
+import org.openbase.bco.psc.re.jp.JPDurationProbabilityThreshold;
+import org.openbase.bco.psc.re.jp.JPDurationReductionFactor;
 import static org.openbase.bco.psc.re.pointing.ArmPostureExtractor.pointingProbability;
 import org.openbase.bco.psc.re.pointing.selectors.RaySelectorInterface;
-import static org.openbase.bco.psc.lib.pointing.PostureFunctions.*;
+import org.openbase.jps.core.JPService;
+import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.exception.NotAvailableException;
+import org.slf4j.LoggerFactory;
 import rst.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
 import rst.tracking.TrackedPosture3DFloatType.TrackedPosture3DFloat;
 import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
@@ -39,13 +46,33 @@ import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class PostureDurationExtractor extends AbstractRayExtractor {
+public class PostureHistoryExtractor extends AbstractRayExtractor {
 
-    private final static long LOOKBACK = 2000;
-    private final static double PROBABILITY_THRESHOLD = 0.8;
-    private final static double MAX_ANGLE = 30.0;
-    private final static double DEFAULT_FACTOR = 0.6;
-    private final static double VARIANCE = 1.0 - DEFAULT_FACTOR;
+    /**
+     * Logger instance.
+     */
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(PostureHistoryExtractor.class);
+
+    /**
+     * Duration that is considered when calculating the probability increase.
+     */
+    private final long lookback;
+    /**
+     * Minimal base probability required for the probability increase to become active.
+     */
+    private final double probabilityThreshold;
+    /**
+     * Maximal angle deviation from current pointing direction allowed for a probability increase.
+     */
+    private final double maxAngle;
+    /**
+     * The factor that the base probability is reduced with outside the thresholds.
+     */
+    private final double reductionFactor;
+    /**
+     * The additional factor that can be added, if the pointing gesture lasts as long as lookback.
+     */
+    private final double reductionRange;
 
     /**
      * History of important stats on the past tracked postures.
@@ -56,9 +83,19 @@ public class PostureDurationExtractor extends AbstractRayExtractor {
      * Constructor.
      *
      * @param raySelector The ray selector that is used to select the correct rays.
+     * @throws JPNotAvailableException is thrown, if the necessary JavaProperties are not available.
      */
-    public PostureDurationExtractor(final RaySelectorInterface raySelector) {
+    public PostureHistoryExtractor(final RaySelectorInterface raySelector) throws JPNotAvailableException {
         super(raySelector);
+        this.lookback = JPService.getProperty(JPDurationLookback.class).getValue();
+        LOGGER.info("Selected lookback time: " + lookback + " ms");
+        this.probabilityThreshold = JPService.getProperty(JPDurationProbabilityThreshold.class).getValue();
+        LOGGER.info("Selected probability threshold: " + probabilityThreshold);
+        this.maxAngle = JPService.getProperty(JPDurationMaximalAngle.class).getValue();
+        LOGGER.info("Selected maximal angle: " + maxAngle);
+        this.reductionFactor = JPService.getProperty(JPDurationReductionFactor.class).getValue();
+        this.reductionRange = 1.0 - reductionFactor;
+        LOGGER.info("Selected reduction factor: " + reductionFactor + ", resulting reduction range: " + reductionRange);
     }
 
     /**
@@ -70,7 +107,7 @@ public class PostureDurationExtractor extends AbstractRayExtractor {
     public synchronized void updatePostures(final TrackedPostures3DFloat postures) {
         final int postureCount = postures.getPostureCount();
         while (postureCount > postureHistory.size()) {
-            postureHistory.addLast(new PostureHistory(LOOKBACK));
+            postureHistory.addLast(new PostureHistory(lookback));
         }
         while (postureHistory.size() > postureCount) {
             postureHistory.removeLast();
@@ -98,8 +135,8 @@ public class PostureDurationExtractor extends AbstractRayExtractor {
         List<PointingRay3DFloatDistribution> pointingRays = new ArrayList<>();
         for (PostureHistory postureHistoryList : postureHistory) {
             if (!postureHistoryList.isEmpty()) {
-                final double durationFactorRight = ((double) Long.min(LOOKBACK, postureHistoryList.getDuration(PROBABILITY_THRESHOLD, MAX_ANGLE, true))) / LOOKBACK * VARIANCE + DEFAULT_FACTOR;
-                final double durationFactorLeft = ((double) Long.min(LOOKBACK, postureHistoryList.getDuration(PROBABILITY_THRESHOLD, MAX_ANGLE, false))) / LOOKBACK * VARIANCE + DEFAULT_FACTOR;
+                final double durationFactorRight = ((double) Long.min(lookback, postureHistoryList.getDuration(probabilityThreshold, maxAngle, true))) / lookback * reductionRange + reductionFactor;
+                final double durationFactorLeft = ((double) Long.min(lookback, postureHistoryList.getDuration(probabilityThreshold, maxAngle, false))) / lookback * reductionRange + reductionFactor;
                 pointingRays.addAll(getRays(postureHistoryList.getLastPosture(), durationFactorLeft * postureHistoryList.getLastProbability(false), durationFactorRight * postureHistoryList.getLastProbability(true)));
             }
         }

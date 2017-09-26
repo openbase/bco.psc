@@ -31,7 +31,7 @@ import org.openbase.bco.psc.re.pointing.AbstractRayExtractor;
 import org.openbase.bco.psc.re.pointing.ArmPostureExtractor;
 import org.openbase.bco.psc.re.pointing.ExtractorType;
 import static org.openbase.bco.psc.re.pointing.ExtractorType.*;
-import org.openbase.bco.psc.re.pointing.PostureDurationExtractor;
+import org.openbase.bco.psc.re.pointing.PostureHistoryExtractor;
 import org.openbase.bco.psc.re.pointing.SimpleExtractor;
 import org.openbase.bco.psc.re.pointing.selectors.ChoiceSelector;
 import org.openbase.bco.psc.re.pointing.selectors.DistributedSelector;
@@ -150,8 +150,8 @@ public class RayExtractorController extends AbstractEventHandler implements RayE
             case ARM_POSTURE:
                 pointingExtractor = new ArmPostureExtractor(raySelector);
                 break;
-            case POSTURE_DURATION:
-                pointingExtractor = new PostureDurationExtractor(raySelector);
+            case POSTURE_HISTORY:
+                pointingExtractor = new PostureHistoryExtractor(raySelector);
                 break;
             default:
                 pointingExtractor = new SimpleExtractor(raySelector);

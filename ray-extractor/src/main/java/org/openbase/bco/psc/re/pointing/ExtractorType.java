@@ -45,7 +45,7 @@ public enum ExtractorType {
      */
     ARM_POSTURE,
     /**
-     * Represents the PostureDurationExtractor which calculates a probability of a pointing gesture like the ArmPostureExtractor, but also includes a pointing duration.
+     * Represents the PostureHistoryExtractor which calculates a probability of a pointing gesture like the ArmPostureExtractor, but also includes a pointing duration.
      */
-    POSTURE_DURATION
+    POSTURE_HISTORY
 }
