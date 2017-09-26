@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.ListIterator;
 import static org.openbase.bco.psc.re.pointing.ArmPostureExtractor.pointingProbability;
 import org.openbase.bco.psc.re.pointing.selectors.RaySelectorInterface;
-import static org.openbase.bco.psc.re.utils.PostureFunctions.*;
+import static org.openbase.bco.psc.lib.pointing.PostureFunctions.*;
 import org.openbase.jul.exception.NotAvailableException;
 import rst.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
 import rst.tracking.TrackedPosture3DFloatType.TrackedPosture3DFloat;

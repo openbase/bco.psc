@@ -24,7 +24,7 @@ package org.openbase.bco.psc.re.pointing;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.openbase.bco.psc.re.pointing.selectors.RaySelectorInterface;
-import static org.openbase.bco.psc.re.utils.PostureFunctions.*;
+import static org.openbase.bco.psc.lib.pointing.PostureFunctions.*;
 import org.openbase.jul.exception.NotAvailableException;
 import rst.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
 import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;

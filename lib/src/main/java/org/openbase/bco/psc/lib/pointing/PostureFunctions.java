@@ -1,9 +1,9 @@
-package org.openbase.bco.psc.re.utils;
+package org.openbase.bco.psc.lib.pointing;
 
 /*
  * -
  * #%L
- * BCO PSC Ray Extractor
+ * BCO PSC Library
  * %%
  * Copyright (C) 2016 - 2017 openbase.org
  * %%
@@ -26,8 +26,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 import javafx.geometry.Point3D;
-import org.openbase.bco.psc.lib.pointing.JointPair;
-import org.openbase.bco.psc.lib.pointing.Joints;
 import rst.geometry.Ray3DFloatType.Ray3DFloat;
 import rst.geometry.TranslationType.Translation;
 import rst.kinematics.Posture3DFloatType.Posture3DFloat;

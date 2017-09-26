@@ -25,7 +25,7 @@ package org.openbase.bco.psc.re.pointing;
 import javafx.geometry.Point3D;
 import org.openbase.bco.psc.lib.pointing.JointPair;
 import org.openbase.bco.psc.lib.pointing.Joints;
-import org.openbase.bco.psc.re.utils.PostureFunctions;
+import org.openbase.bco.psc.lib.pointing.PostureFunctions;
 import rst.tracking.TrackedPosture3DFloatType.TrackedPosture3DFloat;
 
 /**
