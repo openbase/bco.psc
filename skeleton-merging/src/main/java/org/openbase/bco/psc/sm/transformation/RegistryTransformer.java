@@ -1,8 +1,8 @@
-package org.openbase.bco.psc.identification.registry;
+package org.openbase.bco.psc.sm.transformation;
 
-/*-
+/*
  * #%L
- * BCO PSC Identification
+ * BCO PSC Skeleton Merging
  * %%
  * Copyright (C) 2016 - 2017 openbase.org
  * %%
@@ -13,59 +13,56 @@ package org.openbase.bco.psc.identification.registry;
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
+ * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
 import javax.media.j3d.Transform3D;
-import org.openbase.bco.psc.identification.selection.AbstractSelectable;
-import org.openbase.bco.psc.identification.selection.BoundingBox;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
 import org.openbase.jul.iface.Configurable;
 import org.slf4j.LoggerFactory;
 import rst.domotic.unit.UnitConfigType.UnitConfig;
-import rst.geometry.AxisAlignedBoundingBox3DFloatType.AxisAlignedBoundingBox3DFloat;
 
 /**
+ * This class creates a <code>Transformer</code> for a specific device
+ * registered in the bco-unit-registry. The <code>RegistryTransformer</code> is
+ * used to transform the coordinates of
+ * <code>TrackedPosture3dFloat</code>-objects and can be synchronized with the
+ * data in the registry.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class SelectableObject implements Configurable<String, UnitConfig>, AbstractSelectable {
-
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(SelectableObject.class);
-
-    private UnitConfig config;
-    private BoundingBox boundingBox;
+public class RegistryTransformer extends Transformer implements Configurable<String, UnitConfig> {
 
     /**
-     * {@inheritDoc}
-     *
-     * @param config {@inheritDoc}
-     * @return {@inheritDoc}
-     * @throws CouldNotPerformException {@inheritDoc}
-     * @throws InterruptedException {@inheritDoc}
+     * Logger instance.
      */
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(RegistryTransformer.class);
+    /**
+     * UnitConfig of the registry object.
+     */
+    private UnitConfig config;
+
     @Override
     public synchronized UnitConfig applyConfigUpdate(UnitConfig config) throws CouldNotPerformException, InterruptedException {
         this.config = config;
-        Transform3D unitToRootTransform = Registries.getLocationRegistry(true).getUnitToRootTransform3D(config);
-        AxisAlignedBoundingBox3DFloat aabb = Registries.getLocationRegistry().getUnitShape(config).getBoundingBox();
-        boundingBox = new BoundingBox(unitToRootTransform, aabb);
+        Transform3D transform;
+        try {
+            transform = Registries.getLocationRegistry(true).getUnitToRootTransform3D(config);
+        } catch (CouldNotPerformException ex) {
+            throw new CouldNotPerformException("Could not get the transformation.", ex);
+        }
+        setTransform(transform);
+        LOGGER.debug("RegistryTransformer for id " + config.getId() + " updated.");
         return this.config;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return {@inheritDoc}
-     * @throws NotAvailableException {@inheritDoc}
-     */
     @Override
     public synchronized String getId() throws NotAvailableException {
         if (config == null) {
@@ -74,28 +71,11 @@ public class SelectableObject implements Configurable<String, UnitConfig>, Abstr
         return config.getId();
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return {@inheritDoc}
-     * @throws NotAvailableException {@inheritDoc}
-     */
     @Override
     public synchronized UnitConfig getConfig() throws NotAvailableException {
         if (config == null) {
             throw new NotAvailableException("Config");
         }
         return config;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return {@inheritDoc}
-     * @throws NotAvailableException {@inheritDoc}
-     */
-    @Override
-    public synchronized BoundingBox getBoundingBox() throws NotAvailableException {
-        return this.boundingBox;
     }
 }

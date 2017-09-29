@@ -1,4 +1,4 @@
-package org.openbase.bco.psc.control.registry;
+package org.openbase.bco.psc.control;
 
 /*
  * -
