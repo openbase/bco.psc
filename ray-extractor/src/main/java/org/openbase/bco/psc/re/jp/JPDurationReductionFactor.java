@@ -52,7 +52,7 @@ public class JPDurationReductionFactor extends AbstractJPDouble {
      */
     @Override
     protected Double getPropertyDefaultValue() throws JPNotAvailableException {
-        return 0.6;
+        return 0.8;
     }
 
     /**

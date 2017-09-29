@@ -53,7 +53,7 @@ public class JPDurationLookback extends AbstractJPLong {
      */
     @Override
     protected Long getPropertyDefaultValue() throws JPNotAvailableException {
-        return 1500L;
+        return 800L;
     }
 
     /**
