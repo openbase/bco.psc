@@ -32,8 +32,13 @@ import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
 import org.openbase.bco.psc.lib.jp.JPPostureScope;
 import org.openbase.bco.psc.lib.registry.PointingUnitChecker;
 import org.openbase.bco.psc.sm.jp.JPFileTransformers;
+import org.openbase.bco.psc.sm.jp.JPFrameRate;
 import org.openbase.bco.psc.sm.jp.JPRawPostureBaseScope;
 import org.openbase.bco.psc.sm.jp.JPRegistryTransformers;
+import org.openbase.bco.psc.sm.merging.MergingScheduler;
+import org.openbase.bco.psc.sm.merging.PostureFrame;
+import org.openbase.bco.psc.sm.merging.SkeletonMerger;
+import org.openbase.bco.psc.sm.merging.SkeletonMergerInterface;
 import org.openbase.bco.psc.sm.rsb.RSBConnection;
 import org.openbase.bco.psc.sm.transformation.FileTransformer;
 import org.openbase.bco.psc.sm.transformation.RegistryTransformer;
@@ -75,7 +80,11 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
     private final Map<Scope, FileTransformer> scopeFileTransformerMap = new HashMap<>();
     private RegistrySynchronizer<String, RegistryTransformer, UnitConfig, UnitConfig.Builder> selectableObjectRegistrySynchronizer;
     private SynchronizableRegistryImpl<String, RegistryTransformer> registryTransformerRegistry;
-    private boolean merging_required = false;
+
+    // Merging stuff:
+    private MergingScheduler mergingScheduler;
+    private SkeletonMergerInterface merger;
+    private boolean mergingEnabled = false;
 
     private RSBConnection rsbConnection;
 
@@ -101,31 +110,33 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
             Transformer currentTransformer;
             Scope scope = bestScope.get();
             if (scopeIdMap.containsKey(scope)) {
-                LOGGER.trace("Using scope " + scope.toString() + " unit " + scopeIdMap.get(scope));
+                LOGGER.trace("Using transformation for scope " + scope.toString() + " unit " + scopeIdMap.get(scope));
                 currentTransformer = registryTransformerRegistry.get(scopeIdMap.get(scope));
             } else {
-                LOGGER.trace("Using scope " + scope.toString() + " from file.");
+                LOGGER.trace("Using transformation for scope " + scope.toString() + " from file.");
                 currentTransformer = scopeFileTransformerMap.get(scope);
             }
 
             TrackedPostures3DFloat postures = (TrackedPostures3DFloat) event.getData();
             TrackedPostures3DFloat transformedPostures = currentTransformer.transform(postures);
 
-            if (merging_required) {
+            if (mergingEnabled) {
+                LOGGER.trace("Passing the transformed postures to the merger.");
+                merger.postureUpdate(new PostureFrame(System.currentTimeMillis(), scope, transformedPostures));
                 //TODO merge the data here!
 //                return;
+            } else {
+                LOGGER.trace("Creating and sending transformed event.");
+                Event transformedEvent = copyEventMetaData(event);
+                transformedEvent.setData(transformedPostures);
+
+                rsbConnection.publishEvent(transformedEvent);
             }
-
-            LOGGER.trace("Creating transformed event.");
-            Event transformedEvent = copyEventMetaData(event);
-            transformedEvent.setData(transformedPostures);
-
-            rsbConnection.publishEvent(transformedEvent);
         } catch (CouldNotPerformException ex) {
-            ExceptionPrinter.printHistory(new CouldNotPerformException("Processing the postures failed.", ex), LOGGER, LogLevel.WARN);
+            ExceptionPrinter.printHistory(new CouldNotPerformException("Processing or sending the transformed postures failed.", ex), LOGGER, LogLevel.WARN);
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
-            ExceptionPrinter.printHistory(new CouldNotPerformException("Sending the postures failed.", ex), LOGGER, LogLevel.ERROR);
+            ExceptionPrinter.printHistory(new CouldNotPerformException("Sending the transformed postures failed.", ex), LOGGER, LogLevel.ERROR);
         }
     }
 
@@ -200,11 +211,14 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
             initializeRegistryConnection();
         }
 
-        if (scopeIdMap.size() + scopeFileTransformerMap.size() > 1) {
-            merging_required = true;
-        }
-
         rsbConnection = new RSBConnection(this, rawBaseScope, outScope);
+
+        if (scopeIdMap.size() + scopeFileTransformerMap.size() > 1) {
+            mergingEnabled = true;
+            merger = new SkeletonMerger();
+            final int frameRate = JPService.getProperty(JPFrameRate.class).getValue();
+            mergingScheduler = new MergingScheduler(frameRate, rsbConnection, merger);
+        }
     }
 
     private void initializeRegistryConnection() throws InterruptedException, CouldNotPerformException {
@@ -216,6 +230,7 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
                     registryTransformerRegistry, getUnitRegistry().getUnitConfigRemoteRegistry(), RegistryTransformerFactory.getInstance()) {
                 @Override
                 public boolean verifyConfig(UnitConfigType.UnitConfig config) throws VerificationFailedException {
+                    //TODO: Load Kinects from the registry by a flag or so and device type and get the scopes somehow.
                     if (!scopeIdMap.values().contains(config.getId())) {
                         return false;
                     }
@@ -249,11 +264,12 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
             throw new CouldNotPerformException("Activate can only be called after init.");
         }
         if (!active) {
-            active = true;
             Registries.waitForData();
             LOGGER.info("Activating Registry synchronization.");
             selectableObjectRegistrySynchronizer.activate();
             rsbConnection.activate();
+            mergingScheduler.activate();
+            active = true;
         }
     }
 
@@ -261,10 +277,11 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
     public void deactivate() throws CouldNotPerformException, InterruptedException {
         LOGGER.info("Deactivating " + getClass().getName() + ".");
         if (active) {
-            active = false;
+            mergingScheduler.deactivate();
             rsbConnection.deactivate();
             LOGGER.info("Deactivating Registry synchronization.");
             selectableObjectRegistrySynchronizer.deactivate();
+            active = false;
         }
     }
 
