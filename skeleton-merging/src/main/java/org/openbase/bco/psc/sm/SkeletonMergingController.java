@@ -268,7 +268,9 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
             LOGGER.info("Activating Registry synchronization.");
             selectableObjectRegistrySynchronizer.activate();
             rsbConnection.activate();
-            mergingScheduler.activate();
+            if (mergingEnabled) {
+                mergingScheduler.activate();
+            }
             active = true;
         }
     }
@@ -277,7 +279,9 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
     public void deactivate() throws CouldNotPerformException, InterruptedException {
         LOGGER.info("Deactivating " + getClass().getName() + ".");
         if (active) {
-            mergingScheduler.deactivate();
+            if (mergingEnabled) {
+                mergingScheduler.deactivate();
+            }
             rsbConnection.deactivate();
             LOGGER.info("Deactivating Registry synchronization.");
             selectableObjectRegistrySynchronizer.deactivate();
