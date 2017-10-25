@@ -37,12 +37,9 @@ import org.openbase.bco.psc.identification.selection.SelectorType;
 import static org.openbase.bco.psc.identification.selection.SelectorType.*;
 import org.openbase.bco.psc.identification.selection.distance.AbstractDistanceMeasure;
 import org.openbase.bco.psc.identification.selection.distance.AngleMeasure;
-import org.openbase.bco.psc.identification.selection.distance.AngleVsMaxMeasure;
 import org.openbase.bco.psc.identification.selection.distance.DistanceType;
 import static org.openbase.bco.psc.identification.selection.distance.DistanceType.*;
 import org.openbase.bco.psc.identification.selection.distance.OrthogonalMeasure;
-import org.openbase.bco.psc.identification.selection.distance.OrthogonalVsMaxMeasure;
-import org.openbase.bco.psc.identification.selection.distance.PearsonMeasure;
 import org.openbase.bco.psc.lib.jp.JPPscUnitFilterList;
 import org.openbase.bco.psc.lib.registry.PointingUnitChecker;
 import org.openbase.bco.registry.remote.Registries;
@@ -142,18 +139,18 @@ public class IdentificationController extends AbstractEventHandler implements Id
             case ANGLE:
                 distanceMeasure = new AngleMeasure();
                 break;
-            case ANGLE_MAX:
-                distanceMeasure = new AngleVsMaxMeasure();
-                break;
+//            case ANGLE_MAX:
+//                distanceMeasure = new AngleVsMaxMeasure();
+//                break;
             case ORTHOGONAL:
                 distanceMeasure = new OrthogonalMeasure();
                 break;
-            case ORTHOGONAL_MAX:
-                distanceMeasure = new OrthogonalVsMaxMeasure();
-                break;
-            case PEARSON:
-                distanceMeasure = new PearsonMeasure();
-                break;
+//            case ORTHOGONAL_MAX:
+//                distanceMeasure = new OrthogonalVsMaxMeasure();
+//                break;
+//            case PEARSON:
+//                distanceMeasure = new PearsonMeasure();
+//                break;
             default:
                 distanceMeasure = new AngleMeasure();
                 break;
