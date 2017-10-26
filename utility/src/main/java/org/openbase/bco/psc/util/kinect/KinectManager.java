@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import javax.media.j3d.Transform3D;
@@ -45,6 +46,8 @@ import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.slf4j.LoggerFactory;
 import rct.Transform;
+import rst.configuration.EntryType.Entry;
+import rst.configuration.MetaConfigType.MetaConfig;
 import rst.domotic.state.EnablingStateType.EnablingState;
 import rst.domotic.unit.UnitConfigType.UnitConfig;
 import rst.domotic.unit.UnitTemplateType.UnitTemplate;
@@ -205,9 +208,26 @@ public class KinectManager {
     private static void addInformation(final UnitConfig.Builder deviceConfigBuilder) throws JPNotAvailableException, CouldNotPerformException, InterruptedException {
         if (JPService.getProperty(JPKinectName.class).isParsed()) {
             final String name = JPService.getProperty(JPKinectName.class).getValue();
-            LOGGER.info("Setting Kinect name to " + name);
+            final String scope = "/pointing/skeleton/" + name;
+            LOGGER.info("Setting Kinect name to " + name + " and scope to " + scope);
             deviceConfigBuilder.setLabel("Kinect " + name);
-            //TODO: Maybe add scope here
+            final MetaConfig.Builder metaBuilder = deviceConfigBuilder.getMetaConfigBuilder();
+            final ListIterator<Entry.Builder> listIterator = metaBuilder.getEntryBuilderList().listIterator();
+            boolean included = false;
+            while (listIterator.hasNext()) {
+                final int i = listIterator.nextIndex();
+                final Entry.Builder value = listIterator.next();
+                if ("scope".equals(value.getKey())) {
+                    value.setValue(scope);
+                    metaBuilder.setEntry(i, value);
+                    included = true;
+                    break;
+                }
+            }
+            if (!included) {
+                metaBuilder.addEntry(Entry.newBuilder().setKey("scope").setValue(scope));
+            }
+            deviceConfigBuilder.setMetaConfig(metaBuilder);
         }
         if (JPService.getProperty(JPKinectPlacementFile.class).isParsed()) {
             try {
