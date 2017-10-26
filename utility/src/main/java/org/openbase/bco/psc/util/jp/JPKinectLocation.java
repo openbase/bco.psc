@@ -1,9 +1,9 @@
-package org.openbase.bco.psc.control.jp;
+package org.openbase.bco.psc.util.jp;
 
 /*
  * -
  * #%L
- * BCO PSC Control
+ * BCO PSC Utility
  * %%
  * Copyright (C) 2016 - 2017 openbase.org
  * %%
@@ -22,25 +22,25 @@ package org.openbase.bco.psc.control.jp;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import org.openbase.bco.psc.lib.jp.AbstractJPProbability;
 import org.openbase.jps.exception.JPNotAvailableException;
+import org.openbase.jps.preset.AbstractJPString;
 
 /**
- * JavaProperty used to specify the probability threshold defining how big the probability of a unit has to be, to activate the power control action of the control component.
+ * JavaProperty representing the label of the location that the Kinect should be located in.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPControlThreshold extends AbstractJPProbability {
+public class JPKinectLocation extends AbstractJPString {
 
     /**
      * The identifiers that can be used in front of the command line argument.
      */
-    public final static String[] COMMAND_IDENTIFIERS = {"--control-threshold"};
+    public final static String[] COMMAND_IDENTIFIERS = {"-l", "--location"};
 
     /**
      * Constructor.
      */
-    public JPControlThreshold() {
+    public JPKinectLocation() {
         super(COMMAND_IDENTIFIERS);
     }
 
@@ -51,8 +51,8 @@ public class JPControlThreshold extends AbstractJPProbability {
      * @throws JPNotAvailableException {@inheritDoc}
      */
     @Override
-    protected Double getPropertyDefaultValue() throws JPNotAvailableException {
-        return 0.9;
+    protected String getPropertyDefaultValue() throws JPNotAvailableException {
+        return "Home";
     }
 
     /**
@@ -62,7 +62,7 @@ public class JPControlThreshold extends AbstractJPProbability {
      */
     @Override
     public String getDescription() {
-        return "Probability threshold defining how big the probability of a unit has to be, to activate the power control action of the control component.";
+        return "The label of the location that the Kinect should be located in. If not specified, the closest location will automatically be selected if possible.";
     }
 
 }

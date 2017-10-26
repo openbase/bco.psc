@@ -1,6 +1,7 @@
 package org.openbase.bco.psc.re.jp;
 
-/*-
+/*
+ * -
  * #%L
  * BCO PSC Ray Extractor
  * %%
@@ -13,25 +14,24 @@ package org.openbase.bco.psc.re.jp;
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
+ * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
+import org.openbase.bco.psc.lib.jp.AbstractJPProbability;
 import org.openbase.bco.psc.re.pointing.ExtractorType;
 import org.openbase.jps.exception.JPNotAvailableException;
-import org.openbase.jps.preset.AbstractJPDouble;
 
 /**
  * JavaProperty used to specify the minimal base probability necessary for a probability increase by the PostureHistoryExtractor.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPDurationProbabilityThreshold extends AbstractJPDouble {
+public class JPDurationProbabilityThreshold extends AbstractJPProbability {
 
     /**
      * The identifiers that can be used in front of the command line argument.

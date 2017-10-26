@@ -22,6 +22,7 @@ package org.openbase.bco.psc.util;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+import org.openbase.bco.psc.util.jp.JPKinectLocation;
 import org.openbase.bco.psc.util.jp.JPKinectName;
 import org.openbase.bco.psc.util.jp.JPKinectPlacementFile;
 import org.openbase.bco.psc.util.jp.JPKinectSerialNumber;
@@ -53,6 +54,7 @@ public class CreateKinectLauncher {
             JPService.registerProperty(JPKinectName.class);
             JPService.registerProperty(JPKinectSerialNumber.class);
             JPService.registerProperty(JPKinectPlacementFile.class);
+            JPService.registerProperty(JPKinectLocation.class);
             JPService.parseAndExitOnError(args);
             KinectManager.createKinect();
             System.exit(0);

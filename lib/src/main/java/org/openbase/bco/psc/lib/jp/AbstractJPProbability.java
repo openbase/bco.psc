@@ -1,6 +1,7 @@
 package org.openbase.bco.psc.lib.jp;
 
-/*-
+/*
+ * -
  * #%L
  * BCO PSC Library
  * %%
@@ -13,18 +14,18 @@ package org.openbase.bco.psc.lib.jp;
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
+ * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
 import java.util.List;
 import org.openbase.jps.exception.JPBadArgumentException;
 import org.openbase.jps.exception.JPNotAvailableException;
-import org.openbase.jps.preset.AbstractJPFloat;
+import org.openbase.jps.preset.AbstractJPDouble;
 
 /**
  * JavaProperty used to specify the probability threshold that is applied before
@@ -32,9 +33,9 @@ import org.openbase.jps.preset.AbstractJPFloat;
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public abstract class AbstractJPProbabilityThreshold extends AbstractJPFloat {
+public abstract class AbstractJPProbability extends AbstractJPDouble {
 
-    public AbstractJPProbabilityThreshold(String[] commandIdentifier) {
+    public AbstractJPProbability(String[] commandIdentifier) {
         super(commandIdentifier);
     }
 
@@ -45,8 +46,8 @@ public abstract class AbstractJPProbabilityThreshold extends AbstractJPFloat {
      * @throws JPNotAvailableException {@inheritDoc}
      */
     @Override
-    protected Float getPropertyDefaultValue() throws JPNotAvailableException {
-        return 0.0f;
+    protected Double getPropertyDefaultValue() throws JPNotAvailableException {
+        return 0.0;
     }
 
     /**
@@ -57,11 +58,11 @@ public abstract class AbstractJPProbabilityThreshold extends AbstractJPFloat {
      * @throws JPBadArgumentException {@inheritDoc}
      */
     @Override
-    protected Float parse(List<String> arguments) throws JPBadArgumentException {
-        Float f = super.parse(arguments);
-        if (f > 1.0f || f < 0.0f) {
+    protected Double parse(List<String> arguments) throws JPBadArgumentException {
+        Double d = super.parse(arguments);
+        if (d > 1.0 || d < 0.0) {
             throw new JPBadArgumentException("Threshold has to be between 0.0 and 1.0!");
         }
-        return f;
+        return d;
     }
 }

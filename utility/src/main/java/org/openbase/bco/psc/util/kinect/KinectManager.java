@@ -27,12 +27,14 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
+import org.openbase.bco.psc.util.jp.JPKinectLocation;
 import org.openbase.bco.psc.util.jp.JPKinectName;
 import org.openbase.bco.psc.util.jp.JPKinectPlacementFile;
 import org.openbase.bco.psc.util.jp.JPKinectSerialNumber;
@@ -44,6 +46,8 @@ import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.slf4j.LoggerFactory;
 import rct.Transform;
+import rst.configuration.EntryType.Entry;
+import rst.configuration.MetaConfigType.MetaConfig;
 import rst.domotic.state.EnablingStateType.EnablingState;
 import rst.domotic.unit.UnitConfigType.UnitConfig;
 import rst.domotic.unit.UnitTemplateType.UnitTemplate;
@@ -149,17 +153,27 @@ public class KinectManager {
     private static UnitConfig updateLocationId(UnitConfig config) throws CouldNotPerformException, InterruptedException {
         try {
             if (JPService.getProperty(JPKinectPlacementFile.class).isParsed()) {
-                LOGGER.info("Finding the correct location id.");
-                Translation rootTranslation = config.getPlacementConfig().getPosition().getTranslation();
-                Vec3DDouble rootVector = Vec3DDouble.newBuilder().setX(rootTranslation.getX()).setY(rootTranslation.getY()).setZ(rootTranslation.getZ()).build();
                 UnitConfig targetLocation;
-                try {
-                    List<UnitConfig> locationConfigsByCoordinate = getLocationRegistry(true).getLocationConfigsByCoordinate(rootVector, LocationConfigType.LocationConfig.LocationType.TILE);
-                    targetLocation = locationConfigsByCoordinate.get(0);
-                } catch (ExecutionException ex) {
-                    throw new CouldNotPerformException("Could not get the location id.", ex);
+                if (JPService.getProperty(JPKinectLocation.class).isParsed()) {
+                    targetLocation = getLocationRegistry(true).getLocationConfigsByLabel(JPService.getProperty(JPKinectLocation.class).getValue()).get(0);
+                    LOGGER.info("Location selected by user: " + targetLocation.getLabel() + ", calculating the correct transformation.");
+                } else {
+                    LOGGER.info("Finding the correct location id.");
+                    Translation rootTranslation = config.getPlacementConfig().getPosition().getTranslation();
+                    Vec3DDouble rootVector = Vec3DDouble.newBuilder().setX(rootTranslation.getX()).setY(rootTranslation.getY()).setZ(rootTranslation.getZ()).build();
+                    try {
+                        System.out.println("root coordinate vector: " + rootVector.toString());
+                        List<UnitConfig> locationConfigsByCoordinate = getLocationRegistry(true).getLocationConfigsByCoordinate(rootVector, LocationConfigType.LocationConfig.LocationType.TILE);
+                        if (locationConfigsByCoordinate.isEmpty()) {
+                            throw new ExecutionException(new CouldNotPerformException("No fitting location could be found."));
+                        }
+                        targetLocation = locationConfigsByCoordinate.get(0);
+                        LOGGER.info("Selected location is " + targetLocation.getLabel() + ", calculating the correct transformation.");
+                    } catch (ExecutionException ex) {
+                        LOGGER.info("No optimal location could be found, keeping Home as location. If you want a specific location, you can specify it using the -l parameter.");
+                        return config;
+                    }
                 }
-                LOGGER.info("Selected location is " + targetLocation.getLabel() + ", calculating the correct transformation.");
                 Future<Transform> unitTransformationFuture = getLocationRegistry().getUnitTransformationFuture(config, targetLocation);
                 Transform3D transform = unitTransformationFuture.get().getTransform();
                 Quat4d quat = new Quat4d();
@@ -194,9 +208,26 @@ public class KinectManager {
     private static void addInformation(final UnitConfig.Builder deviceConfigBuilder) throws JPNotAvailableException, CouldNotPerformException, InterruptedException {
         if (JPService.getProperty(JPKinectName.class).isParsed()) {
             final String name = JPService.getProperty(JPKinectName.class).getValue();
-            LOGGER.info("Setting Kinect name to " + name);
+            final String scope = "/pointing/skeleton/" + name;
+            LOGGER.info("Setting Kinect name to " + name + " and scope to " + scope);
             deviceConfigBuilder.setLabel("Kinect " + name);
-            //TODO: Maybe add scope here
+            final MetaConfig.Builder metaBuilder = deviceConfigBuilder.getMetaConfigBuilder();
+            final ListIterator<Entry.Builder> listIterator = metaBuilder.getEntryBuilderList().listIterator();
+            boolean included = false;
+            while (listIterator.hasNext()) {
+                final int i = listIterator.nextIndex();
+                final Entry.Builder value = listIterator.next();
+                if ("scope".equals(value.getKey())) {
+                    value.setValue(scope);
+                    metaBuilder.setEntry(i, value);
+                    included = true;
+                    break;
+                }
+            }
+            if (!included) {
+                metaBuilder.addEntry(Entry.newBuilder().setKey("scope").setValue(scope));
+            }
+            deviceConfigBuilder.setMetaConfig(metaBuilder);
         }
         if (JPService.getProperty(JPKinectPlacementFile.class).isParsed()) {
             try {
@@ -247,38 +278,52 @@ public class KinectManager {
             String myLine;
             Matrix3d rotation = new Matrix3d();
             Vector3d translation = new Vector3d();
-            int i = 0;
+            int rot_i = 0;
+            int trans_i = 0;
             boolean rot = false;
             boolean trans = false;
             try {
                 while ((myLine = bufRead.readLine()) != null) {
                     String[] line = new String[3];
                     double[] values = new double[3];
-                    if (myLine.startsWith("Rotation Matrix: ")) {
+                    if (myLine.startsWith("RVEC: ")) {
                         rot = true;
-                        line = myLine.substring("Rotation Matrix: ".length() + 1, myLine.length() - 1).split(",");
-                    } else if (myLine.startsWith("Translation Vector: ")) {
+                        line = myLine.substring("RVEC: ".length() + 1, myLine.length() - 1).split(",");
+                    } else if (myLine.startsWith("TVEC: ")) {
                         trans = true;
-                        line = myLine.substring("Translation Vector: ".length() + 1, myLine.length() - 1).split(",");
+                        line = myLine.substring("TVEC: ".length() + 1, myLine.length() - 1).split(",");
                     } else if (rot) {
                         line = myLine.substring(0, myLine.length() - 1).split(",");
+                    } else if (trans) {
+                        line = myLine.substring(0, myLine.length() - 1).split(",");
                     }
-                    if (rot || trans) {
+                    if (rot) {
                         for (int j = 0; j < 3; j++) {
                             values[j] = Double.parseDouble(line[j].trim());
                         }
-                    }
-                    if (rot) {
-                        rotation.setRow(i, values);
-                        i++;
-                        if (i == 3) {
-                            i = 0;
+                        rotation.setRow(rot_i, values);
+                        rot_i++;
+                        if (rot_i == 3) {
+                            rot_i = 0;
                             rot = false;
                         }
                     }
                     if (trans) {
-                        translation.set(values);
-                        trans = false;
+                        switch (trans_i) {
+                            case 0:
+                                translation.x = Double.parseDouble(line[0].trim());
+                                break;
+                            case 1:
+                                translation.y = Double.parseDouble(line[0].trim());
+                                break;
+                            case 2:
+                                translation.z = Double.parseDouble(line[0].trim());
+                                break;
+                        }
+                        trans_i++;
+                        if (trans_i == 3) {
+                            trans = false;
+                        }
                     }
                 }
                 Transform3D camera_transform = new Transform3D(rotation, translation, 1.0);

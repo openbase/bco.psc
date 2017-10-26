@@ -43,7 +43,7 @@ public class PostureFunctions {
     public static final Point3D UP = new Point3D(0, 0, 1);
 
     //================================================================================
-    // Joint Pair
+    // Joint Pair and Joints
     //================================================================================
     public static final JointPair getJointPair(final boolean right, final PointingType type) {
         if (right) {
@@ -76,6 +76,53 @@ public class PostureFunctions {
                 default:
                     return new JointPair(Joints.Head, Joints.HandLeft);
             }
+        }
+    }
+
+    public static Joints otherJoint(final Joints joint) {
+        switch (joint) {
+            case AnkleLeft:
+                return Joints.AnkleRight;
+            case AnkleRight:
+                return Joints.AnkleLeft;
+            case ElbowLeft:
+                return Joints.ElbowRight;
+            case ElbowRight:
+                return Joints.ElbowLeft;
+            case FootLeft:
+                return Joints.FootRight;
+            case FootRight:
+                return Joints.FootLeft;
+            case HandLeft:
+                return Joints.HandRight;
+            case HandRight:
+                return Joints.HandLeft;
+            case HandTipLeft:
+                return Joints.HandTipRight;
+            case HandTipRight:
+                return Joints.HandTipLeft;
+            case HipLeft:
+                return Joints.HipRight;
+            case HipRight:
+                return Joints.HipLeft;
+            case KneeLeft:
+                return Joints.KneeRight;
+            case KneeRight:
+                return Joints.KneeLeft;
+            case ShoulderLeft:
+                return Joints.ShoulderRight;
+            case ShoulderRight:
+                return Joints.ShoulderLeft;
+            case ThumbLeft:
+                return Joints.ThumbRight;
+            case ThumbRight:
+                return Joints.ThumbLeft;
+            case WristLeft:
+                return Joints.WristRight;
+            case WristRight:
+                return Joints.WristLeft;
+            default:
+                return joint;
         }
     }
 
