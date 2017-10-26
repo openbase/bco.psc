@@ -1,6 +1,7 @@
 package org.openbase.bco.psc.sm.merging;
 
-/*-
+/*
+ * -
  * #%L
  * BCO PSC Skeleton Merging
  * %%
@@ -13,15 +14,14 @@ package org.openbase.bco.psc.sm.merging;
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
+ * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import java.util.Timer;
 import java.util.TimerTask;
 import org.openbase.bco.psc.sm.rsb.RSBConnection;
@@ -33,6 +33,7 @@ import org.openbase.jul.iface.VoidInitializable;
 import org.slf4j.LoggerFactory;
 
 /**
+ * This class handles the timing of merging and publishing of the tracked posture data.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
@@ -43,11 +44,30 @@ public class MergingScheduler extends TimerTask implements Launchable<Void>, Voi
      */
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(MergingScheduler.class);
 
+    /**
+     * The period in milliseconds after which the <code>run()</code> function is called.
+     */
     private final long updatePeriod;
+    /**
+     * RSBConnection used to publish the merged data on.
+     */
     private final RSBConnection rsbConnection;
+    /**
+     * The merger from which the merged data can be acquired.
+     */
     private final SkeletonMergerInterface merger;
+    /**
+     * The timer that executes the merging schedule.
+     */
     private Timer timer;
 
+    /**
+     * Constructor.
+     *
+     * @param frameRate Framerate in which the merging and publishing is taking place.
+     * @param rsbConnection RSBConnection used to publish the merged data on.
+     * @param merger The merger from which the merged data can be acquired.
+     */
     public MergingScheduler(final int frameRate, final RSBConnection rsbConnection, final SkeletonMergerInterface merger) {
         LOGGER.info("Merging Scheduler initialized for the selected framerate of " + frameRate + "/second.");
         this.updatePeriod = 1000 / frameRate;
@@ -63,6 +83,7 @@ public class MergingScheduler extends TimerTask implements Launchable<Void>, Voi
         try {
             if (rsbConnection.isActive()) {
                 rsbConnection.publishData(merger.createMergedData());
+                //TODO: Send rsb messages for new and lost postures...
             }
         } catch (CouldNotPerformException ex) {
             ExceptionPrinter.printHistory(new CouldNotPerformException("Sending the merged postures failed.", ex), LOGGER, LogLevel.ERROR);

@@ -1,4 +1,4 @@
-package org.openbase.bco.psc.sm.merging;
+package org.openbase.bco.psc.sm.jp;
 
 /*
  * -
@@ -22,30 +22,33 @@ package org.openbase.bco.psc.sm.merging;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import java.util.HashMap;
-import java.util.List;
-
 /**
+ * JavaProperty used to signal that the program should not try to connect to the registry.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class MergingHistory {
+public class JPDisableRegistry extends org.openbase.jps.preset.AbstractJPBoolean {
 
-    private final PostureFrame lastResult;
-    private final HashMap<String, PostureFrame> lastInputFrames;
-    private final List<HashMap<String, Integer>> connections;
+    /**
+     * The identifiers that can be used in front of the command line argument.
+     */
+    public final static String[] COMMAND_IDENTIFIERS = {"--dr", "--disable-registry"};
 
-    public MergingHistory(final PostureFrame lastResult, final HashMap<String, PostureFrame> lastInputFrames, final List<HashMap<String, Integer>> connections) {
-        this.lastResult = lastResult;
-        this.lastInputFrames = lastInputFrames;
-        this.connections = connections;
+    /**
+     * Constructor.
+     */
+    public JPDisableRegistry() {
+        super(COMMAND_IDENTIFIERS);
     }
 
-    public PostureFrame getLastResult() {
-        return lastResult;
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     */
+    @Override
+    public String getDescription() {
+        return "If true, the program will not connect to the registry and thus not load any unit objects.";
     }
 
-    public List<HashMap<String, Integer>> getConnections() {
-        return connections;
-    }
 }

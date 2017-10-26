@@ -23,7 +23,9 @@ package org.openbase.bco.psc.sm;
  * #L%
  */
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -31,14 +33,18 @@ import java.util.concurrent.TimeUnit;
 import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
 import org.openbase.bco.psc.lib.jp.JPPostureScope;
 import org.openbase.bco.psc.lib.registry.PointingUnitChecker;
+import org.openbase.bco.psc.sm.jp.JPDeviceClassList;
+import org.openbase.bco.psc.sm.jp.JPDisableRegistry;
 import org.openbase.bco.psc.sm.jp.JPFileTransformers;
 import org.openbase.bco.psc.sm.jp.JPFrameRate;
 import org.openbase.bco.psc.sm.jp.JPRawPostureBaseScope;
 import org.openbase.bco.psc.sm.jp.JPRegistryTransformers;
+import org.openbase.bco.psc.sm.jp.JPStabilizationFactor;
 import org.openbase.bco.psc.sm.merging.MergingScheduler;
 import org.openbase.bco.psc.sm.merging.PostureFrame;
 import org.openbase.bco.psc.sm.merging.SkeletonMerger;
 import org.openbase.bco.psc.sm.merging.SkeletonMergerInterface;
+import org.openbase.bco.psc.sm.merging.stabilizing.StabilizerImpl;
 import org.openbase.bco.psc.sm.rsb.RSBConnection;
 import org.openbase.bco.psc.sm.transformation.FileTransformer;
 import org.openbase.bco.psc.sm.transformation.RegistryTransformer;
@@ -57,6 +63,8 @@ import org.openbase.jul.exception.printer.ExceptionPrinter;
 import org.openbase.jul.exception.printer.LogLevel;
 import org.openbase.jul.iface.Launchable;
 import org.openbase.jul.iface.VoidInitializable;
+import org.openbase.jul.pattern.Observable;
+import org.openbase.jul.pattern.Observer;
 import org.openbase.jul.storage.registry.RegistrySynchronizer;
 import org.openbase.jul.storage.registry.SynchronizableRegistryImpl;
 import org.slf4j.LoggerFactory;
@@ -64,21 +72,25 @@ import rsb.AbstractEventHandler;
 import rsb.Event;
 import rsb.MetaData;
 import rsb.Scope;
+import rst.domotic.state.EnablingStateType.EnablingState;
 import rst.domotic.unit.UnitConfigType;
 import rst.domotic.unit.UnitConfigType.UnitConfig;
+import rst.domotic.unit.UnitTemplateType.UnitTemplate;
 import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
 
 /**
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class SkeletonMergingController extends AbstractEventHandler implements SkeletonMerging, Launchable<Void>, VoidInitializable {
+public class SkeletonMergingController extends AbstractEventHandler implements SkeletonMerging, Launchable<Void>, VoidInitializable, Observer<Map<String, RegistryTransformer>> {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(SkeletonMergingController.class);
 
+    private final List<String> idRestriction = new ArrayList<>();
+    private final List<String> deviceClassList = new ArrayList<>();
     private final Map<Scope, String> scopeIdMap = new HashMap<>();
     private final Map<Scope, FileTransformer> scopeFileTransformerMap = new HashMap<>();
-    private RegistrySynchronizer<String, RegistryTransformer, UnitConfig, UnitConfig.Builder> selectableObjectRegistrySynchronizer;
+    private RegistrySynchronizer<String, RegistryTransformer, UnitConfig, UnitConfig.Builder> registryTransformerRegistrySynchronizer;
     private SynchronizableRegistryImpl<String, RegistryTransformer> registryTransformerRegistry;
 
     // Merging stuff:
@@ -92,7 +104,7 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
     private boolean active;
 
     @Override
-    public void handleEvent(Event event) {
+    public synchronized void handleEvent(Event event) {
         if (!(event.getData() instanceof TrackedPostures3DFloat) || rsbConnection.getOutScope().equals(event.getScope())) {
             return;
         }
@@ -108,7 +120,7 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
         }
         try {
             Transformer currentTransformer;
-            Scope scope = bestScope.get();
+            final Scope scope = bestScope.get();
             if (scopeIdMap.containsKey(scope)) {
                 LOGGER.trace("Using transformation for scope " + scope.toString() + " unit " + scopeIdMap.get(scope));
                 currentTransformer = registryTransformerRegistry.get(scopeIdMap.get(scope));
@@ -117,8 +129,8 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
                 currentTransformer = scopeFileTransformerMap.get(scope);
             }
 
-            TrackedPostures3DFloat postures = (TrackedPostures3DFloat) event.getData();
-            TrackedPostures3DFloat transformedPostures = currentTransformer.transform(postures);
+            final TrackedPostures3DFloat postures = (TrackedPostures3DFloat) event.getData();
+            final TrackedPostures3DFloat transformedPostures = currentTransformer.transform(postures);
 
             if (mergingEnabled) {
                 LOGGER.trace("Passing the transformed postures to the merger.");
@@ -127,7 +139,7 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
 //                return;
             } else {
                 LOGGER.trace("Creating and sending transformed event.");
-                Event transformedEvent = copyEventMetaData(event);
+                final Event transformedEvent = copyEventMetaData(event);
                 transformedEvent.setData(transformedPostures);
 
                 rsbConnection.publishEvent(transformedEvent);
@@ -160,6 +172,7 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
         if (!initialized) {
             try {
                 registryTransformerRegistry = new SynchronizableRegistryImpl<>();
+                registryTransformerRegistry.setName("registryTransformers");
 
                 handleJPArguments();
 
@@ -182,9 +195,9 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
         Scope rawBaseScope = JPService.getProperty(JPRawPostureBaseScope.class).getValue();
         Scope pscBaseScope = JPService.getProperty(JPPSCBaseScope.class).getValue();
         Scope outScope = pscBaseScope.concat(JPService.getProperty(JPPostureScope.class).getValue());
-        boolean registryRequired = false;
+//        boolean registryRequired = false;
         if (!(JPService.getProperty(JPFileTransformers.class).isParsed() || JPService.getProperty(JPRegistryTransformers.class).isParsed())) {
-            //TODO: Add config file or so?!
+            //TODO: Remove this part!
             throw new JPValidationException("At least one of --registry-id or --transform-file has to be specified");
         }
 
@@ -195,29 +208,46 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
                 LOGGER.info("Registering on scope " + scope.toString() + " Transformer from file " + entry.getValue().getAbsolutePath());
             }
         }
-        if (JPService.getProperty(JPRegistryTransformers.class).isParsed()) {
-            registryRequired = true;
-            for (Entry<Scope, String> entry : JPService.getProperty(JPRegistryTransformers.class).getValue().entrySet()) {
-                Scope scope = rawBaseScope.concat(entry.getKey());
-                scopeIdMap.put(scope, entry.getValue());
-                LOGGER.info("Registering on scope " + scope.toString() + " Unit with id " + entry.getValue());
-            }
-        }
-        if (registryRequired) {
-            if (scopeIdMap.keySet().stream().anyMatch(k -> scopeFileTransformerMap.containsKey(k))
-                    || scopeFileTransformerMap.keySet().stream().anyMatch(k -> scopeIdMap.containsKey(k))) {
-                throw new JPValidationException("The same scope appeared in the -f and the -r arguments, which is invalid.");
-            }
+        idRestriction.addAll(JPService.getProperty(JPRegistryTransformers.class).getValue());
+        deviceClassList.addAll(JPService.getProperty(JPDeviceClassList.class).getValue());
+//        if (JPService.getProperty(JPRegistryTransformers.class).isParsed()) {
+//            for (Entry<Scope, String> entry : JPService.getProperty(JPRegistryTransformers.class).getValue().entrySet()) {
+//                Scope scope = rawBaseScope.concat(entry.getKey());
+//                scopeIdMap.put(scope, entry.getValue());
+//                LOGGER.info("Registering on scope " + scope.toString() + " Unit with id " + entry.getValue());
+//            }
+//        }
+        checkScopeMaps();
+        if (!JPService.getProperty(JPDisableRegistry.class).getValue()) {
             initializeRegistryConnection();
         }
+//        if (registryRequired) {
+//            if (scopeIdMap.keySet().stream().anyMatch(k -> scopeFileTransformerMap.containsKey(k))
+//                    || scopeFileTransformerMap.keySet().stream().anyMatch(k -> scopeIdMap.containsKey(k))) {
+//                throw new JPValidationException("The same scope appeared in the -f and the -r arguments, which is invalid.");
+//            }
+//            initializeRegistryConnection();
+//        }
 
         rsbConnection = new RSBConnection(this, rawBaseScope, outScope);
 
         if (scopeIdMap.size() + scopeFileTransformerMap.size() > 1) {
             mergingEnabled = true;
-            merger = new SkeletonMerger();
+            merger = new SkeletonMerger(new StabilizerImpl(JPService.getProperty(JPStabilizationFactor.class).getValue()));
             final int frameRate = JPService.getProperty(JPFrameRate.class).getValue();
             mergingScheduler = new MergingScheduler(frameRate, rsbConnection, merger);
+        }
+    }
+
+    private void checkScopeMaps() throws JPValidationException {
+        if (scopeFileTransformerMap.keySet().stream().anyMatch(k -> scopeFileTransformerMap.containsKey(k))) {
+            throw new JPValidationException("The same scope occurs multiple times in the file transformers.");
+        }
+        if (scopeIdMap.keySet().stream().anyMatch(k -> scopeFileTransformerMap.keySet().stream().filter(k2 -> k == k2).count() > 1)) {
+            throw new JPValidationException("The same scope appeared in the file transformers and the registry transformers.");
+        }
+        if (scopeIdMap.keySet().stream().anyMatch(k -> scopeIdMap.keySet().stream().filter(k2 -> k == k2).count() > 1)) {
+            throw new JPValidationException("The same scope appeared multiple times in the registry.");
         }
     }
 
@@ -226,16 +256,25 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
             LOGGER.info("Initializing Registry synchronization.");
             Registries.getUnitRegistry().waitForData(3, TimeUnit.SECONDS);
 
-            selectableObjectRegistrySynchronizer = new RegistrySynchronizer<String, RegistryTransformer, UnitConfigType.UnitConfig, UnitConfigType.UnitConfig.Builder>(
+            registryTransformerRegistrySynchronizer = new RegistrySynchronizer<String, RegistryTransformer, UnitConfigType.UnitConfig, UnitConfigType.UnitConfig.Builder>(
                     registryTransformerRegistry, getUnitRegistry().getUnitConfigRemoteRegistry(), RegistryTransformerFactory.getInstance()) {
                 @Override
                 public boolean verifyConfig(UnitConfigType.UnitConfig config) throws VerificationFailedException {
-                    //TODO: Load Kinects from the registry by a flag or so and device type and get the scopes somehow.
-                    if (!scopeIdMap.values().contains(config.getId())) {
+                    //TODO: Load Kinects from the registry by a flag or so and device type and get the scopes somehow. Also check enabled state.
+                    if (!idRestriction.isEmpty() && !idRestriction.contains(config.getId())) {
+                        return false;
+                    }
+                    if (config.getType() != UnitTemplate.UnitType.DEVICE
+                            || !deviceClassList.contains(config.getDeviceConfig().getDeviceClassId())
+                            || config.getMetaConfig().getEntryList().stream().noneMatch(e -> "scope".equals(e.getKey()))
+                            || config.getEnablingState().getValue() != EnablingState.State.ENABLED) {
+                        if (!idRestriction.isEmpty()) {
+                            LOGGER.warn("Config of specified id " + config.getId() + " is not applicable for skeleton merging.");
+                        }
                         return false;
                     }
                     try {
-                        if (PointingUnitChecker.hasLocationDataAndBoundingBox(config)) {
+                        if (PointingUnitChecker.hasLocationData(config)) {
                             return true;
                         } else {
                             throw new CouldNotPerformException("Registry Id found in the arguments, but no location data available.");
@@ -250,6 +289,7 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
                     }
                 }
             };
+            registryTransformerRegistry.addObserver(this);
         } catch (NotAvailableException ex) {
             throw new CouldNotPerformException("Could not connect to the registry.", ex);
         } catch (CouldNotPerformException ex) {
@@ -266,7 +306,7 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
         if (!active) {
             Registries.waitForData();
             LOGGER.info("Activating Registry synchronization.");
-            selectableObjectRegistrySynchronizer.activate();
+            registryTransformerRegistrySynchronizer.activate();
             rsbConnection.activate();
             if (mergingEnabled) {
                 mergingScheduler.activate();
@@ -284,7 +324,7 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
             }
             rsbConnection.deactivate();
             LOGGER.info("Deactivating Registry synchronization.");
-            selectableObjectRegistrySynchronizer.deactivate();
+            registryTransformerRegistrySynchronizer.deactivate();
             active = false;
         }
     }
@@ -292,6 +332,21 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
     @Override
     public boolean isActive() {
         return active;
+    }
+
+    @Override
+    public synchronized void update(Observable<Map<String, RegistryTransformer>> source, Map<String, RegistryTransformer> data) throws Exception {
+        scopeIdMap.clear();
+        LOGGER.info("Clearing registry scopes");
+        for (Entry<String, RegistryTransformer> e : data.entrySet()) {
+            scopeIdMap.put(e.getValue().getScope(), e.getKey());
+            LOGGER.info("Registering on scope " + e.getValue().getScope().toString() + " Unit with id " + e.getKey());
+        }
+        try {
+            checkScopeMaps();
+        } catch (JPValidationException ex) {
+            ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.WARN);
+        }
     }
 
 }

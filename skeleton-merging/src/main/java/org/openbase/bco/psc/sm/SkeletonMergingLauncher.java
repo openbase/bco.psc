@@ -4,10 +4,12 @@ import org.openbase.bco.psc.lib.jp.JPLocalInput;
 import org.openbase.bco.psc.lib.jp.JPLocalOutput;
 import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
 import org.openbase.bco.psc.lib.jp.JPPostureScope;
+import org.openbase.bco.psc.sm.jp.JPDisableRegistry;
 import org.openbase.bco.psc.sm.jp.JPFileTransformers;
 import org.openbase.bco.psc.sm.jp.JPFrameRate;
 import org.openbase.bco.psc.sm.jp.JPRawPostureBaseScope;
 import org.openbase.bco.psc.sm.jp.JPRegistryTransformers;
+import org.openbase.bco.psc.sm.jp.JPStabilizationFactor;
 import org.openbase.bco.registry.lib.BCO;
 import org.openbase.jps.core.JPService;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -55,7 +57,9 @@ public class SkeletonMergingLauncher extends AbstractLauncher<SkeletonMergingCon
         // Component specific
         JPService.registerProperty(JPFileTransformers.class);
         JPService.registerProperty(JPRegistryTransformers.class);
+        JPService.registerProperty(JPDisableRegistry.class);
         JPService.registerProperty(JPFrameRate.class);
+        JPService.registerProperty(JPStabilizationFactor.class);
 
         // Transport specification
         JPService.registerProperty(JPLocalInput.class);

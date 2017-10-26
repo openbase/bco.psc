@@ -39,7 +39,7 @@ public class PostureFrame {
     private final long timestamp;
     private final Scope scope;
     private final TrackedPostures3DFloat postures;
-    private final List<List<Joint3D>> joints;
+    private final List<Skeleton3D> joints;
 
     public PostureFrame(final long timestamp, final Scope scope, final TrackedPostures3DFloat postures) {
         this.timestamp = timestamp;
@@ -48,21 +48,22 @@ public class PostureFrame {
         this.joints = postures.getPostureList().stream()
                 .map(p -> {
                     final Iterator<Float> i = p.getConfidenceList().iterator();
+                    // Check whether this works:
                     return p.getPosture().getPositionList().stream()
                             .filter(x -> i.hasNext())
                             .map(pos -> new Joint3D(pos, i.next()))
-                            .collect(Collectors.toList());
+                            .collect(Collectors.toCollection(Skeleton3D::new));
                 })
                 .collect(Collectors.toList());
     }
 
-    public PostureFrame(final long timestamp, final List<List<Joint3D>> joints) {
+    public PostureFrame(final long timestamp, final List<Skeleton3D> joints) {
         this.timestamp = timestamp;
         this.scope = new Scope("/");
         this.joints = joints;
         this.postures = TrackedPostures3DFloat.newBuilder()
                 .addAllPosture(joints.stream()
-                        .map((List<Joint3D> jl)
+                        .map((Skeleton3D jl)
                                 -> TrackedPosture3DFloat.newBuilder()
                                 .setPosture(Posture3DFloat.newBuilder()
                                         .addAllPosition(jl.stream()
@@ -71,7 +72,7 @@ public class PostureFrame {
                                         )
                                 )
                                 .addAllConfidence(jl.stream()
-                                        .map((Joint3D j) -> j.getConfidence())
+                                        .map((Joint3D j) -> (float) j.getConfidence())
                                         .collect(Collectors.toList())
                                 ).build()
                         )
@@ -81,6 +82,10 @@ public class PostureFrame {
 
     public long getTimestamp() {
         return timestamp;
+    }
+
+    public long getAge(final long currentTimestamp) {
+        return currentTimestamp - timestamp;
     }
 
     public String getKey() {
@@ -93,5 +98,9 @@ public class PostureFrame {
 
     public TrackedPostures3DFloat getPostures() {
         return postures;
+    }
+
+    public List<Skeleton3D> getSkeletons() {
+        return joints;
     }
 }

@@ -1,6 +1,6 @@
 package org.openbase.bco.psc.sm.jp;
 
-/*
+/*-
  * #%L
  * BCO PSC Skeleton Merging
  * %%
@@ -13,28 +13,31 @@ package org.openbase.bco.psc.sm.jp;
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public
- * License along with this program. If not, see
+ * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
+import java.util.Arrays;
+import java.util.List;
 import org.openbase.jps.exception.JPValidationException;
 import org.openbase.jps.preset.AbstractJPListString;
 
 /**
- * JavaProperty used to specify RSB Scopes(optional) and registry ids of the used Skeleton Sensors (Kinect).
+ * JavaProperty representing the registry ids of the device classes (e.g. Kinect) of the devices that should be used for the transformations.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPRegistryTransformers extends AbstractJPListString {
+public class JPDeviceClassList extends AbstractJPListString {
 
     /**
      * The identifiers that can be used in front of the command line argument.
      */
-    public final static String[] COMMAND_IDENTIFIERS = {"--sm-registry-transformers"};
+    public final static String[] COMMAND_IDENTIFIERS = {"--sm-unit-hosts"};
 
     private final static String HEXA_REGEX = "[0-9a-fA-F]";
     private final static String UNIT_ID_REGEX = HEXA_REGEX + "{8}-" + HEXA_REGEX + "{4}-" + HEXA_REGEX + "{4}-" + HEXA_REGEX + "{4}-" + HEXA_REGEX + "{12}";
@@ -43,7 +46,7 @@ public class JPRegistryTransformers extends AbstractJPListString {
     /**
      * Constructor.
      */
-    public JPRegistryTransformers() {
+    public JPDeviceClassList() {
         super(COMMAND_IDENTIFIERS);
     }
 
@@ -53,9 +56,19 @@ public class JPRegistryTransformers extends AbstractJPListString {
      * @return {@inheritDoc}
      */
     @Override
+    protected List<String> getPropertyDefaultValue() {
+        // Kinect 2 class default id.
+        return Arrays.asList("e18d2b16-1969-4e5b-b40c-8b255c2cdb8c");
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     */
+    @Override
     public String getDescription() {
-        return "Registry ids of the used Skeleton Sensors (Kinect). The registry should contain placement information and scopes. "
-                + "If the parameter is not used, all Kinects in the registry are used.";
+        return "Registry ids of the device classes (e.g. Kinect) of the devices that should be used for the transformations.";
     }
 
     /**

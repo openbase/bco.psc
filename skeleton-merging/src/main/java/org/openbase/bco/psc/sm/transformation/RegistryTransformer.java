@@ -21,12 +21,15 @@ package org.openbase.bco.psc.sm.transformation;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+import java.util.Objects;
 import javax.media.j3d.Transform3D;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
 import org.openbase.jul.iface.Configurable;
 import org.slf4j.LoggerFactory;
+import rsb.Scope;
 import rst.domotic.unit.UnitConfigType.UnitConfig;
 
 /**
@@ -48,10 +51,26 @@ public class RegistryTransformer extends Transformer implements Configurable<Str
      * UnitConfig of the registry object.
      */
     private UnitConfig config;
+    /**
+     * The scope on which the posture data is sent.
+     */
+    private Scope scope;
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param config {@inheritDoc}
+     * @return {@inheritDoc}
+     * @throws CouldNotPerformException {@inheritDoc}
+     * @throws InterruptedException {@inheritDoc}
+     */
     @Override
     public synchronized UnitConfig applyConfigUpdate(UnitConfig config) throws CouldNotPerformException, InterruptedException {
         this.config = config;
+        this.scope = new Scope(config.getMetaConfig().getEntryList().stream()
+                .filter(e -> "scope".equals(e.getKey()))
+                .findFirst()
+                .orElseThrow(() -> new CouldNotPerformException("No scope was found for UnitConfig " + config.getLabel())).getValue());
         Transform3D transform;
         try {
             transform = Registries.getLocationRegistry(true).getUnitToRootTransform3D(config);
@@ -63,6 +82,12 @@ public class RegistryTransformer extends Transformer implements Configurable<Str
         return this.config;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     * @throws NotAvailableException {@inheritDoc}
+     */
     @Override
     public synchronized String getId() throws NotAvailableException {
         if (config == null) {
@@ -71,11 +96,67 @@ public class RegistryTransformer extends Transformer implements Configurable<Str
         return config.getId();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     * @throws NotAvailableException {@inheritDoc}
+     */
     @Override
     public synchronized UnitConfig getConfig() throws NotAvailableException {
         if (config == null) {
             throw new NotAvailableException("Config");
         }
         return config;
+    }
+
+    /**
+     * Gets the scope on which the posture data of this transformer is sent.
+     *
+     * @return the scope.
+     * @throws NotAvailableException is thrown if the scope is not available.
+     */
+    public synchronized Scope getScope() throws NotAvailableException {
+        if (scope == null) {
+            throw new NotAvailableException("Scope");
+        }
+        return scope;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder()
+                .append(config)
+                .append(scope)
+                .toHashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param obj {@inheritDoc}
+     * @return {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final RegistryTransformer other = (RegistryTransformer) obj;
+        if (!Objects.equals(this.config, other.config)) {
+            return false;
+        }
+        return Objects.equals(this.scope, other.scope);
     }
 }
