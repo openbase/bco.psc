@@ -150,7 +150,7 @@ public class RayExtractorController extends AbstractEventHandler implements RayE
             case ARM_POSTURE:
                 pointingExtractor = new ArmPostureExtractor(raySelector);
                 break;
-            case POSTURE_HISTORY:
+            case POSTURE_DURATION:
                 pointingExtractor = new PostureHistoryExtractor(raySelector);
                 break;
             default:

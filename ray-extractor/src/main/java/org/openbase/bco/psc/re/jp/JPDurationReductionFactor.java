@@ -62,7 +62,7 @@ public class JPDurationReductionFactor extends AbstractJPDouble {
      */
     @Override
     public String getDescription() {
-        return "This is only used if the ray-extractor is " + ExtractorType.POSTURE_HISTORY.toString()
+        return "This is only used if the ray-extractor is " + ExtractorType.POSTURE_DURATION.toString()
                 + ". It specifies the factor that the base probability is reduced with if no duration is achieved inside the specified thresholds.";
     }
 

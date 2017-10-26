@@ -63,7 +63,7 @@ public class JPDurationLookback extends AbstractJPLong {
      */
     @Override
     public String getDescription() {
-        return "This is only used if the ray-extractor is " + ExtractorType.POSTURE_HISTORY.toString()
+        return "This is only used if the ray-extractor is " + ExtractorType.POSTURE_DURATION.toString()
                 + ". It specifies the duration that is considered for the probability calculation of a pointing gesture.";
     }
 

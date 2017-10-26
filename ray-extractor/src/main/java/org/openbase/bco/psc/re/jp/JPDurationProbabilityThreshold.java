@@ -63,7 +63,7 @@ public class JPDurationProbabilityThreshold extends AbstractJPProbability {
      */
     @Override
     public String getDescription() {
-        return "This is only used if the ray-extractor is " + ExtractorType.POSTURE_HISTORY.toString()
+        return "This is only used if the ray-extractor is " + ExtractorType.POSTURE_DURATION.toString()
                 + ". It specifies the minimal base probability necessary for a probability increase.";
     }
 
