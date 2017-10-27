@@ -1,6 +1,7 @@
 package org.openbase.bco.psc.sm.jp;
 
-/*-
+/*
+ * -
  * #%L
  * BCO PSC Skeleton Merging
  * %%
@@ -13,15 +14,14 @@ package org.openbase.bco.psc.sm.jp;
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
+ * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import java.util.Arrays;
 import java.util.List;
 import org.openbase.jps.exception.JPValidationException;
@@ -37,7 +37,7 @@ public class JPDeviceClassList extends AbstractJPListString {
     /**
      * The identifiers that can be used in front of the command line argument.
      */
-    public final static String[] COMMAND_IDENTIFIERS = {"--sm-unit-hosts"};
+    public final static String[] COMMAND_IDENTIFIERS = {"--sm-device-classes"};
 
     private final static String HEXA_REGEX = "[0-9a-fA-F]";
     private final static String UNIT_ID_REGEX = HEXA_REGEX + "{8}-" + HEXA_REGEX + "{4}-" + HEXA_REGEX + "{4}-" + HEXA_REGEX + "{4}-" + HEXA_REGEX + "{12}";

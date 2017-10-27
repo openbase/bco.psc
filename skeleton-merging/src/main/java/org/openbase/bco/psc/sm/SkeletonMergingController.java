@@ -195,9 +195,9 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
         Scope rawBaseScope = JPService.getProperty(JPRawPostureBaseScope.class).getValue();
         Scope pscBaseScope = JPService.getProperty(JPPSCBaseScope.class).getValue();
         Scope outScope = pscBaseScope.concat(JPService.getProperty(JPPostureScope.class).getValue());
-//        boolean registryRequired = false;
+
+        //TODO: Remove this part!
         if (!(JPService.getProperty(JPFileTransformers.class).isParsed() || JPService.getProperty(JPRegistryTransformers.class).isParsed())) {
-            //TODO: Remove this part!
             throw new JPValidationException("At least one of --registry-id or --transform-file has to be specified");
         }
 
@@ -208,29 +208,18 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
                 LOGGER.info("Registering on scope " + scope.toString() + " Transformer from file " + entry.getValue().getAbsolutePath());
             }
         }
+
         idRestriction.addAll(JPService.getProperty(JPRegistryTransformers.class).getValue());
         deviceClassList.addAll(JPService.getProperty(JPDeviceClassList.class).getValue());
-//        if (JPService.getProperty(JPRegistryTransformers.class).isParsed()) {
-//            for (Entry<Scope, String> entry : JPService.getProperty(JPRegistryTransformers.class).getValue().entrySet()) {
-//                Scope scope = rawBaseScope.concat(entry.getKey());
-//                scopeIdMap.put(scope, entry.getValue());
-//                LOGGER.info("Registering on scope " + scope.toString() + " Unit with id " + entry.getValue());
-//            }
-//        }
+
         checkScopeMaps();
         if (!JPService.getProperty(JPDisableRegistry.class).getValue()) {
             initializeRegistryConnection();
         }
-//        if (registryRequired) {
-//            if (scopeIdMap.keySet().stream().anyMatch(k -> scopeFileTransformerMap.containsKey(k))
-//                    || scopeFileTransformerMap.keySet().stream().anyMatch(k -> scopeIdMap.containsKey(k))) {
-//                throw new JPValidationException("The same scope appeared in the -f and the -r arguments, which is invalid.");
-//            }
-//            initializeRegistryConnection();
-//        }
 
         rsbConnection = new RSBConnection(this, rawBaseScope, outScope);
 
+        //TODO: merging should always be on after it is finalized (remove mergingEnabled variable)
         if (scopeIdMap.size() + scopeFileTransformerMap.size() > 1) {
             mergingEnabled = true;
             merger = new SkeletonMerger(new StabilizerImpl(JPService.getProperty(JPStabilizationFactor.class).getValue()));

@@ -4,6 +4,7 @@ import org.openbase.bco.psc.lib.jp.JPLocalInput;
 import org.openbase.bco.psc.lib.jp.JPLocalOutput;
 import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
 import org.openbase.bco.psc.lib.jp.JPPostureScope;
+import org.openbase.bco.psc.sm.jp.JPDeviceClassList;
 import org.openbase.bco.psc.sm.jp.JPDisableRegistry;
 import org.openbase.bco.psc.sm.jp.JPFileTransformers;
 import org.openbase.bco.psc.sm.jp.JPFrameRate;
@@ -58,6 +59,7 @@ public class SkeletonMergingLauncher extends AbstractLauncher<SkeletonMergingCon
         JPService.registerProperty(JPFileTransformers.class);
         JPService.registerProperty(JPRegistryTransformers.class);
         JPService.registerProperty(JPDisableRegistry.class);
+        JPService.registerProperty(JPDeviceClassList.class);
         JPService.registerProperty(JPFrameRate.class);
         JPService.registerProperty(JPStabilizationFactor.class);
 
