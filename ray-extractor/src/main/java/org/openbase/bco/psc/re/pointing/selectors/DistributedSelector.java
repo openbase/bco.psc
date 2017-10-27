@@ -22,7 +22,7 @@ package org.openbase.bco.psc.re.pointing.selectors;
  * #L%
  */
 
-import static org.openbase.bco.psc.re.utils.PostureFunctions.*;
+import static org.openbase.bco.psc.lib.pointing.PostureFunctions.*;
 import rst.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
 import rst.tracking.PointingRay3DFloatType.PointingRay3DFloat.PointingType;
 import rst.tracking.TrackedPosture3DFloatType.TrackedPosture3DFloat;

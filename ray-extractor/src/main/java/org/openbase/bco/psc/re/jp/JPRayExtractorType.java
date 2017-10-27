@@ -1,6 +1,7 @@
 package org.openbase.bco.psc.re.jp;
 
-/*-
+/*
+ * -
  * #%L
  * BCO PSC Ray Extractor
  * %%
@@ -13,11 +14,11 @@ package org.openbase.bco.psc.re.jp;
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
+ * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
@@ -26,8 +27,7 @@ import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jps.preset.AbstractJPEnum;
 
 /**
- * JavaProperty used to specify the RayExtractorInterface implementation to be
- * used.
+ * JavaProperty used to specify the AbstractRayExtractor implementation to be used.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
@@ -66,7 +66,7 @@ public class JPRayExtractorType extends AbstractJPEnum<ExtractorType> {
      */
     @Override
     protected ExtractorType getPropertyDefaultValue() throws JPNotAvailableException {
-        return ExtractorType.ARM_POSTURE;
+        return ExtractorType.POSTURE_DURATION;
     }
 
     /**
@@ -76,7 +76,7 @@ public class JPRayExtractorType extends AbstractJPEnum<ExtractorType> {
      */
     @Override
     public String getDescription() {
-        return "Defines which implementation of the RayExtractorInterface is used. Possible choices are: " + typeNames;
+        return "Defines which implementation of the AbstractRayExtractor is used. Possible choices are: " + typeNames;
     }
 
 }

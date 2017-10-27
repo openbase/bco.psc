@@ -1,4 +1,4 @@
-package org.openbase.bco.psc.sm;
+package org.openbase.bco.psc.sm.transformation;
 
 /*
  * #%L
@@ -13,15 +13,14 @@ package org.openbase.bco.psc.sm;
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
+ * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import java.util.stream.Collectors;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Point3d;
@@ -40,43 +39,52 @@ import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class Transformer {
-    /** Logger instance. */
+
+    /**
+     * Logger instance.
+     */
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Transformer.class);
-    /** Transform object used to transform the postures. */
+    /**
+     * Transform object used to transform the postures.
+     */
     private Transform3D transform;
-    
-    /** Constructor for the use in child-classes. */
-    protected Transformer(){}
-    
+
+    /**
+     * Constructor for the use in child-classes.
+     */
+    protected Transformer() {
+    }
+
     /**
      * Public Constructor.
-     * 
+     *
      * @param transform the transform object used to transform the postures.
      */
-    public Transformer(Transform3D transform){
+    public Transformer(Transform3D transform) {
         this.transform = transform;
     }
-    
+
     /**
-     * Sets the internal transform object to the argument. 
+     * Sets the internal transform object to the argument.
      * For the use in child-classes.
-     * 
+     *
      * @param transform New transform object.
      */
-    protected final synchronized void setTransform(Transform3D transform){
+    protected final synchronized void setTransform(Transform3D transform) {
         this.transform = transform;
     }
-    
+
     /**
      * Transforms the argument's coordinates to root coordinates.
-     * 
+     *
      * @param skeletons postures that shall be transformed.
      * @return A copy of the <code>skeletons</code> argument with transformed coordinates.
      * @throws CouldNotPerformException is thrown, if the internal transform object is not set.
      */
-    public synchronized TrackedPostures3DFloat transform (TrackedPostures3DFloat skeletons) throws CouldNotPerformException{
-        if(transform == null)
+    public synchronized TrackedPostures3DFloat transform(TrackedPostures3DFloat skeletons) throws CouldNotPerformException {
+        if (transform == null) {
             throw new CouldNotPerformException("Transform is null.");
+        }
         LOGGER.trace("Transforming postures.");
         TrackedPostures3DFloat.Builder posturesBuilder = skeletons.toBuilder().clone().clearPosture();
         posturesBuilder.addAllPosture(skeletons.getPostureList().stream()
@@ -87,7 +95,7 @@ public class Transformer {
 
     /**
      * Transforms the argument's coordinates to root coordinates.
-     * 
+     *
      * @param skeleton posture that shall be transformed.
      * @return A copy of the <code>skeleton</code> argument with transformed coordinates.
      */
@@ -99,7 +107,7 @@ public class Transformer {
 
     /**
      * Transforms the argument's coordinates to root coordinates.
-     * 
+     *
      * @param posture posture that shall be transformed.
      * @return A copy of the <code>posture</code> argument with transformed coordinates.
      */
@@ -116,13 +124,13 @@ public class Transformer {
 
     /**
      * Transforms the argument to root coordinates.
-     * 
+     *
      * @param translation translation that shall be transformed.
      * @return The transformed <code>translation</code> argument.
      */
     private Translation transformPosition(Translation translation) {
         Translation.Builder transformedTranslation = translation.toBuilder().clone().clearX().clearY().clearZ();
-        if(translation.hasX() && translation.hasY() && translation.hasZ()){
+        if (translation.hasX() && translation.hasY() && translation.hasZ()) {
             Point3d point = new Point3d(-translation.getX(), -translation.getY(), translation.getZ());
             transform.transform(point);
             transformedTranslation.setX(point.x).setY(point.y).setZ(point.z);
@@ -132,13 +140,13 @@ public class Transformer {
 
     /**
      * Transforms the argument to root coordinates.
-     * 
+     *
      * @param rotation rotation that shall be transformed.
      * @return The <code>rotation</code> argument.
      */
     private Rotation transformRotation(Rotation rotation) {
         Rotation.Builder transformedRotation = rotation.toBuilder().clone().clearQw().clearQx().clearQy().clearQz();
-        if(rotation.hasQw() && rotation.hasQx() && rotation.hasQy() && rotation.hasQz()){
+        if (rotation.hasQw() && rotation.hasQx() && rotation.hasQy() && rotation.hasQz()) {
             Transform3D t = new Transform3D();
             t.set(new Quat4d(rotation.getQw(), rotation.getQx(), rotation.getQy(), rotation.getQz()));
             Transform3D multiply = new Transform3D();

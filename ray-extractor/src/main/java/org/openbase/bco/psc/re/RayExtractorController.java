@@ -1,6 +1,7 @@
 package org.openbase.bco.psc.re;
 
-/*-
+/*
+ * -
  * #%L
  * BCO PSC Ray Extractor
  * %%
@@ -13,11 +14,11 @@ package org.openbase.bco.psc.re;
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
+ * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
@@ -26,10 +27,11 @@ import java.util.stream.Collectors;
 import org.openbase.bco.psc.re.jp.JPRayExtractorThreshold;
 import org.openbase.bco.psc.re.jp.JPRayExtractorType;
 import org.openbase.bco.psc.re.jp.JPRaySelectorType;
+import org.openbase.bco.psc.re.pointing.AbstractRayExtractor;
 import org.openbase.bco.psc.re.pointing.ArmPostureExtractor;
 import org.openbase.bco.psc.re.pointing.ExtractorType;
 import static org.openbase.bco.psc.re.pointing.ExtractorType.*;
-import org.openbase.bco.psc.re.pointing.RayExtractorInterface;
+import org.openbase.bco.psc.re.pointing.PostureHistoryExtractor;
 import org.openbase.bco.psc.re.pointing.SimpleExtractor;
 import org.openbase.bco.psc.re.pointing.selectors.ChoiceSelector;
 import org.openbase.bco.psc.re.pointing.selectors.DistributedSelector;
@@ -64,7 +66,7 @@ public class RayExtractorController extends AbstractEventHandler implements RayE
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(RayExtractorLauncher.class);
     private double threshold;
     private RSBConnection rsbConnection;
-    private RayExtractorInterface pointingExtractor;
+    private AbstractRayExtractor pointingExtractor;
 
     private boolean initialized;
     private boolean active;
@@ -101,12 +103,12 @@ public class RayExtractorController extends AbstractEventHandler implements RayE
     @Override
     public void init() throws InitializationException, InterruptedException {
         if (!initialized) {
-            initialized = true;
             try {
 
                 initExtractor();
                 rsbConnection = new RSBConnection(this);
                 rsbConnection.init();
+                initialized = true;
             } catch (JPNotAvailableException | CouldNotPerformException ex) {
                 throw new InitializationException(RayExtractorController.class, ex);
             }
@@ -147,6 +149,9 @@ public class RayExtractorController extends AbstractEventHandler implements RayE
                 break;
             case ARM_POSTURE:
                 pointingExtractor = new ArmPostureExtractor(raySelector);
+                break;
+            case POSTURE_DURATION:
+                pointingExtractor = new PostureHistoryExtractor(raySelector);
                 break;
             default:
                 pointingExtractor = new SimpleExtractor(raySelector);

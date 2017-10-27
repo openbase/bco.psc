@@ -27,8 +27,7 @@ import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jps.preset.AbstractJPEnum;
 
 /**
- * JavaProperty used to specify the RaySelectorInterface implementation to be
- * used.
+ * JavaProperty used to specify the RaySelectorInterface implementation to be used.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */

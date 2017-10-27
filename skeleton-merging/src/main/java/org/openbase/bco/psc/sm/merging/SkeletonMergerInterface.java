@@ -1,8 +1,9 @@
-package org.openbase.bco.psc.re.pointing;
+package org.openbase.bco.psc.sm.merging;
 
 /*
+ * -
  * #%L
- * BCO PSC Ray Extractor
+ * BCO PSC Skeleton Merging
  * %%
  * Copyright (C) 2016 - 2017 openbase.org
  * %%
@@ -21,23 +22,15 @@ package org.openbase.bco.psc.re.pointing;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import java.util.List;
-import rst.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
 import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
 
 /**
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public interface RayExtractorInterface {
+public interface SkeletonMergerInterface {
 
-    //TODO: 1. Add implementation that checks the other arm (whole posture) aswell
-    // 2. Also implementation that tracks the movement over time and increases probability.
-    // 3. An implementation that consideres the arm trajectory instead of fixed angles.
-    //================================================================================
-    // Abstract methods
-    //================================================================================
-    public void updatePostures(TrackedPostures3DFloat postures);
+    public void postureUpdate(final PostureFrame postureFrame);
 
-    public List<PointingRay3DFloatDistribution> getPointingRays();
+    public TrackedPostures3DFloat createMergedData();
 }

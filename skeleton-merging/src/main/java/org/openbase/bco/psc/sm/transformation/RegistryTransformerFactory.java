@@ -1,6 +1,7 @@
-package org.openbase.bco.psc.sm.registry;
+package org.openbase.bco.psc.sm.transformation;
 
-/*-
+/*
+ * -
  * #%L
  * BCO PSC Skeleton Merging
  * %%
@@ -13,16 +14,14 @@ package org.openbase.bco.psc.sm.registry;
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
+ * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
-import org.openbase.bco.psc.sm.RegistryTransformer;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InstantiationException;
 import org.openbase.jul.pattern.Factory;
@@ -31,17 +30,25 @@ import rst.domotic.unit.UnitConfigType.UnitConfig;
 
 /**
  * Factory for the creation of RegistryTransformers from UnitConfigs.
- * 
+ *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class RegistryTransformerFactory implements Factory<RegistryTransformer, UnitConfig>  {
-    /** Logger instance. */
+public class RegistryTransformerFactory implements Factory<RegistryTransformer, UnitConfig> {
+
+    /**
+     * Logger instance.
+     */
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(RegistryTransformerFactory.class);
-    /** The singleton <code>RegistryTransformerFactory</code>. */
+    /**
+     * The singleton <code>RegistryTransformerFactory</code>.
+     */
     public static RegistryTransformerFactory instance;
-    
-    /** Private constructor to avoid instantiation beside the singleton. */
-    private RegistryTransformerFactory(){}
+
+    /**
+     * Private constructor to avoid instantiation beside the singleton.
+     */
+    private RegistryTransformerFactory() {
+    }
 
     /**
      * Method returns a singelton instance of the unit factory.
@@ -60,7 +67,7 @@ public class RegistryTransformerFactory implements Factory<RegistryTransformer, 
         try {
             RegistryTransformer transformer = new RegistryTransformer();
             transformer.applyConfigUpdate(config);
-            LOGGER.info("Created RegistryTransformer for id "+transformer.getId());
+            LOGGER.info("Created RegistryTransformer for id " + transformer.getId());
             return transformer;
         } catch (CouldNotPerformException ex) {
             throw new InstantiationException("RegistryTransformerInstance", ex);

@@ -25,8 +25,6 @@ package org.openbase.bco.psc.control;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.openbase.bco.psc.control.jp.JPControlThreshold;
-import org.openbase.bco.psc.control.registry.ControllableObject;
-import org.openbase.bco.psc.control.registry.ControllableObjectFactory;
 import org.openbase.bco.psc.control.rsb.RSBConnection;
 import org.openbase.bco.psc.lib.jp.JPPscUnitFilterList;
 import org.openbase.bco.psc.lib.registry.PointingUnitChecker;
@@ -51,23 +49,53 @@ import rst.domotic.unit.UnitConfigType;
 import rst.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
 
 /**
+ * The controller class of this application.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class ControlController extends AbstractEventHandler implements Control, Launchable<Void>, VoidInitializable {
 
+    /**
+     * Logger instance.
+     */
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ControlController.class);
 
+    /**
+     * The object handling the rsb connection.
+     */
     private RSBConnection rsbConnection;
 
+    /**
+     * The synchronizer which synchronizes the unit registry with the internal controllableObjectRegistry.
+     */
     private RegistrySynchronizer<String, ControllableObject, UnitConfigType.UnitConfig, UnitConfigType.UnitConfig.Builder> controllableObjectRegistrySynchronizer;
+    /**
+     * Internal synchronized registry containing all controllable objects.
+     */
     private SynchronizableRegistryImpl<String, ControllableObject> controllableObjectRegistry;
 
+    /**
+     * The flags used to identify controllable objects in the unit registry.
+     */
     private List<String> registryFlags;
+    /**
+     * Probability threshold, that has to be exceeded for a control action to take place.
+     */
     private double threshold;
+    /**
+     * Activation state of this class.
+     */
     private boolean active = false;
+    /**
+     * Initialization state of this class.
+     */
     private boolean initialized = false;
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param event {@inheritDoc}
+     */
     @Override
     public void handleEvent(final Event event) {
         LOGGER.trace(event.toString());
@@ -80,7 +108,7 @@ public class ControlController extends AbstractEventHandler implements Control, 
                             if (controllableObjectRegistry.get(x.getId()).switchPowerState()) {
                                 LOGGER.info("Switched power state of unit " + controllableObjectRegistry.get(x.getId()).getConfig().getLabel() + " with id " + x.getId());
                             } else {
-                                LOGGER.info("Did not switch power state of unit " + controllableObjectRegistry.get(x.getId()).getConfig().getLabel() + " with id " + x.getId());
+                                LOGGER.trace("Did not switch power state of unit " + controllableObjectRegistry.get(x.getId()).getConfig().getLabel() + " with id " + x.getId());
                             }
                         } catch (CouldNotPerformException ex) {
                             ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
@@ -93,10 +121,15 @@ public class ControlController extends AbstractEventHandler implements Control, 
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws InitializationException {@inheritDoc}
+     * @throws InterruptedException {@inheritDoc}
+     */
     @Override
     public void init() throws InitializationException, InterruptedException {
         if (!initialized) {
-            initialized = true;
             try {
                 LOGGER.info("Initializing ControlController.");
 
@@ -110,12 +143,19 @@ public class ControlController extends AbstractEventHandler implements Control, 
 
                 rsbConnection = new RSBConnection(this);
                 rsbConnection.init();
+                initialized = true;
             } catch (JPNotAvailableException | CouldNotPerformException ex) {
                 throw new InitializationException(ControlController.class, ex);
             }
         }
     }
 
+    /**
+     * Initializes the synchronization of the internal controllableObjectRegistry with the unit registry.
+     *
+     * @throws InterruptedException is thrown in case of an external interruption.
+     * @throws CouldNotPerformException is thrown, if the registry synchronization could not be initialized.
+     */
     private void initializeRegistryConnection() throws InterruptedException, CouldNotPerformException {
         try {
             LOGGER.info("Initializing Registry synchronization.");
@@ -144,6 +184,12 @@ public class ControlController extends AbstractEventHandler implements Control, 
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws CouldNotPerformException {@inheritDoc}
+     * @throws InterruptedException {@inheritDoc}
+     */
     @Override
     public void activate() throws CouldNotPerformException, InterruptedException {
         LOGGER.info("Activating " + getClass().getName() + ".");
@@ -159,6 +205,12 @@ public class ControlController extends AbstractEventHandler implements Control, 
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws CouldNotPerformException {@inheritDoc}
+     * @throws InterruptedException {@inheritDoc}
+     */
     @Override
     public void deactivate() throws CouldNotPerformException, InterruptedException {
         LOGGER.info("Deactivating " + getClass().getName() + ".");
@@ -170,6 +222,11 @@ public class ControlController extends AbstractEventHandler implements Control, 
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     */
     @Override
     public boolean isActive() {
         return active;

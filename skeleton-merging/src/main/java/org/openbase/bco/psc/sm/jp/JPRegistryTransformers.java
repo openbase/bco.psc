@@ -13,34 +13,23 @@ package org.openbase.bco.psc.sm.jp;
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
+ * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import org.openbase.jps.core.AbstractJavaProperty;
-import org.openbase.jps.exception.JPNotAvailableException;
-import org.openbase.jps.exception.JPParsingException;
-import rsb.Scope;
+import org.openbase.jps.exception.JPValidationException;
+import org.openbase.jps.preset.AbstractJPListString;
 
 /**
- * JavaProperty used to specify RSB Scopes(optional) and registry ids of the
- * used Skeleton Sensors (Kinect).
+ * JavaProperty used to specify RSB Scopes(optional) and registry ids of the used Skeleton Sensors (Kinect).
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPRegistryTransformers extends AbstractJavaProperty<Map<Scope, String>> {
+public class JPRegistryTransformers extends AbstractJPListString {
 
     /**
      * The identifiers that can be used in front of the command line argument.
@@ -49,17 +38,7 @@ public class JPRegistryTransformers extends AbstractJavaProperty<Map<Scope, Stri
 
     private final static String HEXA_REGEX = "[0-9a-fA-F]";
     private final static String UNIT_ID_REGEX = HEXA_REGEX + "{8}-" + HEXA_REGEX + "{4}-" + HEXA_REGEX + "{4}-" + HEXA_REGEX + "{4}-" + HEXA_REGEX + "{12}";
-    private final static String FULL_REGEX = "(([^:]+):)?(" + UNIT_ID_REGEX + ")";
-    private final static Pattern PATTERN = Pattern.compile(FULL_REGEX);
-
-    private final static String KEY_VALUE_SEPARATOR = ":";
-    private final static String KEY_IDENTIFIER = "SCOPE";
-    private final static String VALUE_IDENTIFIER = "STRING";
-
-    /**
-     * String identifying the type of the argument.
-     */
-    public final static String[] ARGUMENT_IDENTIFIERS = {"(" + KEY_IDENTIFIER + KEY_VALUE_SEPARATOR + ")" + VALUE_IDENTIFIER};
+    private final static String FULL_REGEX = UNIT_ID_REGEX;
 
     /**
      * Constructor.
@@ -74,49 +53,23 @@ public class JPRegistryTransformers extends AbstractJavaProperty<Map<Scope, Stri
      * @return {@inheritDoc}
      */
     @Override
-    protected String[] generateArgumentIdentifiers() {
-        return ARGUMENT_IDENTIFIERS;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return {@inheritDoc}
-     */
-    @Override
     public String getDescription() {
-        return "RSB Scopes(optional) and registry ids of the used Skeleton Sensors (Kinect). The registry should contain placement information. "
-                + "One of this or the \"--sm-file-transformers\" parameter have to be used.";
+        return "Registry ids of the used Skeleton Sensors (Kinect). The registry should contain placement information and scopes. "
+                + "If the parameter is not used, all Kinects in the registry are used.";
     }
 
     /**
      * {@inheritDoc}
      *
-     * @return {@inheritDoc}
-     * @throws JPNotAvailableException {@inheritDoc}
+     * @throws JPValidationException {@inheritDoc}
      */
     @Override
-    protected Map<Scope, String> getPropertyDefaultValue() throws JPNotAvailableException {
-        return Collections.emptyMap();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @param arguments {@inheritDoc}
-     * @return {@inheritDoc}
-     * @throws Exception {@inheritDoc}
-     */
-    @Override
-    protected Map<Scope, String> parse(List<String> arguments) throws Exception {
-        if (arguments.stream().anyMatch(s -> !s.matches(FULL_REGEX))) {
-            throw new JPParsingException("Every argument of " + COMMAND_IDENTIFIERS[1] + " has to be of type " + ARGUMENT_IDENTIFIERS[0]
-                    + " and thus match \"" + FULL_REGEX + "\".");
+    protected void validate() throws JPValidationException {
+        super.validate();
+        for (String s : getValue()) {
+            if (!s.matches(FULL_REGEX)) {
+                throw new JPValidationException("Every argument has to be a unit id and thus match \"" + FULL_REGEX + "\"");
+            }
         }
-        return arguments.stream().map(s -> {
-            Matcher m = PATTERN.matcher(s);
-            m.matches();
-            return new SimpleEntry<>((m.group(2) != null) ? new Scope(m.group(2)) : new Scope("/"), m.group(3));
-        }).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 }
