@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.openbase.bco</groupId>
         <artifactId>psc</artifactId>
-        <version>1.4.4-SNAPSHOT</version>
+        <version>1.4.4</version>
     </parent>
     
     <url>https://github.com/openbase/bco.psc/wiki</url>
