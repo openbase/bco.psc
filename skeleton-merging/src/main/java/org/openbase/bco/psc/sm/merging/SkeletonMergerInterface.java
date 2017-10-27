@@ -1,9 +1,9 @@
-package org.openbase.bco.psc.identification.selection.distance;
+package org.openbase.bco.psc.sm.merging;
 
 /*
  * -
  * #%L
- * BCO PSC Identification
+ * BCO PSC Skeleton Merging
  * %%
  * Copyright (C) 2016 - 2017 openbase.org
  * %%
@@ -22,14 +22,15 @@ package org.openbase.bco.psc.identification.selection.distance;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
+
 /**
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public enum DistanceType {
-    ANGLE,
-    ORTHOGONAL
-//    ANGLE_MAX,
-//    ORTHOGONAL_MAX,
-//    PEARSON
+public interface SkeletonMergerInterface {
+
+    public void postureUpdate(final PostureFrame postureFrame);
+
+    public TrackedPostures3DFloat createMergedData();
 }

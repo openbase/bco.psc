@@ -55,6 +55,20 @@
                                 <platform>unix</platform>
                             </platforms>
                         </program>
+                        <program>
+                            <mainClass>org.openbase.bco.psc.util.CreateKinectLauncher</mainClass>
+                            <id>bco-psc-create-kinect</id>
+                            <platforms>
+                                <platform>unix</platform>
+                            </platforms>
+                        </program>
+                        <program>
+                            <mainClass>org.openbase.bco.psc.util.UpdateKinectLauncher</mainClass>
+                            <id>bco-psc-update-kinect</id>
+                            <platforms>
+                                <platform>unix</platform>
+                            </platforms>
+                        </program>
                     </programs>
                 </configuration>
             </plugin>

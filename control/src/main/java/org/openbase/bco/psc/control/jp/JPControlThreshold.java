@@ -22,7 +22,7 @@ package org.openbase.bco.psc.control.jp;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import org.openbase.bco.psc.lib.jp.AbstractJPProbabilityThreshold;
+import org.openbase.bco.psc.lib.jp.AbstractJPProbability;
 import org.openbase.jps.exception.JPNotAvailableException;
 
 /**
@@ -30,7 +30,7 @@ import org.openbase.jps.exception.JPNotAvailableException;
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPControlThreshold extends AbstractJPProbabilityThreshold {
+public class JPControlThreshold extends AbstractJPProbability {
 
     /**
      * The identifiers that can be used in front of the command line argument.
@@ -51,8 +51,8 @@ public class JPControlThreshold extends AbstractJPProbabilityThreshold {
      * @throws JPNotAvailableException {@inheritDoc}
      */
     @Override
-    protected Float getPropertyDefaultValue() throws JPNotAvailableException {
-        return 0.9f;
+    protected Double getPropertyDefaultValue() throws JPNotAvailableException {
+        return 0.9;
     }
 
     /**

@@ -21,7 +21,7 @@ package org.openbase.bco.psc.identification.jp;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import org.openbase.bco.psc.lib.jp.AbstractJPProbabilityThreshold;
+import org.openbase.bco.psc.lib.jp.AbstractJPProbability;
 
 /**
  * JavaProperty used to specify the probability threshold defining how big the
@@ -30,7 +30,7 @@ import org.openbase.bco.psc.lib.jp.AbstractJPProbabilityThreshold;
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPIdentificationThreshold extends AbstractJPProbabilityThreshold {
+public class JPIdentificationThreshold extends AbstractJPProbability {
 
     /**
      * The identifiers that can be used in front of the command line argument.

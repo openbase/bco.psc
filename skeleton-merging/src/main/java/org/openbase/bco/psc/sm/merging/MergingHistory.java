@@ -1,9 +1,9 @@
-package org.openbase.bco.psc.identification.selection.distance;
+package org.openbase.bco.psc.sm.merging;
 
 /*
  * -
  * #%L
- * BCO PSC Identification
+ * BCO PSC Skeleton Merging
  * %%
  * Copyright (C) 2016 - 2017 openbase.org
  * %%
@@ -22,14 +22,30 @@ package org.openbase.bco.psc.identification.selection.distance;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+import java.util.HashMap;
+import java.util.List;
+
 /**
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public enum DistanceType {
-    ANGLE,
-    ORTHOGONAL
-//    ANGLE_MAX,
-//    ORTHOGONAL_MAX,
-//    PEARSON
+public class MergingHistory {
+
+    private final PostureFrame lastResult;
+    private final HashMap<String, PostureFrame> lastInputFrames;
+    private final List<HashMap<String, Integer>> connections;
+
+    public MergingHistory(final PostureFrame lastResult, final HashMap<String, PostureFrame> lastInputFrames, final List<HashMap<String, Integer>> connections) {
+        this.lastResult = lastResult;
+        this.lastInputFrames = lastInputFrames;
+        this.connections = connections;
+    }
+
+    public PostureFrame getLastResult() {
+        return lastResult;
+    }
+
+    public List<HashMap<String, Integer>> getConnections() {
+        return connections;
+    }
 }

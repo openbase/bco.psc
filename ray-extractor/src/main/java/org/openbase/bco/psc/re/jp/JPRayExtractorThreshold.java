@@ -22,14 +22,14 @@ package org.openbase.bco.psc.re.jp;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import org.openbase.bco.psc.lib.jp.AbstractJPProbabilityThreshold;
+import org.openbase.bco.psc.lib.jp.AbstractJPProbability;
 
 /**
  * JavaProperty used to specify the probability threshold defining how big the probability of a pointing ray distribution has to be, to be sent by the ray-extractor.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPRayExtractorThreshold extends AbstractJPProbabilityThreshold {
+public class JPRayExtractorThreshold extends AbstractJPProbability {
 
     /**
      * The identifiers that can be used in front of the command line argument.

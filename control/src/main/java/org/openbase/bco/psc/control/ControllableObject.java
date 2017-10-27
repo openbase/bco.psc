@@ -22,6 +22,8 @@ package org.openbase.bco.psc.control;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+import java.util.Objects;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.openbase.bco.dal.remote.service.PowerStateServiceRemote;
 import org.openbase.bco.dal.remote.service.ServiceRemoteFactoryImpl;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -150,5 +152,38 @@ public class ControllableObject implements Configurable<String, UnitConfig> {
             throw new NotAvailableException("Config");
         }
         return config;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder()
+                .append(config)
+                .toHashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param obj {@inheritDoc}
+     * @return {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ControllableObject other = (ControllableObject) obj;
+        return Objects.equals(this.config, other.config);
     }
 }

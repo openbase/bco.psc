@@ -63,7 +63,7 @@ public class JPDurationMaximalAngle extends AbstractJPDouble {
      */
     @Override
     public String getDescription() {
-        return "This is only used if the ray-extractor is " + ExtractorType.POSTURE_HISTORY.toString()
+        return "This is only used if the ray-extractor is " + ExtractorType.POSTURE_DURATION.toString()
                 + ". It specifies the maximal angle deviation from current pointing direction allowed for a probability increase.";
     }
 

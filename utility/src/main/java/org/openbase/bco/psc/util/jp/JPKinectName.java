@@ -1,9 +1,9 @@
-package org.openbase.bco.psc.re.jp;
+package org.openbase.bco.psc.util.jp;
 
 /*
  * -
  * #%L
- * BCO PSC Ray Extractor
+ * BCO PSC Utility
  * %%
  * Copyright (C) 2016 - 2017 openbase.org
  * %%
@@ -22,25 +22,25 @@ package org.openbase.bco.psc.re.jp;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import org.openbase.bco.psc.re.pointing.ExtractorType;
 import org.openbase.jps.exception.JPNotAvailableException;
-import org.openbase.jps.preset.AbstractJPDouble;
+import org.openbase.jps.preset.AbstractJPString;
 
 /**
+ * JavaProperty representing the name of the Kinect that is to be updated or created in the registry.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPDurationReductionFactor extends AbstractJPDouble {
+public class JPKinectName extends AbstractJPString {
 
     /**
      * The identifiers that can be used in front of the command line argument.
      */
-    public final static String[] COMMAND_IDENTIFIERS = {"--re-duration-reduction-factor"};
+    public final static String[] COMMAND_IDENTIFIERS = {"-n", "--name"};
 
     /**
      * Constructor.
      */
-    public JPDurationReductionFactor() {
+    public JPKinectName() {
         super(COMMAND_IDENTIFIERS);
     }
 
@@ -51,8 +51,8 @@ public class JPDurationReductionFactor extends AbstractJPDouble {
      * @throws JPNotAvailableException {@inheritDoc}
      */
     @Override
-    protected Double getPropertyDefaultValue() throws JPNotAvailableException {
-        return 0.8;
+    protected String getPropertyDefaultValue() throws JPNotAvailableException {
+        return "";
     }
 
     /**
@@ -62,8 +62,7 @@ public class JPDurationReductionFactor extends AbstractJPDouble {
      */
     @Override
     public String getDescription() {
-        return "This is only used if the ray-extractor is " + ExtractorType.POSTURE_DURATION.toString()
-                + ". It specifies the factor that the base probability is reduced with if no duration is achieved inside the specified thresholds.";
+        return "The name of the computer connected to the Kinect or another name that is used as a label and scope.";
     }
 
 }

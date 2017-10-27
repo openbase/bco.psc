@@ -1,9 +1,9 @@
-package org.openbase.bco.psc.re.jp;
+package org.openbase.bco.psc.util.jp;
 
 /*
  * -
  * #%L
- * BCO PSC Ray Extractor
+ * BCO PSC Utility
  * %%
  * Copyright (C) 2016 - 2017 openbase.org
  * %%
@@ -22,25 +22,30 @@ package org.openbase.bco.psc.re.jp;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import org.openbase.bco.psc.re.pointing.ExtractorType;
+import java.util.List;
+import org.openbase.jps.exception.JPBadArgumentException;
 import org.openbase.jps.exception.JPNotAvailableException;
-import org.openbase.jps.preset.AbstractJPDouble;
+import org.openbase.jps.preset.AbstractJPString;
 
 /**
+ * JavaProperty representing the unit id of the Kinect device config to be updated.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPDurationReductionFactor extends AbstractJPDouble {
+public class JPKinectUnitId extends AbstractJPString {
 
     /**
      * The identifiers that can be used in front of the command line argument.
      */
-    public final static String[] COMMAND_IDENTIFIERS = {"--re-duration-reduction-factor"};
+    public final static String[] COMMAND_IDENTIFIERS = {"-u", "--unit-id"};
+
+    private final static String HEXA_REGEX = "[0-9a-fA-F]";
+    private final static String UNIT_ID_REGEX = HEXA_REGEX + "{8}-" + HEXA_REGEX + "{4}-" + HEXA_REGEX + "{4}-" + HEXA_REGEX + "{4}-" + HEXA_REGEX + "{12}";
 
     /**
      * Constructor.
      */
-    public JPDurationReductionFactor() {
+    public JPKinectUnitId() {
         super(COMMAND_IDENTIFIERS);
     }
 
@@ -51,8 +56,8 @@ public class JPDurationReductionFactor extends AbstractJPDouble {
      * @throws JPNotAvailableException {@inheritDoc}
      */
     @Override
-    protected Double getPropertyDefaultValue() throws JPNotAvailableException {
-        return 0.8;
+    protected String getPropertyDefaultValue() throws JPNotAvailableException {
+        return "";
     }
 
     /**
@@ -62,8 +67,22 @@ public class JPDurationReductionFactor extends AbstractJPDouble {
      */
     @Override
     public String getDescription() {
-        return "This is only used if the ray-extractor is " + ExtractorType.POSTURE_DURATION.toString()
-                + ". It specifies the factor that the base probability is reduced with if no duration is achieved inside the specified thresholds.";
+        return "The unit id of the existing Kinect device config.";
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param arguments {@inheritDoc}
+     * @return {@inheritDoc}
+     * @throws JPBadArgumentException {@inheritDoc}
+     */
+    @Override
+    protected String parse(List<String> arguments) throws JPBadArgumentException {
+        String result = super.parse(arguments);
+        if (!result.matches(UNIT_ID_REGEX)) {
+            throw new JPBadArgumentException("The given unit id " + result + " is not valid.");
+        }
+        return result;
+    }
 }

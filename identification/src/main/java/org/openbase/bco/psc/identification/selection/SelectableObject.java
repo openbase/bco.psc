@@ -22,7 +22,9 @@ package org.openbase.bco.psc.identification.selection;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+import java.util.Objects;
 import javax.media.j3d.Transform3D;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
@@ -96,5 +98,38 @@ public class SelectableObject implements Configurable<String, UnitConfig>, Abstr
     @Override
     public synchronized BoundingBox getBoundingBox() throws NotAvailableException {
         return this.boundingBox;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder()
+                .append(config)
+                .toHashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param obj {@inheritDoc}
+     * @return {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final SelectableObject other = (SelectableObject) obj;
+        return Objects.equals(this.config, other.config);
     }
 }

@@ -43,9 +43,9 @@ public class PostureFunctions {
     public static final Point3D UP = new Point3D(0, 0, 1);
 
     //================================================================================
-    // Joint Pair
+    // Joint Pair and Joints
     //================================================================================
-    public static final JointPair getJointPair(boolean right, PointingType type) {
+    public static final JointPair getJointPair(final boolean right, final PointingType type) {
         if (right) {
             switch (type) {
                 case HEAD_HAND:
@@ -79,76 +79,126 @@ public class PostureFunctions {
         }
     }
 
+    public static Joints otherJoint(final Joints joint) {
+        switch (joint) {
+            case AnkleLeft:
+                return Joints.AnkleRight;
+            case AnkleRight:
+                return Joints.AnkleLeft;
+            case ElbowLeft:
+                return Joints.ElbowRight;
+            case ElbowRight:
+                return Joints.ElbowLeft;
+            case FootLeft:
+                return Joints.FootRight;
+            case FootRight:
+                return Joints.FootLeft;
+            case HandLeft:
+                return Joints.HandRight;
+            case HandRight:
+                return Joints.HandLeft;
+            case HandTipLeft:
+                return Joints.HandTipRight;
+            case HandTipRight:
+                return Joints.HandTipLeft;
+            case HipLeft:
+                return Joints.HipRight;
+            case HipRight:
+                return Joints.HipLeft;
+            case KneeLeft:
+                return Joints.KneeRight;
+            case KneeRight:
+                return Joints.KneeLeft;
+            case ShoulderLeft:
+                return Joints.ShoulderRight;
+            case ShoulderRight:
+                return Joints.ShoulderLeft;
+            case ThumbLeft:
+                return Joints.ThumbRight;
+            case ThumbRight:
+                return Joints.ThumbLeft;
+            case WristLeft:
+                return Joints.WristRight;
+            case WristRight:
+                return Joints.WristLeft;
+            default:
+                return joint;
+        }
+    }
+
     //================================================================================
     // RST-Conversions
     //================================================================================
-    public static final Vec3DFloat toVec3DFloat(Translation translation) {
+    public static final Vec3DFloat toVec3DFloat(final Translation translation) {
         return Vec3DFloat.newBuilder()
                 .setX((float) translation.getX())
                 .setY((float) translation.getY())
                 .setZ((float) translation.getZ()).build();
     }
 
-    public static final Vec3DFloat toVec3DFloat(Point3D point) {
+    public static final Vec3DFloat toVec3DFloat(final Point3D point) {
         return Vec3DFloat.newBuilder()
                 .setX((float) point.getX())
                 .setY((float) point.getY())
                 .setZ((float) point.getZ()).build();
     }
 
-    public static final Vec3DFloat getVec(TrackedPosture3DFloat posture, Joints joint) {
+    public static final Vec3DFloat getVec(final TrackedPosture3DFloat posture, final Joints joint) {
         return toVec3DFloat(posture.getPosture().getPosition(joint.getValue()));
     }
 
-    public static final Vec3DFloat subtract(Vec3DFloat first, Vec3DFloat second) {
+    public static final Vec3DFloat subtract(final Vec3DFloat first, final Vec3DFloat second) {
         return Vec3DFloat.newBuilder()
                 .setX(first.getX() - second.getX())
                 .setY(first.getY() - second.getY())
                 .setZ(first.getZ() - second.getZ()).build();
     }
 
-    public static Ray3DFloat getRay(TrackedPosture3DFloat posture, JointPair jointPair) {
-        Vec3DFloat startVec = getVec(posture, jointPair.getJoint1());
-        Vec3DFloat endVec = getVec(posture, jointPair.getJoint2());
-        Vec3DFloat direction = subtract(endVec, startVec);
+    public static Ray3DFloat getRay(final TrackedPosture3DFloat posture, final JointPair jointPair) {
+        final Vec3DFloat startVec = getVec(posture, jointPair.getJoint1());
+        final Vec3DFloat endVec = getVec(posture, jointPair.getJoint2());
+        final Vec3DFloat direction = subtract(endVec, startVec);
         return Ray3DFloat.newBuilder().setOrigin(endVec).setDirection(direction).build();
     }
 
-    public static final PointingRay3DFloat getPointingRay(TrackedPosture3DFloat posture, boolean right, double pointingProbability, PointingType type) {
-        JointPair jointPair = getJointPair(right, type);
+    public static final PointingRay3DFloat getPointingRay(final TrackedPosture3DFloat posture, final boolean right,
+            final double pointingProbability, final PointingType type) {
+        final JointPair jointPair = getJointPair(right, type);
         return PointingRay3DFloat.newBuilder().setRay(getRay(posture, jointPair)).setCertainty((float) pointingProbability).setType(type).setRightHandPointing(right).build();
     }
 
-    public static final PointingRay3DFloat getPointingRayWithConfidence(TrackedPosture3DFloat posture, boolean right, double pointingProbability, PointingType type) {
-        JointPair jointPair = getJointPair(right, type);
-        float certainty = posture.getConfidence(jointPair.getJoint1().getValue())
+    public static final PointingRay3DFloat getPointingRayWithConfidence(final TrackedPosture3DFloat posture, final boolean right,
+            final double pointingProbability, final PointingType type) {
+        final JointPair jointPair = getJointPair(right, type);
+        final float certainty = posture.getConfidence(jointPair.getJoint1().getValue())
                 * posture.getConfidence(jointPair.getJoint2().getValue());
         return getPointingRay(posture, right, certainty * pointingProbability, type);
     }
 
-    public static final Collection<PointingRay3DFloat> getAllRaysForSideAndTypesWithConfidence(TrackedPosture3DFloat posture,
-            boolean right, double pointingProbability, Collection<PointingType> types) {
+    public static final Collection<PointingRay3DFloat> getAllRaysForSideAndTypesWithConfidence(final TrackedPosture3DFloat posture,
+            final boolean right, final double pointingProbability, final Collection<PointingType> types) {
         return types.stream()
                 .map(type -> getPointingRayWithConfidence(posture, right, pointingProbability / types.size(), type))
                 .collect(Collectors.toList());
     }
 
-    public static final Collection<PointingRay3DFloat> getAllRaysForSideWithConfidence(TrackedPosture3DFloat posture, boolean right, double pointingProbability) {
+    public static final Collection<PointingRay3DFloat> getAllRaysForSideWithConfidence(final TrackedPosture3DFloat posture, final boolean right,
+            final double pointingProbability) {
         return getAllRaysForSideAndTypesWithConfidence(posture, right, pointingProbability, Arrays.asList(PointingType.values()));
     }
 
     //================================================================================
     // Posture check
     //================================================================================
-    public static final boolean checkPosture(TrackedPosture3DFloat posture) {
+    public static final boolean checkPosture(final TrackedPosture3DFloat posture) {
         if (!posture.hasPosture()) {
             return false;
         }
-        Posture3DFloat post = posture.getPosture();
+        final Posture3DFloat post = posture.getPosture();
         return post.getPositionCount() != 0 && post.getPositionCount() == posture.getConfidenceCount();
     }
 
-    public static final double postureConfidence(TrackedPosture3DFloat posture, boolean right) {
+    public static final double postureConfidence(final TrackedPosture3DFloat posture, final boolean right) {
         double confidence = posture.getConfidence(Joints.Head.getValue());
         if (right) {
             confidence *= posture.getConfidence(Joints.ShoulderRight.getValue());
@@ -164,37 +214,41 @@ public class PostureFunctions {
         return confidence;
     }
 
-    public static final boolean checkConfidences(TrackedPosture3DFloat posture, boolean right) {
+    public static final boolean checkConfidences(final TrackedPosture3DFloat posture, final boolean right) {
         return postureConfidence(posture, right) == 1.0;
     }
 
     //================================================================================
     // Point3D calculations
     //================================================================================
-    public static final Point3D toPoint3D(Translation translation) {
+    public static final Translation toTranslation(final Point3D point) {
+        return Translation.newBuilder().setX(point.getX()).setY(point.getY()).setZ(point.getZ()).build();
+    }
+
+    public static final Point3D toPoint3D(final Translation translation) {
         return new Point3D(translation.getX(), translation.getY(), translation.getZ());
     }
 
-    public static final Point3D getPoint3D(TrackedPosture3DFloat posture, Joints joint) {
+    public static final Point3D getPoint3D(final TrackedPosture3DFloat posture, final Joints joint) {
         return toPoint3D(posture.getPosture().getPosition(joint.getValue()));
     }
 
-    public static final Point3D getDirection(TrackedPosture3DFloat posture, JointPair jointPair) {
-        Point3D start = getPoint3D(posture, jointPair.getJoint1());
-        Point3D end = getPoint3D(posture, jointPair.getJoint2());
+    public static final Point3D getDirection(final TrackedPosture3DFloat posture, final JointPair jointPair) {
+        final Point3D start = getPoint3D(posture, jointPair.getJoint1());
+        final Point3D end = getPoint3D(posture, jointPair.getJoint2());
         return end.subtract(start);
     }
 
-    public static final Point3D projectOn(Point3D vector, Point3D onto) {
+    public static final Point3D projectOn(final Point3D vector, final Point3D onto) {
         return onto.multiply(onto.dotProduct(vector) / (Math.pow(onto.magnitude(), 2)));
     }
 
-    public static final Point3D projectOrthogonal(Point3D vector, Point3D orthogonal) {
+    public static final Point3D projectOrthogonal(final Point3D vector, final Point3D orthogonal) {
         return vector.subtract(projectOn(vector, orthogonal));
     }
 
-    public static final double getSignedAngle(Point3D vector1, Point3D vector2, Point3D up) {
-        double angle = vector1.angle(vector2);
+    public static final double getSignedAngle(final Point3D vector1, final Point3D vector2, final Point3D up) {
+        final double angle = vector1.angle(vector2);
         // positive if vector2 turned to the right from vector1 viewed from up.
         return up.dotProduct(vector2.crossProduct(vector1)) < 0 ? -angle : angle;
     }
@@ -202,64 +256,64 @@ public class PostureFunctions {
     //================================================================================
     // Posture specific calculations
     //================================================================================
-    public static final Point3D postureUpDirection(TrackedPosture3DFloat posture) {
+    public static final Point3D postureUpDirection(final TrackedPosture3DFloat posture) {
         return getDirection(posture, new JointPair(Joints.SpineBase, Joints.Neck)).normalize();
     }
 
-    public static final Point3D postureUpDirection(TrackedPosture3DFloat posture, boolean relative) {
+    public static final Point3D postureUpDirection(final TrackedPosture3DFloat posture, final boolean relative) {
         return relative ? postureUpDirection(posture) : UP;
     }
 
-    public static final Point3D postureRightDirection(TrackedPosture3DFloat posture, Point3D up) {
-        Point3D hipDir = getDirection(posture, new JointPair(Joints.HipLeft, Joints.HipRight));
-        Point3D shoulderDir = getDirection(posture, new JointPair(Joints.ShoulderLeft, Joints.ShoulderRight));
+    public static final Point3D postureRightDirection(final TrackedPosture3DFloat posture, final Point3D up) {
+        final Point3D hipDir = getDirection(posture, new JointPair(Joints.HipLeft, Joints.HipRight));
+        final Point3D shoulderDir = getDirection(posture, new JointPair(Joints.ShoulderLeft, Joints.ShoulderRight));
         return projectOrthogonal(hipDir.add(shoulderDir.multiply(0.5)), up).normalize();
     }
 
-    public static final Point3D postureRightDirection(TrackedPosture3DFloat posture, boolean relative) {
+    public static final Point3D postureRightDirection(final TrackedPosture3DFloat posture, final boolean relative) {
         return postureRightDirection(posture, postureUpDirection(posture, relative));
     }
 
-    public static final Point3D postureFrontDirection(Point3D up, Point3D right) {
+    public static final Point3D postureFrontDirection(final Point3D up, final Point3D right) {
         return up.crossProduct(right);
     }
 
-    public static final Point3D postureFrontDirection(TrackedPosture3DFloat posture, Point3D up) {
+    public static final Point3D postureFrontDirection(final TrackedPosture3DFloat posture, final Point3D up) {
         return postureFrontDirection(up, postureRightDirection(posture, up));
     }
 
-    public static final Point3D postureFrontDirection(TrackedPosture3DFloat posture, boolean relative) {
+    public static final Point3D postureFrontDirection(final TrackedPosture3DFloat posture, final boolean relative) {
         return postureFrontDirection(posture, postureUpDirection(posture, relative));
     }
 
     //================================================================================
     // Angle calculations
     //================================================================================
-    public static final double getElbowAngle(TrackedPosture3DFloat posture, boolean right) {
-        JointPair pair1 = right ? new JointPair(Joints.ElbowRight, Joints.ShoulderRight) : new JointPair(Joints.ElbowLeft, Joints.ShoulderLeft);
-        JointPair pair2 = right ? new JointPair(Joints.ElbowRight, Joints.HandRight) : new JointPair(Joints.ElbowLeft, Joints.HandLeft);
+    public static final double getElbowAngle(final TrackedPosture3DFloat posture, final boolean right) {
+        final JointPair pair1 = right ? new JointPair(Joints.ElbowRight, Joints.ShoulderRight) : new JointPair(Joints.ElbowLeft, Joints.ShoulderLeft);
+        final JointPair pair2 = right ? new JointPair(Joints.ElbowRight, Joints.HandRight) : new JointPair(Joints.ElbowLeft, Joints.HandLeft);
         return getDirection(posture, pair1).angle(getDirection(posture, pair2));
     }
 
-    public static final double getHandHeightAngle(TrackedPosture3DFloat posture, boolean right, boolean relative) {
-        JointPair armJoints = right ? new JointPair(Joints.ShoulderRight, Joints.HandRight) : new JointPair(Joints.ShoulderLeft, Joints.HandLeft);
-        Point3D direction = getDirection(posture, armJoints);
-        Point3D up = postureUpDirection(posture, relative);
+    public static final double getHandHeightAngle(final TrackedPosture3DFloat posture, final boolean right, final boolean relative) {
+        final JointPair armJoints = right ? new JointPair(Joints.ShoulderRight, Joints.HandRight) : new JointPair(Joints.ShoulderLeft, Joints.HandLeft);
+        final Point3D direction = getDirection(posture, armJoints);
+        final Point3D up = postureUpDirection(posture, relative);
         return up.angle(direction);
     }
 
-    public static final double getElbowHeightAngle(TrackedPosture3DFloat posture, boolean right, boolean relative) {
-        JointPair armJoints = right ? new JointPair(Joints.ShoulderRight, Joints.ElbowRight) : new JointPair(Joints.ShoulderLeft, Joints.ElbowLeft);
-        Point3D direction = getDirection(posture, armJoints);
-        Point3D up = postureUpDirection(posture, relative);
+    public static final double getElbowHeightAngle(final TrackedPosture3DFloat posture, final boolean right, final boolean relative) {
+        final JointPair armJoints = right ? new JointPair(Joints.ShoulderRight, Joints.ElbowRight) : new JointPair(Joints.ShoulderLeft, Joints.ElbowLeft);
+        final Point3D direction = getDirection(posture, armJoints);
+        final Point3D up = postureUpDirection(posture, relative);
         return up.angle(direction);
     }
 
-    public static final double getSignedHorizontalAngle(TrackedPosture3DFloat posture, boolean right, boolean relative) {
-        Joints handJoint = right ? Joints.HandRight : Joints.HandLeft;
-        Point3D up = postureUpDirection(posture, relative);
-        Point3D front = postureFrontDirection(posture, up);
-        Point3D direction = projectOrthogonal(getDirection(posture, new JointPair(Joints.SpineMid, handJoint)), up);
+    public static final double getSignedHorizontalAngle(final TrackedPosture3DFloat posture, final boolean right, final boolean relative) {
+        final Joints handJoint = right ? Joints.HandRight : Joints.HandLeft;
+        final Point3D up = postureUpDirection(posture, relative);
+        final Point3D front = postureFrontDirection(posture, up);
+        final Point3D direction = projectOrthogonal(getDirection(posture, new JointPair(Joints.SpineMid, handJoint)), up);
         return getSignedAngle(front, direction, up);
     }
 }

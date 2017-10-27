@@ -1,9 +1,9 @@
-package org.openbase.bco.psc.re.jp;
+package org.openbase.bco.psc.sm.jp;
 
 /*
  * -
  * #%L
- * BCO PSC Ray Extractor
+ * BCO PSC Skeleton Merging
  * %%
  * Copyright (C) 2016 - 2017 openbase.org
  * %%
@@ -22,37 +22,23 @@ package org.openbase.bco.psc.re.jp;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import org.openbase.bco.psc.re.pointing.ExtractorType;
-import org.openbase.jps.exception.JPNotAvailableException;
-import org.openbase.jps.preset.AbstractJPDouble;
-
 /**
+ * JavaProperty used to signal that the program should not try to connect to the registry.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPDurationReductionFactor extends AbstractJPDouble {
+public class JPDisableRegistry extends org.openbase.jps.preset.AbstractJPBoolean {
 
     /**
      * The identifiers that can be used in front of the command line argument.
      */
-    public final static String[] COMMAND_IDENTIFIERS = {"--re-duration-reduction-factor"};
+    public final static String[] COMMAND_IDENTIFIERS = {"--dr", "--disable-registry"};
 
     /**
      * Constructor.
      */
-    public JPDurationReductionFactor() {
+    public JPDisableRegistry() {
         super(COMMAND_IDENTIFIERS);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return {@inheritDoc}
-     * @throws JPNotAvailableException {@inheritDoc}
-     */
-    @Override
-    protected Double getPropertyDefaultValue() throws JPNotAvailableException {
-        return 0.8;
     }
 
     /**
@@ -62,8 +48,7 @@ public class JPDurationReductionFactor extends AbstractJPDouble {
      */
     @Override
     public String getDescription() {
-        return "This is only used if the ray-extractor is " + ExtractorType.POSTURE_DURATION.toString()
-                + ". It specifies the factor that the base probability is reduced with if no duration is achieved inside the specified thresholds.";
+        return "If true, the program will not connect to the registry and thus not load any unit objects.";
     }
 
 }

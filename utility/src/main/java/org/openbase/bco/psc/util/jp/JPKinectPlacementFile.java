@@ -1,9 +1,9 @@
-package org.openbase.bco.psc.re.jp;
+package org.openbase.bco.psc.util.jp;
 
 /*
  * -
  * #%L
- * BCO PSC Ray Extractor
+ * BCO PSC Utility
  * %%
  * Copyright (C) 2016 - 2017 openbase.org
  * %%
@@ -22,26 +22,37 @@ package org.openbase.bco.psc.re.jp;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import org.openbase.bco.psc.re.pointing.ExtractorType;
+import java.io.File;
 import org.openbase.jps.exception.JPNotAvailableException;
-import org.openbase.jps.preset.AbstractJPDouble;
+import org.openbase.jps.preset.AbstractJPFile;
+import org.openbase.jps.tools.FileHandler;
 
 /**
+ * JavaProperty representing the file containing placement information for the creation or update of a Kinect device config in the registry.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPDurationReductionFactor extends AbstractJPDouble {
+public class JPKinectPlacementFile extends AbstractJPFile {
 
     /**
      * The identifiers that can be used in front of the command line argument.
      */
-    public final static String[] COMMAND_IDENTIFIERS = {"--re-duration-reduction-factor"};
+    public final static String[] COMMAND_IDENTIFIERS = {"-p", "--placement-file"};
+
+    /**
+     * Existence handling mode used for the file validation.
+     */
+    private final static FileHandler.ExistenceHandling EXISTENCE_HANDLING = FileHandler.ExistenceHandling.CanExist;
+    /**
+     * Auto create mode used for the file validation.
+     */
+    private final static FileHandler.AutoMode AUTO_CREATE_MODE = FileHandler.AutoMode.Off;
 
     /**
      * Constructor.
      */
-    public JPDurationReductionFactor() {
-        super(COMMAND_IDENTIFIERS);
+    public JPKinectPlacementFile() {
+        super(COMMAND_IDENTIFIERS, EXISTENCE_HANDLING, AUTO_CREATE_MODE);
     }
 
     /**
@@ -51,8 +62,8 @@ public class JPDurationReductionFactor extends AbstractJPDouble {
      * @throws JPNotAvailableException {@inheritDoc}
      */
     @Override
-    protected Double getPropertyDefaultValue() throws JPNotAvailableException {
-        return 0.8;
+    protected File getPropertyDefaultValue() throws JPNotAvailableException {
+        return new File("");
     }
 
     /**
@@ -62,8 +73,7 @@ public class JPDurationReductionFactor extends AbstractJPDouble {
      */
     @Override
     public String getDescription() {
-        return "This is only used if the ray-extractor is " + ExtractorType.POSTURE_DURATION.toString()
-                + ". It specifies the factor that the base probability is reduced with if no duration is achieved inside the specified thresholds.";
+        return "The file containing position and rotation of the Kinect created by the camera-calibration component.";
     }
 
 }

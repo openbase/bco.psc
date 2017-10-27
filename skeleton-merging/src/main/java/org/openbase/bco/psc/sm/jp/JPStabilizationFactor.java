@@ -1,9 +1,8 @@
-package org.openbase.bco.psc.re.jp;
+package org.openbase.bco.psc.sm.jp;
 
-/*
- * -
+/*-
  * #%L
- * BCO PSC Ray Extractor
+ * BCO PSC Skeleton Merging
  * %%
  * Copyright (C) 2016 - 2017 openbase.org
  * %%
@@ -14,33 +13,31 @@ package org.openbase.bco.psc.re.jp;
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public
- * License along with this program. If not, see
+ * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import org.openbase.bco.psc.re.pointing.ExtractorType;
+
+import org.openbase.bco.psc.lib.jp.AbstractJPProbability;
 import org.openbase.jps.exception.JPNotAvailableException;
-import org.openbase.jps.preset.AbstractJPDouble;
 
 /**
+ * JavaProperty representing the percentage of the previous frame in the current frame's values used for stabilization.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPDurationReductionFactor extends AbstractJPDouble {
+public class JPStabilizationFactor extends AbstractJPProbability {
 
     /**
      * The identifiers that can be used in front of the command line argument.
      */
-    public final static String[] COMMAND_IDENTIFIERS = {"--re-duration-reduction-factor"};
+    public final static String[] COMMAND_IDENTIFIERS = {"--sm-stabilization-factor"};
 
-    /**
-     * Constructor.
-     */
-    public JPDurationReductionFactor() {
+    public JPStabilizationFactor() {
         super(COMMAND_IDENTIFIERS);
     }
 
@@ -52,7 +49,7 @@ public class JPDurationReductionFactor extends AbstractJPDouble {
      */
     @Override
     protected Double getPropertyDefaultValue() throws JPNotAvailableException {
-        return 0.8;
+        return 0.1;
     }
 
     /**
@@ -62,8 +59,7 @@ public class JPDurationReductionFactor extends AbstractJPDouble {
      */
     @Override
     public String getDescription() {
-        return "This is only used if the ray-extractor is " + ExtractorType.POSTURE_DURATION.toString()
-                + ". It specifies the factor that the base probability is reduced with if no duration is achieved inside the specified thresholds.";
+        return "The percentage of the previous frame in the current frame's values used for stabilization.";
     }
 
 }
