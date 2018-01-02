@@ -5,7 +5,7 @@ package org.openbase.bco.psc.identification.selection;
  * #%L
  * BCO PSC Identification
  * %%
- * Copyright (C) 2016 - 2017 openbase.org
+ * Copyright (C) 2016 - 2018 openbase.org
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
