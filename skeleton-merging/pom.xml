@@ -14,7 +14,7 @@
         <version>1.5-SNAPSHOT</version>
     </parent>
     
-    <url>https://github.com/openbase/bco.pointing-smart-control/wiki</url>
+    <url>https://github.com/openbase/bco.psc/wiki</url>
     
          <licenses>
             <license>
