@@ -1,8 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.openbase.bco</groupId>
-    <artifactId>psc</artifactId>
+    <groupId>org.openbase</groupId>
+    <artifactId>bco.psc</artifactId>
     <version>1.6-SNAPSHOT</version>
 
     <name>BCO PSC</name>
@@ -188,8 +188,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.openbase.bco</groupId>
-            <artifactId>dal.remote</artifactId>
+            <groupId>org.openbase</groupId>
+            <artifactId>bco.dal.remote</artifactId>
             <version>${dependency.bco.dal.version}</version>
         </dependency>
     </dependencies>

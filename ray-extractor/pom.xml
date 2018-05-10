@@ -1,16 +1,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.openbase.bco</groupId>
-    <artifactId>psc.ray-extractor</artifactId>
+    <groupId>org.openbase</groupId>
+    <artifactId>bco.psc.ray-extractor</artifactId>
     <packaging>jar</packaging>
 
     <name>BCO PSC Ray Extractor</name>
     <description>This software is used to extract and publish pointing rays and their certainties from tracked postures.</description>
     
     <parent>
-        <groupId>org.openbase.bco</groupId>
-        <artifactId>psc</artifactId>
+        <groupId>org.openbase</groupId>
+        <artifactId>bco.psc</artifactId>
         <version>1.6-SNAPSHOT</version>
     </parent>
     
@@ -81,8 +81,8 @@
 	
     <dependencies>
         <dependency>
-            <groupId>org.openbase.bco</groupId>
-            <artifactId>psc.lib</artifactId>
+            <groupId>org.openbase</groupId>
+            <artifactId>bco.psc.lib</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

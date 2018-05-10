@@ -1,15 +1,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.openbase.bco</groupId>
-    <artifactId>psc.util</artifactId>
+    <groupId>org.openbase</groupId>
+    <artifactId>bco.psc.util</artifactId>
     <packaging>jar</packaging>
 
     <name>BCO PSC Utility</name>
     
     <parent>
-        <groupId>org.openbase.bco</groupId>
-        <artifactId>psc</artifactId>
+        <groupId>org.openbase</groupId>
+        <artifactId>bco.psc</artifactId>
         <version>1.6-SNAPSHOT</version>
     </parent>
 
@@ -100,23 +100,23 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.openbase.bco</groupId>
-            <artifactId>psc.skeleton-merging</artifactId>
+            <groupId>org.openbase</groupId>
+            <artifactId>bco.psc.skeleton-merging</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openbase.bco</groupId>
-            <artifactId>psc.ray-extractor</artifactId>
+            <groupId>org.openbase</groupId>
+            <artifactId>bco.psc.ray-extractor</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openbase.bco</groupId>
-            <artifactId>psc.identification</artifactId>
+            <groupId>org.openbase</groupId>
+            <artifactId>bco.psc.identification</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openbase.bco</groupId>
-            <artifactId>psc.control</artifactId>
+            <groupId>org.openbase</groupId>
+            <artifactId>bco.psc.control</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
