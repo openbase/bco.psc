@@ -105,7 +105,7 @@ public class IdentificationController extends AbstractEventHandler implements Id
             Registries.getUnitRegistry().waitForData(3, TimeUnit.SECONDS);
 
             this.selectableObjectRegistrySynchronizer = new RegistrySynchronizer<String, SelectableObject, UnitConfig, UnitConfig.Builder>(
-                    selector.getSelectedObjectRegistry(), getUnitRegistry().getUnitConfigRemoteRegistry(), SelectableObjectFactory.getInstance()) {
+                    selector.getSelectedObjectRegistry(), getUnitRegistry().getUnitConfigRemoteRegistry(), getUnitRegistry(), SelectableObjectFactory.getInstance()) {
                 @Override
                 public boolean verifyConfig(UnitConfig config) throws VerificationFailedException {
                     try {

@@ -162,7 +162,7 @@ public class ControlController extends AbstractEventHandler implements Control, 
             Registries.getUnitRegistry().waitForData(3, TimeUnit.SECONDS);
 
             this.controllableObjectRegistrySynchronizer = new RegistrySynchronizer<String, ControllableObject, UnitConfigType.UnitConfig, UnitConfigType.UnitConfig.Builder>(
-                    controllableObjectRegistry, getUnitRegistry().getUnitConfigRemoteRegistry(), ControllableObjectFactory.getInstance()) {
+                    controllableObjectRegistry, getUnitRegistry().getUnitConfigRemoteRegistry(), getUnitRegistry(), ControllableObjectFactory.getInstance()) {
                 @Override
                 public boolean verifyConfig(UnitConfigType.UnitConfig config) throws VerificationFailedException {
                     try {
