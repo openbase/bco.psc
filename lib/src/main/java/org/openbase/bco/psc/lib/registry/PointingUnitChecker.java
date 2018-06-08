@@ -91,7 +91,7 @@ public class PointingUnitChecker {
             try {
                 type = getUnitRegistry().getServiceTemplateById(sc.getServiceDescription().getServiceTemplateId()).getType();
             } catch (CouldNotPerformException ex) {
-                type = sc.getServiceDescription().getType();
+                type = sc.getServiceDescription().getServiceType();
             }
             if (ServiceTemplate.ServiceType.POWER_STATE_SERVICE == type
                     && ServiceTemplate.ServicePattern.OPERATION == sc.getServiceDescription().getPattern()) {
