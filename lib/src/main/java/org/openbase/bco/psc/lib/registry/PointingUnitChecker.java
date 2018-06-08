@@ -27,6 +27,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.openbase.bco.registry.lib.util.UnitConfigProcessor;
 import org.openbase.bco.registry.remote.Registries;
+
+import static org.openbase.bco.registry.remote.Registries.getTemplateRegistry;
 import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.slf4j.LoggerFactory;
@@ -53,7 +55,7 @@ public class PointingUnitChecker {
 
     public static boolean isDalOrGroupWithLocation(UnitConfig config) throws InterruptedException, CouldNotPerformException {
         try {
-            if (config != null && (config.getType() == UnitType.UNIT_GROUP || UnitConfigProcessor.isDalUnit(config))) {
+            if (config != null && (config.getUnitType() == UnitType.UNIT_GROUP || UnitConfigProcessor.isDalUnit(config))) {
                 return hasLocationDataAndBoundingBox(config);
             }
         } catch (CouldNotPerformException ex) {
@@ -67,7 +69,7 @@ public class PointingUnitChecker {
             return false;
         }
         try {
-            Registries.getLocationRegistry(true).getUnitBoundingBoxCenterGlobalPoint3d(config);
+            Registries.getUnitRegistry(true).getUnitBoundingBoxCenterGlobalPoint3d(config);
             return true;
         } catch (CouldNotPerformException ex) {
             return false;
@@ -76,7 +78,7 @@ public class PointingUnitChecker {
 
     public static boolean hasLocationData(UnitConfig config) throws InterruptedException, CouldNotPerformException {
         try {
-            Registries.getLocationRegistry(true).getUnitToRootTransformationFuture(config).get(10000, TimeUnit.SECONDS);
+            Registries.getUnitRegistry(true).getUnitToRootTransformationFuture(config).get(10000, TimeUnit.SECONDS);
         } catch (CouldNotPerformException | TimeoutException ex) {
             throw new CouldNotPerformException("GlobalTransformReceiver not available.", ex);
         } catch (ExecutionException ex) {
@@ -89,7 +91,7 @@ public class PointingUnitChecker {
         for (ServiceConfig sc : config.getServiceConfigList()) {
             ServiceTemplate.ServiceType type;
             try {
-                type = getUnitRegistry().getServiceTemplateById(sc.getServiceDescription().getServiceTemplateId()).getType();
+                type = getTemplateRegistry().getServiceTemplateById(sc.getServiceDescription().getServiceTemplateId()).getType();
             } catch (CouldNotPerformException ex) {
                 type = sc.getServiceDescription().getServiceType();
             }

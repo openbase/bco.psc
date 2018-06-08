@@ -73,7 +73,7 @@ public class RegistryTransformer extends Transformer implements Configurable<Str
                 .orElseThrow(() -> new CouldNotPerformException("No scope was found for UnitConfig " + config.getLabel())).getValue());
         Transform3D transform;
         try {
-            transform = Registries.getLocationRegistry(true).getUnitToRootTransform3D(config);
+            transform = Registries.getUnitRegistry(true).getUnitToRootTransform3D(config);
         } catch (CouldNotPerformException ex) {
             throw new CouldNotPerformException("Could not get the transformation.", ex);
         }

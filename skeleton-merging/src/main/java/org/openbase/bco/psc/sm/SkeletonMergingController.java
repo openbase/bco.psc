@@ -248,22 +248,22 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
             registryTransformerRegistrySynchronizer = new RegistrySynchronizer<String, RegistryTransformer, UnitConfigType.UnitConfig, UnitConfigType.UnitConfig.Builder>(
                     registryTransformerRegistry, getUnitRegistry().getUnitConfigRemoteRegistry(), getUnitRegistry(), RegistryTransformerFactory.getInstance()) {
                 @Override
-                public boolean verifyConfig(UnitConfigType.UnitConfig config) throws VerificationFailedException {
+                public boolean verifyConfig(UnitConfigType.UnitConfig unitConfig) throws VerificationFailedException {
                     //TODO: Load Kinects from the registry by a flag or so and device type and get the scopes somehow. Also check enabled state.
-                    if (!idRestriction.isEmpty() && !idRestriction.contains(config.getId())) {
+                    if (!idRestriction.isEmpty() && !idRestriction.contains(unitConfig.getId())) {
                         return false;
                     }
-                    if (config.getType() != UnitTemplate.UnitType.DEVICE
-                            || !deviceClassList.contains(config.getDeviceConfig().getDeviceClassId())
-                            || config.getMetaConfig().getEntryList().stream().noneMatch(e -> "scope".equals(e.getKey()))
-                            || config.getEnablingState().getValue() != EnablingState.State.ENABLED) {
+                    if (unitConfig.getUnitType() != UnitTemplate.UnitType.DEVICE
+                            || !deviceClassList.contains(unitConfig.getDeviceConfig().getDeviceClassId())
+                            || unitConfig.getMetaConfig().getEntryList().stream().noneMatch(e -> "scope".equals(e.getKey()))
+                            || unitConfig.getEnablingState().getValue() != EnablingState.State.ENABLED) {
                         if (!idRestriction.isEmpty()) {
-                            LOGGER.warn("Config of specified id " + config.getId() + " is not applicable for skeleton merging.");
+                            LOGGER.warn("Config of specified id " + unitConfig.getId() + " is not applicable for skeleton merging.");
                         }
                         return false;
                     }
                     try {
-                        if (PointingUnitChecker.hasLocationData(config)) {
+                        if (PointingUnitChecker.hasLocationData(unitConfig)) {
                             return true;
                         } else {
                             throw new CouldNotPerformException("Registry Id found in the arguments, but no location data available.");

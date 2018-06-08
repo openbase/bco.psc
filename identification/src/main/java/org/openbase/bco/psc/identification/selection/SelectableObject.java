@@ -55,7 +55,7 @@ public class SelectableObject implements Configurable<String, UnitConfig>, Abstr
     @Override
     public synchronized UnitConfig applyConfigUpdate(UnitConfig config) throws CouldNotPerformException, InterruptedException {
         this.config = config;
-        Transform3D unitToRootTransform = Registries.getLocationRegistry(true).getUnitToRootTransform3D(config);
+        Transform3D unitToRootTransform = Registries.getUnitRegistry(true).getUnitToRootTransform3D(config);
         AxisAlignedBoundingBox3DFloat aabb = Registries.getUnitRegistry().getUnitShape(config).getBoundingBox();
         boundingBox = new BoundingBox(unitToRootTransform, aabb);
         return this.config;

@@ -40,7 +40,7 @@ import org.openbase.bco.psc.util.jp.JPKinectPlacementFile;
 import org.openbase.bco.psc.util.jp.JPKinectSerialNumber;
 import org.openbase.bco.psc.util.jp.JPKinectUnitId;
 import org.openbase.bco.registry.remote.Registries;
-import static org.openbase.bco.registry.remote.Registries.getLocationRegistry;
+import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
 import org.openbase.jps.core.JPService;
 import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -92,10 +92,10 @@ public class KinectManager {
             }
             final String unitId = JPService.getProperty(JPKinectUnitId.class).getValue();
             LOGGER.info("Loading device config to update.");
-            UnitConfig.Builder deviceConfigBuilder = Registries.getDeviceRegistry(true).getDeviceConfigById(unitId).toBuilder();
+            UnitConfig.Builder deviceConfigBuilder = Registries.getUnitRegistry(true).getUnitConfigById(unitId).toBuilder();
             addInformation(deviceConfigBuilder);
             LOGGER.info("Updating the registry.");
-            Future<UnitConfig> configResult = Registries.getDeviceRegistry(true).updateDeviceConfig(deviceConfigBuilder.build());
+            Future<UnitConfig> configResult = Registries.getUnitRegistry(true).updateUnitConfig(deviceConfigBuilder.build());
             UnitConfig finalResult = updateLocationId(configResult.get());
             LOGGER.info("Updated config result: \n" + finalResult.toString());
         } catch (CouldNotPerformException | ExecutionException | JPNotAvailableException ex) {
@@ -121,20 +121,20 @@ public class KinectManager {
                 throw new CouldNotPerformException("The kinect name is required for creating the Kinect config.");
             }
             final String name = JPService.getProperty(JPKinectName.class).getValue();
-            if (!Registries.getDeviceRegistry(true).getUnitConfigsByLabel(NAME_PREFIX + name).isEmpty()) {
+            if (!Registries.getUnitRegistry(true).getUnitConfigsByLabel(NAME_PREFIX + name).isEmpty()) {
                 throw new CouldNotPerformException("There already is a Kinect under the name " + name + ". Please use bco-psc-update-kinect instead or select another name.");
             }
             final String serialNumber = JPService.getProperty(JPKinectSerialNumber.class).getValue();
             LOGGER.info("Creating new device config.");
             UnitConfig.Builder deviceConfigBuilder = UnitConfig.newBuilder()
-                    .setType(UnitTemplate.UnitType.DEVICE)
+                    .setUnitType(UnitTemplate.UnitType.DEVICE)
                     .setDeviceConfig(DeviceConfig.newBuilder()
                             .setDeviceClassId(KINECT_CLASS_ID)
                             .setSerialNumber(serialNumber))
                     .setEnablingState(EnablingState.newBuilder().setValue(EnablingState.State.ENABLED));
             addInformation(deviceConfigBuilder);
             LOGGER.info("Creating the registry entry.");
-            Future<UnitConfig> configResult = Registries.getDeviceRegistry(true).registerDeviceConfig(deviceConfigBuilder.build());
+            Future<UnitConfig> configResult = Registries.getUnitRegistry(true).registerUnitConfig(deviceConfigBuilder.build());
             UnitConfig finalResult = updateLocationId(configResult.get());
             LOGGER.info("Created config result: \n" + finalResult.toString());
         } catch (CouldNotPerformException | ExecutionException | JPNotAvailableException ex) {
@@ -155,7 +155,7 @@ public class KinectManager {
             if (JPService.getProperty(JPKinectPlacementFile.class).isParsed()) {
                 UnitConfig targetLocation;
                 if (JPService.getProperty(JPKinectLocation.class).isParsed()) {
-                    targetLocation = getLocationRegistry(true).getLocationConfigsByLabel(JPService.getProperty(JPKinectLocation.class).getValue()).get(0);
+                    targetLocation = getUnitRegistry(true).getUnitConfigsByLabel(JPService.getProperty(JPKinectLocation.class).getValue()).get(0);
                     LOGGER.info("Location selected by user: " + targetLocation.getLabel() + ", calculating the correct transformation.");
                 } else {
                     LOGGER.info("Finding the correct location id.");
@@ -163,7 +163,7 @@ public class KinectManager {
                     Vec3DDouble rootVector = Vec3DDouble.newBuilder().setX(rootTranslation.getX()).setY(rootTranslation.getY()).setZ(rootTranslation.getZ()).build();
                     try {
                         System.out.println("root coordinate vector: " + rootVector.toString());
-                        List<UnitConfig> locationConfigsByCoordinate = getLocationRegistry(true).getLocationConfigsByCoordinate(rootVector, LocationConfigType.LocationConfig.LocationType.TILE);
+                        List<UnitConfig> locationConfigsByCoordinate = getUnitRegistry(true).getLocationConfigsByCoordinate(rootVector, LocationConfigType.LocationConfig.LocationType.TILE);
                         if (locationConfigsByCoordinate.isEmpty()) {
                             throw new ExecutionException(new CouldNotPerformException("No fitting location could be found."));
                         }
@@ -174,7 +174,7 @@ public class KinectManager {
                         return config;
                     }
                 }
-                Future<Transform> unitTransformationFuture = getLocationRegistry().getUnitTransformationFuture(config, targetLocation);
+                Future<Transform> unitTransformationFuture = getUnitRegistry().getUnitTransformationFuture(config, targetLocation);
                 Transform3D transform = unitTransformationFuture.get().getTransform();
                 Quat4d quat = new Quat4d();
                 Vector3d vec = new Vector3d();
@@ -188,7 +188,7 @@ public class KinectManager {
                                 .setPosition(Pose.newBuilder().setRotation(rot).setTranslation(trans)))
                         .build();
                 LOGGER.info("Updating the placement config in the registry.");
-                return Registries.getDeviceRegistry(true).updateDeviceConfig(updatedConfig).get();
+                return Registries.getUnitRegistry(true).updateUnitConfig(updatedConfig).get();
             } else {
                 return config;
             }
@@ -240,7 +240,7 @@ public class KinectManager {
                 transform.get(quat, vec);
                 Rotation.Builder rot = Rotation.newBuilder().setQw(quat.w).setQx(quat.x).setQy(quat.y).setQz(quat.z);
                 Translation.Builder trans = Translation.newBuilder().setX(vec.x).setY(vec.y).setZ(vec.z);
-                String rootId = Registries.getLocationRegistry(true).getRootLocationConfig().getId();
+                String rootId = Registries.getUnitRegistry(true).getRootLocationConfig().getId();
                 PlacementConfig.Builder placementBuilder = PlacementConfig.newBuilder()
                         .setPosition(Pose.newBuilder().setRotation(rot).setTranslation(trans))
                         .setLocationId(rootId);
