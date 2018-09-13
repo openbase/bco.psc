@@ -65,6 +65,7 @@ import org.openbase.jul.iface.Launchable;
 import org.openbase.jul.iface.VoidInitializable;
 import org.openbase.jul.pattern.Observable;
 import org.openbase.jul.pattern.Observer;
+import org.openbase.jul.pattern.provider.DataProvider;
 import org.openbase.jul.storage.registry.RegistrySynchronizer;
 import org.openbase.jul.storage.registry.SynchronizableRegistryImpl;
 import org.slf4j.LoggerFactory;
@@ -78,11 +79,13 @@ import rst.domotic.unit.UnitConfigType.UnitConfig;
 import rst.domotic.unit.UnitTemplateType.UnitTemplate;
 import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
 
+import javax.xml.crypto.Data;
+
 /**
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class SkeletonMergingController extends AbstractEventHandler implements SkeletonMerging, Launchable<Void>, VoidInitializable, Observer<Map<String, RegistryTransformer>> {
+public class SkeletonMergingController extends AbstractEventHandler implements SkeletonMerging, Launchable<Void>, VoidInitializable, Observer<DataProvider<Map<String, RegistryTransformer>>, Map<String, RegistryTransformer>> {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(SkeletonMergingController.class);
 
@@ -324,7 +327,7 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
     }
 
     @Override
-    public synchronized void update(Observable<Map<String, RegistryTransformer>> source, Map<String, RegistryTransformer> data) throws Exception {
+    public synchronized void update(DataProvider<Map<String, RegistryTransformer>> source, Map<String, RegistryTransformer> data) throws Exception {
         scopeIdMap.clear();
         LOGGER.info("Clearing registry scopes");
         for (Entry<String, RegistryTransformer> e : data.entrySet()) {
