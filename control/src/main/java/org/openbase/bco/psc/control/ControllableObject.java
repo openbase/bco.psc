@@ -24,8 +24,8 @@ package org.openbase.bco.psc.control;
  */
 import java.util.Objects;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.openbase.bco.dal.remote.service.PowerStateServiceRemote;
-import org.openbase.bco.dal.remote.service.ServiceRemoteFactoryImpl;
+import org.openbase.bco.dal.remote.layer.service.PowerStateServiceRemote;
+import org.openbase.bco.dal.remote.layer.service.ServiceRemoteFactoryImpl;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
 import org.openbase.jul.iface.Configurable;
