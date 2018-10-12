@@ -22,24 +22,11 @@ package org.openbase.bco.psc.sm;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
+
 import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
 import org.openbase.bco.psc.lib.jp.JPPostureScope;
 import org.openbase.bco.psc.lib.registry.PointingUnitChecker;
-import org.openbase.bco.psc.sm.jp.JPDeviceClassList;
-import org.openbase.bco.psc.sm.jp.JPDisableRegistry;
-import org.openbase.bco.psc.sm.jp.JPFileTransformers;
-import org.openbase.bco.psc.sm.jp.JPFrameRate;
-import org.openbase.bco.psc.sm.jp.JPRawPostureBaseScope;
-import org.openbase.bco.psc.sm.jp.JPRegistryTransformers;
-import org.openbase.bco.psc.sm.jp.JPStabilizationFactor;
+import org.openbase.bco.psc.sm.jp.*;
 import org.openbase.bco.psc.sm.merging.MergingScheduler;
 import org.openbase.bco.psc.sm.merging.PostureFrame;
 import org.openbase.bco.psc.sm.merging.SkeletonMerger;
@@ -51,19 +38,16 @@ import org.openbase.bco.psc.sm.transformation.RegistryTransformer;
 import org.openbase.bco.psc.sm.transformation.RegistryTransformerFactory;
 import org.openbase.bco.psc.sm.transformation.Transformer;
 import org.openbase.bco.registry.remote.Registries;
-import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
 import org.openbase.jps.core.JPService;
 import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jps.exception.JPValidationException;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InitializationException;
 import org.openbase.jul.exception.NotAvailableException;
-import org.openbase.jul.exception.VerificationFailedException;
 import org.openbase.jul.exception.printer.ExceptionPrinter;
 import org.openbase.jul.exception.printer.LogLevel;
 import org.openbase.jul.iface.Launchable;
 import org.openbase.jul.iface.VoidInitializable;
-import org.openbase.jul.pattern.Observable;
 import org.openbase.jul.pattern.Observer;
 import org.openbase.jul.pattern.provider.DataProvider;
 import org.openbase.jul.storage.registry.RegistrySynchronizer;
@@ -74,15 +58,18 @@ import rsb.Event;
 import rsb.MetaData;
 import rsb.Scope;
 import rst.domotic.state.EnablingStateType.EnablingState;
-import rst.domotic.unit.UnitConfigType;
 import rst.domotic.unit.UnitConfigType.UnitConfig;
 import rst.domotic.unit.UnitTemplateType.UnitTemplate;
 import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
 
-import javax.xml.crypto.Data;
+import java.io.File;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
+
+import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
 
 /**
- *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class SkeletonMergingController extends AbstractEventHandler implements SkeletonMerging, Launchable<Void>, VoidInitializable, Observer<DataProvider<Map<String, RegistryTransformer>>, Map<String, RegistryTransformer>> {
@@ -248,39 +235,37 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
             LOGGER.info("Initializing Registry synchronization.");
             Registries.getUnitRegistry().waitForData(3, TimeUnit.SECONDS);
 
-            registryTransformerRegistrySynchronizer = new RegistrySynchronizer<String, RegistryTransformer, UnitConfigType.UnitConfig, UnitConfigType.UnitConfig.Builder>(
-                    registryTransformerRegistry, getUnitRegistry().getUnitConfigRemoteRegistry(), getUnitRegistry(), RegistryTransformerFactory.getInstance()) {
-                @Override
-                public boolean verifyConfig(UnitConfigType.UnitConfig unitConfig) throws VerificationFailedException {
-                    //TODO: Load Kinects from the registry by a flag or so and device type and get the scopes somehow. Also check enabled state.
-                    if (!idRestriction.isEmpty() && !idRestriction.contains(unitConfig.getId())) {
-                        return false;
-                    }
-                    if (unitConfig.getUnitType() != UnitTemplate.UnitType.DEVICE
-                            || !deviceClassList.contains(unitConfig.getDeviceConfig().getDeviceClassId())
-                            || unitConfig.getMetaConfig().getEntryList().stream().noneMatch(e -> "scope".equals(e.getKey()))
-                            || unitConfig.getEnablingState().getValue() != EnablingState.State.ENABLED) {
-                        if (!idRestriction.isEmpty()) {
-                            LOGGER.warn("Config of specified id " + unitConfig.getId() + " is not applicable for skeleton merging.");
-                        }
-                        return false;
-                    }
-                    try {
-                        if (PointingUnitChecker.hasLocationData(unitConfig)) {
-                            return true;
-                        } else {
-                            throw new CouldNotPerformException("Registry Id found in the arguments, but no location data available.");
-                        }
-                    } catch (InterruptedException ex) {
-                        Thread.currentThread().interrupt();
-                        ExceptionPrinter.printHistory(new CouldNotPerformException("Could not initialize registry connection", ex), logger, LogLevel.ERROR);
-                        return false;
-                    } catch (CouldNotPerformException ex) {
-                        ExceptionPrinter.printHistory(ex, logger, LogLevel.ERROR);
-                        return false;
-                    }
+            registryTransformerRegistrySynchronizer = new RegistrySynchronizer<>(
+                    registryTransformerRegistry, getUnitRegistry().getUnitConfigRemoteRegistry(), getUnitRegistry(), RegistryTransformerFactory.getInstance());
+            registryTransformerRegistrySynchronizer.addFilter(unitConfig -> {
+                //TODO: Load Kinects from the registry by a flag or so and device type and get the scopes somehow. Also check enabled state.
+                if (!idRestriction.isEmpty() && !idRestriction.contains(unitConfig.getId())) {
+                    return true;
                 }
-            };
+                if (unitConfig.getUnitType() != UnitTemplate.UnitType.DEVICE
+                        || !deviceClassList.contains(unitConfig.getDeviceConfig().getDeviceClassId())
+                        || unitConfig.getMetaConfig().getEntryList().stream().noneMatch(e -> "scope".equals(e.getKey()))
+                        || unitConfig.getEnablingState().getValue() != EnablingState.State.ENABLED) {
+                    if (!idRestriction.isEmpty()) {
+                        LOGGER.warn("Config of specified id " + unitConfig.getId() + " is not applicable for skeleton merging.");
+                    }
+                    return true;
+                }
+                try {
+                    if (PointingUnitChecker.hasLocationData(unitConfig)) {
+                        return false;
+                    } else {
+                        throw new CouldNotPerformException("Registry Id found in the arguments, but no location data available.");
+                    }
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    ExceptionPrinter.printHistory(new CouldNotPerformException("Could not initialize registry connection", ex), LOGGER, LogLevel.ERROR);
+                    return true;
+                } catch (CouldNotPerformException ex) {
+                    ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
+                    return true;
+                }
+            });
             registryTransformerRegistry.addObserver(this);
         } catch (NotAvailableException ex) {
             throw new CouldNotPerformException("Could not connect to the registry.", ex);

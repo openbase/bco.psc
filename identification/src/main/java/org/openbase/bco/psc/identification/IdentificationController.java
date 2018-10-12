@@ -22,35 +22,25 @@ package org.openbase.bco.psc.identification;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+
 import org.openbase.bco.psc.identification.jp.JPDistanceType;
 import org.openbase.bco.psc.identification.jp.JPIdentificationThreshold;
 import org.openbase.bco.psc.identification.jp.JPUnitSelectorType;
 import org.openbase.bco.psc.identification.rsb.RSBConnection;
-import org.openbase.bco.psc.identification.selection.AbstractUnitSelector;
-import org.openbase.bco.psc.identification.selection.MaxSelector;
-import org.openbase.bco.psc.identification.selection.MeanSelector;
-import org.openbase.bco.psc.identification.selection.SelectableObject;
-import org.openbase.bco.psc.identification.selection.SelectableObjectFactory;
-import org.openbase.bco.psc.identification.selection.SelectorType;
-import static org.openbase.bco.psc.identification.selection.SelectorType.*;
+import org.openbase.bco.psc.identification.selection.*;
 import org.openbase.bco.psc.identification.selection.distance.AbstractDistanceMeasure;
 import org.openbase.bco.psc.identification.selection.distance.AngleMeasure;
 import org.openbase.bco.psc.identification.selection.distance.DistanceType;
-import static org.openbase.bco.psc.identification.selection.distance.DistanceType.*;
 import org.openbase.bco.psc.identification.selection.distance.OrthogonalMeasure;
 import org.openbase.bco.psc.lib.jp.JPPscUnitFilterList;
 import org.openbase.bco.psc.lib.registry.PointingUnitChecker;
 import org.openbase.bco.registry.remote.Registries;
-import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
 import org.openbase.jps.core.JPService;
 import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InitializationException;
 import org.openbase.jul.exception.InstantiationException;
 import org.openbase.jul.exception.NotAvailableException;
-import org.openbase.jul.exception.VerificationFailedException;
 import org.openbase.jul.exception.printer.ExceptionPrinter;
 import org.openbase.jul.exception.printer.LogLevel;
 import org.openbase.jul.iface.Launchable;
@@ -63,8 +53,12 @@ import rst.domotic.unit.UnitConfigType.UnitConfig;
 import rst.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
 import rst.tracking.PointingRay3DFloatDistributionCollectionType.PointingRay3DFloatDistributionCollection;
 
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
+
 /**
- *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class IdentificationController extends AbstractEventHandler implements Identification, Launchable<Void>, VoidInitializable {
@@ -104,22 +98,20 @@ public class IdentificationController extends AbstractEventHandler implements Id
             LOGGER.info("Initializing Registry synchronization.");
             Registries.getUnitRegistry().waitForData(3, TimeUnit.SECONDS);
 
-            this.selectableObjectRegistrySynchronizer = new RegistrySynchronizer<String, SelectableObject, UnitConfig, UnitConfig.Builder>(
-                    selector.getSelectedObjectRegistry(), getUnitRegistry().getUnitConfigRemoteRegistry(), getUnitRegistry(), SelectableObjectFactory.getInstance()) {
-                @Override
-                public boolean verifyConfig(UnitConfig config) throws VerificationFailedException {
-                    try {
-                        return PointingUnitChecker.isPointingControlUnit(config, registryFlags);
-                    } catch (InterruptedException ex) {
-                        Thread.currentThread().interrupt();
-                        ExceptionPrinter.printHistory(ex, logger, LogLevel.ERROR);
-                        return false;
-                    } catch (CouldNotPerformException ex) {
-                        ExceptionPrinter.printHistory(ex, logger, LogLevel.WARN);
-                        return false;
-                    }
+            selectableObjectRegistrySynchronizer = new RegistrySynchronizer<String, SelectableObject, UnitConfig, UnitConfig.Builder>(
+                    selector.getSelectedObjectRegistry(), getUnitRegistry().getUnitConfigRemoteRegistry(), getUnitRegistry(), SelectableObjectFactory.getInstance());
+            selectableObjectRegistrySynchronizer.addFilter(config -> {
+                try {
+                    return !PointingUnitChecker.isPointingControlUnit(config, registryFlags);
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
+                    return true;
+                } catch (CouldNotPerformException ex) {
+                    ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.WARN);
+                    return true;
                 }
-            };
+            });
         } catch (NotAvailableException ex) {
             throw new CouldNotPerformException("Could not connect to the registry.", ex);
         } catch (CouldNotPerformException ex) {

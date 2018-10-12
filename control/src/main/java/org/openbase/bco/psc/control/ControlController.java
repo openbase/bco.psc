@@ -161,22 +161,20 @@ public class ControlController extends AbstractEventHandler implements Control, 
             LOGGER.info("Initializing Registry synchronization.");
             Registries.getUnitRegistry().waitForData(3, TimeUnit.SECONDS);
 
-            this.controllableObjectRegistrySynchronizer = new RegistrySynchronizer<String, ControllableObject, UnitConfigType.UnitConfig, UnitConfigType.UnitConfig.Builder>(
-                    controllableObjectRegistry, getUnitRegistry().getUnitConfigRemoteRegistry(), getUnitRegistry(), ControllableObjectFactory.getInstance()) {
-                @Override
-                public boolean verifyConfig(UnitConfigType.UnitConfig config) throws VerificationFailedException {
+            controllableObjectRegistrySynchronizer = new RegistrySynchronizer<>(
+                    controllableObjectRegistry, getUnitRegistry().getUnitConfigRemoteRegistry(), getUnitRegistry(), ControllableObjectFactory.getInstance());
+            controllableObjectRegistrySynchronizer.addFilter(config -> {
                     try {
-                        return PointingUnitChecker.isPointingControlUnit(config, registryFlags);
+                        return !PointingUnitChecker.isPointingControlUnit(config, registryFlags);
                     } catch (InterruptedException ex) {
                         Thread.currentThread().interrupt();
-                        ExceptionPrinter.printHistory(ex, logger, LogLevel.ERROR);
-                        return false;
+                        ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
+                        return true;
                     } catch (CouldNotPerformException ex) {
-                        ExceptionPrinter.printHistory(ex, logger, LogLevel.WARN);
-                        return false;
+                        ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.WARN);
+                        return true;
                     }
-                }
-            };
+                });
         } catch (NotAvailableException ex) {
             throw new CouldNotPerformException("Could not connect to the registry.", ex);
         } catch (CouldNotPerformException ex) {
