@@ -54,6 +54,13 @@
     </build>
 	
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.openjfx/javafx.graphics -->
+        <dependency>
+            <groupId>org.openbase</groupId>
+            <artifactId>jul.visual.javafx</artifactId>
+            <version>${dependency.jul.version}</version>
+            <type>pom</type>
+        </dependency>
     </dependencies>
 
 </project>
