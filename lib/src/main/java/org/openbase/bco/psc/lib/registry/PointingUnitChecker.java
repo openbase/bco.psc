@@ -104,6 +104,11 @@ public class PointingUnitChecker {
     }
 
     private static boolean isRegistryFlagSet(MetaConfig meta, List<String> registryFlags) {
+
+        // filter non if no matches are defined.
+        if(registryFlags.isEmpty()) {
+            return true;
+        }
         if (meta == null || meta.getEntryList() == null) {
             return false;
         }
