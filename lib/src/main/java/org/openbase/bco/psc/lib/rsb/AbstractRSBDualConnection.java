@@ -22,7 +22,7 @@ package org.openbase.bco.psc.lib.rsb;
  * #L%
  */
 
-import com.google.protobuf.GeneratedMessage;
+import com.google.protobuf.Message;
 import com.google.protobuf.MessageOrBuilder;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InitializationException;
@@ -38,7 +38,7 @@ import rsb.Event;
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  * @param <T> The type that the Informer is publishing.
  */
-public abstract class AbstractRSBDualConnection<T extends GeneratedMessage & MessageOrBuilder> extends AbstractRSBListenerConnection {
+public abstract class AbstractRSBDualConnection<T extends Message & MessageOrBuilder> extends AbstractRSBListenerConnection {
 
     /**
      * Logger instance.

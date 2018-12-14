@@ -22,7 +22,7 @@ package org.openbase.bco.psc.lib.rsb;
  * #L%
  */
 
-import com.google.protobuf.GeneratedMessage;
+import com.google.protobuf.Message;
 import com.google.protobuf.MessageOrBuilder;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InitializationException;
@@ -96,7 +96,7 @@ public abstract class AbstractRSBListenerConnection implements Launchable<Void>,
      * @param <M> The type that is being registered.
      * @param defaultInstance The default instance of the type to be registered.
      */
-    protected <M extends GeneratedMessage & MessageOrBuilder> void registerConverterForType(M defaultInstance) {
+    protected <M extends Message & MessageOrBuilder> void registerConverterForType(M defaultInstance) {
         DefaultConverterRepository.getDefaultConverterRepository()
                 .addConverter(new ProtocolBufferConverter<>(defaultInstance));
     }
