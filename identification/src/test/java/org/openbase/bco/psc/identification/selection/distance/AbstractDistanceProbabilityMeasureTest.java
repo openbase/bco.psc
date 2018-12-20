@@ -26,7 +26,7 @@ import javax.vecmath.Vector3d;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import static org.openbase.bco.psc.identification.Testing.*;
-import rst.math.Vec3DFloatType.Vec3DFloat;
+import org.openbase.type.math.Vec3DFloatType.Vec3DFloat;
 
 /**
  *

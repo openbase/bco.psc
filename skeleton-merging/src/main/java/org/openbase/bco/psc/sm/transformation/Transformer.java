@@ -27,11 +27,11 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.slf4j.LoggerFactory;
-import rst.geometry.RotationType.Rotation;
-import rst.geometry.TranslationType.Translation;
-import rst.kinematics.Posture3DFloatType.Posture3DFloat;
-import rst.tracking.TrackedPosture3DFloatType.TrackedPosture3DFloat;
-import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
+import org.openbase.type.geometry.RotationType.Rotation;
+import org.openbase.type.geometry.TranslationType.Translation;
+import org.openbase.type.kinematics.Posture3DFloatType.Posture3DFloat;
+import org.openbase.type.tracking.TrackedPosture3DFloatType.TrackedPosture3DFloat;
+import org.openbase.type.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
 
 /**
  * The Transformer class is used to transform the coordinates of TrackedPosture3DFloat-objects to the root coordinate system.

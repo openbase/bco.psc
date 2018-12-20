@@ -26,9 +26,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import rsb.Scope;
-import rst.kinematics.Posture3DFloatType.Posture3DFloat;
-import rst.tracking.TrackedPosture3DFloatType.TrackedPosture3DFloat;
-import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
+import org.openbase.type.kinematics.Posture3DFloatType.Posture3DFloat;
+import org.openbase.type.tracking.TrackedPosture3DFloatType.TrackedPosture3DFloat;
+import org.openbase.type.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
 
 /**
  *

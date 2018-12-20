@@ -22,7 +22,7 @@ package org.openbase.bco.psc.sm.merging;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
+import org.openbase.type.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
 
 /**
  *

@@ -48,18 +48,18 @@ import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.extension.rst.processing.LabelProcessor;
 import org.slf4j.LoggerFactory;
 import rct.Transform;
-import rst.configuration.EntryType.Entry;
-import rst.configuration.MetaConfigType.MetaConfig;
-import rst.domotic.state.EnablingStateType.EnablingState;
-import rst.domotic.unit.UnitConfigType.UnitConfig;
-import rst.domotic.unit.UnitTemplateType.UnitTemplate;
-import rst.domotic.unit.device.DeviceConfigType.DeviceConfig;
-import rst.domotic.unit.location.LocationConfigType;
-import rst.geometry.PoseType.Pose;
-import rst.geometry.RotationType.Rotation;
-import rst.geometry.TranslationType.Translation;
-import rst.math.Vec3DDoubleType.Vec3DDouble;
-import rst.spatial.PlacementConfigType.PlacementConfig;
+import org.openbase.type.configuration.EntryType.Entry;
+import org.openbase.type.configuration.MetaConfigType.MetaConfig;
+import org.openbase.type.domotic.state.EnablingStateType.EnablingState;
+import org.openbase.type.domotic.unit.UnitConfigType.UnitConfig;
+import org.openbase.type.domotic.unit.UnitTemplateType.UnitTemplate;
+import org.openbase.type.domotic.unit.device.DeviceConfigType.DeviceConfig;
+import org.openbase.type.domotic.unit.location.LocationConfigType;
+import org.openbase.type.geometry.PoseType.Pose;
+import org.openbase.type.geometry.RotationType.Rotation;
+import org.openbase.type.geometry.TranslationType.Translation;
+import org.openbase.type.math.Vec3DDoubleType.Vec3DDouble;
+import org.openbase.type.spatial.PlacementConfigType.PlacementConfig;
 
 /**
  *

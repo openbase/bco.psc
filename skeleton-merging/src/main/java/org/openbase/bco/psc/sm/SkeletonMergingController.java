@@ -57,10 +57,10 @@ import rsb.AbstractEventHandler;
 import rsb.Event;
 import rsb.MetaData;
 import rsb.Scope;
-import rst.domotic.state.EnablingStateType.EnablingState;
-import rst.domotic.unit.UnitConfigType.UnitConfig;
-import rst.domotic.unit.UnitTemplateType.UnitTemplate;
-import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
+import org.openbase.type.domotic.state.EnablingStateType.EnablingState;
+import org.openbase.type.domotic.unit.UnitConfigType.UnitConfig;
+import org.openbase.type.domotic.unit.UnitTemplateType.UnitTemplate;
+import org.openbase.type.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
 
 import java.io.File;
 import java.util.*;

@@ -37,9 +37,9 @@ import org.openbase.jps.core.JPService;
 import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.exception.NotAvailableException;
 import org.slf4j.LoggerFactory;
-import rst.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
-import rst.tracking.TrackedPosture3DFloatType.TrackedPosture3DFloat;
-import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
+import org.openbase.type.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
+import org.openbase.type.tracking.TrackedPosture3DFloatType.TrackedPosture3DFloat;
+import org.openbase.type.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
 
 /**
  * Calculates a probability of a pointing gesture similar to the ArmPostureExtractor but using several thresholds on past posture data.

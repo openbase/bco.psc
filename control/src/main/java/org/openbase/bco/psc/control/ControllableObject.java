@@ -30,9 +30,9 @@ import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
 import org.openbase.jul.iface.Configurable;
 import org.slf4j.LoggerFactory;
-import rst.domotic.service.ServiceTemplateType;
-import rst.domotic.state.PowerStateType.PowerState;
-import rst.domotic.unit.UnitConfigType.UnitConfig;
+import org.openbase.type.domotic.service.ServiceTemplateType;
+import org.openbase.type.domotic.state.PowerStateType.PowerState;
+import org.openbase.type.domotic.unit.UnitConfigType.UnitConfig;
 
 /**
  * This class represents a Unit which whose power state can be controlled.

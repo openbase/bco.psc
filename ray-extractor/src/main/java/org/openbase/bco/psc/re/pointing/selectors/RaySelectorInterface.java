@@ -22,8 +22,8 @@ package org.openbase.bco.psc.re.pointing.selectors;
  * #L%
  */
 
-import rst.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
-import rst.tracking.TrackedPosture3DFloatType.TrackedPosture3DFloat;
+import org.openbase.type.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
+import org.openbase.type.tracking.TrackedPosture3DFloatType.TrackedPosture3DFloat;
 
 /**
  *

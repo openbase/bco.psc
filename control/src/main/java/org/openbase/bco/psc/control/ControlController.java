@@ -45,8 +45,8 @@ import org.openbase.jul.storage.registry.SynchronizableRegistryImpl;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Event;
-import rst.domotic.unit.UnitConfigType;
-import rst.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
+import org.openbase.type.domotic.unit.UnitConfigType;
+import org.openbase.type.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
 
 /**
  * The controller class of this application.

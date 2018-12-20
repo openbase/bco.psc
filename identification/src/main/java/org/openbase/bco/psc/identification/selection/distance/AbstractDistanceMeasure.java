@@ -24,8 +24,8 @@ package org.openbase.bco.psc.identification.selection.distance;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 import org.openbase.bco.psc.identification.selection.BoundingBox;
-import rst.geometry.Ray3DFloatType.Ray3DFloat;
-import rst.math.Vec3DFloatType.Vec3DFloat;
+import org.openbase.type.geometry.Ray3DFloatType.Ray3DFloat;
+import org.openbase.type.math.Vec3DFloatType.Vec3DFloat;
 
 /**
  *

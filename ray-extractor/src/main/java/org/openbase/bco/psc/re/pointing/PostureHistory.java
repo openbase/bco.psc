@@ -26,7 +26,7 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
-import rst.tracking.TrackedPosture3DFloatType.TrackedPosture3DFloat;
+import org.openbase.type.tracking.TrackedPosture3DFloatType.TrackedPosture3DFloat;
 
 /**
  * This class handles the history of a single posture up to a certain duration.

@@ -33,8 +33,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.openbase.bco.psc.identification.Testing.*;
-import rst.geometry.AxisAlignedBoundingBox3DFloatType.AxisAlignedBoundingBox3DFloat;
-import rst.geometry.TranslationType.Translation;
+import org.openbase.type.geometry.AxisAlignedBoundingBox3DFloatType.AxisAlignedBoundingBox3DFloat;
+import org.openbase.type.geometry.TranslationType.Translation;
 
 /**
  *

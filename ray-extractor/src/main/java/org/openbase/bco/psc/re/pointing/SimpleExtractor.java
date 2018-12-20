@@ -26,8 +26,8 @@ import java.util.stream.Collectors;
 import org.openbase.bco.psc.re.pointing.selectors.RaySelectorInterface;
 import static org.openbase.bco.psc.lib.pointing.PostureFunctions.*;
 import org.openbase.jul.exception.NotAvailableException;
-import rst.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
-import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
+import org.openbase.type.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
+import org.openbase.type.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
 
 /**
  * The simple extractor returns pointing rays that always have the probability 1 and should not be used.

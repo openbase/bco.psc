@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 import javafx.geometry.Point3D;
 import org.openbase.bco.psc.lib.pointing.Joints;
 import org.openbase.bco.psc.sm.merging.stabilizing.Stabilizer;
-import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
+import org.openbase.type.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
 
 /**
  *

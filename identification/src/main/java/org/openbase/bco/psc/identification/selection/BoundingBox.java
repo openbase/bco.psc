@@ -27,8 +27,8 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import rst.geometry.AxisAlignedBoundingBox3DFloatType.AxisAlignedBoundingBox3DFloat;
-import rst.geometry.TranslationType.Translation;
+import org.openbase.type.geometry.AxisAlignedBoundingBox3DFloatType.AxisAlignedBoundingBox3DFloat;
+import org.openbase.type.geometry.TranslationType.Translation;
 
 /**
  *

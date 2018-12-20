@@ -29,9 +29,9 @@ import org.openbase.bco.psc.re.pointing.selectors.RaySelectorInterface;
 import org.openbase.bco.psc.lib.pointing.PostureFunctions;
 import static org.openbase.bco.psc.lib.pointing.PostureFunctions.*;
 import org.openbase.jul.exception.NotAvailableException;
-import rst.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
-import rst.tracking.TrackedPosture3DFloatType.TrackedPosture3DFloat;
-import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
+import org.openbase.type.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
+import org.openbase.type.tracking.TrackedPosture3DFloatType.TrackedPosture3DFloat;
+import org.openbase.type.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
 
 /**
  * Calculates a probability of a pointing gesture based on a model using joint angles which was derived from empirical data.

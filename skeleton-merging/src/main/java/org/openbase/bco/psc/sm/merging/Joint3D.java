@@ -24,7 +24,7 @@ package org.openbase.bco.psc.sm.merging;
  */
 import javafx.geometry.Point3D;
 import org.openbase.bco.psc.lib.pointing.PostureFunctions;
-import rst.geometry.TranslationType.Translation;
+import org.openbase.type.geometry.TranslationType.Translation;
 
 /**
  *

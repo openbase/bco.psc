@@ -26,7 +26,7 @@ import javafx.geometry.Point3D;
 import org.openbase.bco.psc.lib.pointing.JointPair;
 import org.openbase.bco.psc.lib.pointing.Joints;
 import org.openbase.bco.psc.lib.pointing.PostureFunctions;
-import rst.tracking.TrackedPosture3DFloatType.TrackedPosture3DFloat;
+import org.openbase.type.tracking.TrackedPosture3DFloatType.TrackedPosture3DFloat;
 
 /**
  * This class represents a single observation of a tracked posture and keeps the most relevant data for future evaluation of the posture history.

@@ -53,9 +53,9 @@ import org.openbase.jul.iface.VoidInitializable;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Event;
-import rst.tracking.PointingRay3DFloatDistributionCollectionType.PointingRay3DFloatDistributionCollection;
-import rst.tracking.PointingRay3DFloatType.PointingRay3DFloat.PointingType;
-import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
+import org.openbase.type.tracking.PointingRay3DFloatDistributionCollectionType.PointingRay3DFloatDistributionCollection;
+import org.openbase.type.tracking.PointingRay3DFloatType.PointingRay3DFloat.PointingType;
+import org.openbase.type.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
 
 /**
  *

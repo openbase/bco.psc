@@ -30,7 +30,7 @@ import org.openbase.jul.exception.NotAvailableException;
 import org.openbase.jul.iface.Configurable;
 import org.slf4j.LoggerFactory;
 import rsb.Scope;
-import rst.domotic.unit.UnitConfigType.UnitConfig;
+import org.openbase.type.domotic.unit.UnitConfigType.UnitConfig;
 
 /**
  * This class creates a <code>Transformer</code> for a specific device

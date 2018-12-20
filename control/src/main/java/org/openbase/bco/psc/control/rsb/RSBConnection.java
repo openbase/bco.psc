@@ -34,7 +34,7 @@ import org.openbase.jul.extension.rsb.iface.RSBListener;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Scope;
-import rst.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
+import org.openbase.type.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
 
 /**
  * This class handles the RSB connections of the project.

@@ -25,11 +25,11 @@ package org.openbase.bco.psc.re.pointing.selectors;
 import javafx.geometry.Point3D;
 import org.openbase.bco.psc.lib.pointing.Joints;
 import static org.openbase.bco.psc.lib.pointing.PostureFunctions.*;
-import rst.geometry.Ray3DFloatType;
-import rst.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
-import rst.tracking.PointingRay3DFloatType.PointingRay3DFloat;
-import rst.tracking.PointingRay3DFloatType.PointingRay3DFloat.PointingType;
-import rst.tracking.TrackedPosture3DFloatType.TrackedPosture3DFloat;
+import org.openbase.type.geometry.Ray3DFloatType;
+import org.openbase.type.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
+import org.openbase.type.tracking.PointingRay3DFloatType.PointingRay3DFloat;
+import org.openbase.type.tracking.PointingRay3DFloatType.PointingRay3DFloat.PointingType;
+import org.openbase.type.tracking.TrackedPosture3DFloatType.TrackedPosture3DFloat;
 
 /**
  *

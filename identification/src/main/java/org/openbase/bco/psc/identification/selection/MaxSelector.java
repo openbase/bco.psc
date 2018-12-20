@@ -23,7 +23,7 @@ package org.openbase.bco.psc.identification.selection;
  */
 import org.openbase.bco.psc.identification.selection.distance.AbstractDistanceMeasure;
 import org.openbase.jul.exception.InstantiationException;
-import rst.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
+import org.openbase.type.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
 
 /**
  *

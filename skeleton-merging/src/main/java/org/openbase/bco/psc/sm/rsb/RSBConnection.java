@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Event;
 import rsb.Scope;
-import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
+import org.openbase.type.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
 
 /**
  * This class handles the RSB connections of the project.

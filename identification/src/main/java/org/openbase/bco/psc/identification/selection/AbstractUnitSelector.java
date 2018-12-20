@@ -30,10 +30,10 @@ import org.openbase.jul.exception.printer.ExceptionPrinter;
 import org.openbase.jul.exception.printer.LogLevel;
 import org.openbase.jul.storage.registry.SynchronizableRegistryImpl;
 import org.slf4j.LoggerFactory;
-import rst.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
-import rst.domotic.unit.UnitProbabilityType.UnitProbability;
-import rst.tracking.PointingRay3DFloatDistributionCollectionType.PointingRay3DFloatDistributionCollection;
-import rst.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
+import org.openbase.type.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
+import org.openbase.type.domotic.unit.UnitProbabilityType.UnitProbability;
+import org.openbase.type.tracking.PointingRay3DFloatDistributionCollectionType.PointingRay3DFloatDistributionCollection;
+import org.openbase.type.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
 
 /**
  *

@@ -25,9 +25,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.openbase.bco.psc.re.pointing.selectors.RaySelectorInterface;
 import org.openbase.jul.exception.NotAvailableException;
-import rst.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
-import rst.tracking.TrackedPosture3DFloatType.TrackedPosture3DFloat;
-import rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
+import org.openbase.type.tracking.PointingRay3DFloatDistributionType.PointingRay3DFloatDistribution;
+import org.openbase.type.tracking.TrackedPosture3DFloatType.TrackedPosture3DFloat;
+import org.openbase.type.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
 
 /**
  * An interface for different implementations of ray extractors.

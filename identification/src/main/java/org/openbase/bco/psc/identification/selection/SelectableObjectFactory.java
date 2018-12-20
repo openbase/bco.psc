@@ -26,7 +26,7 @@ import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InstantiationException;
 import org.openbase.jul.pattern.Factory;
 import org.slf4j.LoggerFactory;
-import rst.domotic.unit.UnitConfigType;
+import org.openbase.type.domotic.unit.UnitConfigType;
 
 /**
  *
