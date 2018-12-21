@@ -127,7 +127,7 @@ public class PostureFunctions {
     }
 
     //================================================================================
-    // RST-Conversions
+    // Type-Conversions
     //================================================================================
     public static final Vec3DFloat toVec3DFloat(final Translation translation) {
         return Vec3DFloat.newBuilder()

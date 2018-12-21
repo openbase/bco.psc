@@ -26,7 +26,7 @@ import org.openbase.bco.psc.control.ControlLauncher;
 import org.openbase.bco.psc.identification.IdentificationLauncher;
 import org.openbase.bco.psc.re.RayExtractorLauncher;
 import org.openbase.bco.psc.sm.SkeletonMergingLauncher;
-import org.openbase.bco.registry.lib.BCO;
+import org.openbase.bco.authentication.lib.BCO;
 import org.openbase.jul.pattern.launch.AbstractLauncher;
 
 /**

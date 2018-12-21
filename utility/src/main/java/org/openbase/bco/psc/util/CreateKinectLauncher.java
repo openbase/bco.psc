@@ -27,7 +27,7 @@ import org.openbase.bco.psc.util.jp.JPKinectName;
 import org.openbase.bco.psc.util.jp.JPKinectPlacementFile;
 import org.openbase.bco.psc.util.jp.JPKinectSerialNumber;
 import org.openbase.bco.psc.util.kinect.KinectManager;
-import org.openbase.bco.registry.lib.BCO;
+import org.openbase.bco.authentication.lib.BCO;
 import org.openbase.jps.core.JPService;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.printer.ExceptionPrinter;

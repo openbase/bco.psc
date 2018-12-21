@@ -12,7 +12,7 @@ import org.openbase.bco.psc.re.jp.JPDurationReductionFactor;
 import org.openbase.bco.psc.re.jp.JPRayExtractorThreshold;
 import org.openbase.bco.psc.re.jp.JPRayExtractorType;
 import org.openbase.bco.psc.re.jp.JPRaySelectorType;
-import org.openbase.bco.registry.lib.BCO;
+import org.openbase.bco.authentication.lib.BCO;
 import org.openbase.jps.core.JPService;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InstantiationException;
