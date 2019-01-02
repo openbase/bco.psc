@@ -5,7 +5,7 @@ package org.openbase.bco.psc.sm.transformation;
  * #%L
  * BCO PSC Skeleton Merging
  * %%
- * Copyright (C) 2016 - 2018 openbase.org
+ * Copyright (C) 2016 - 2019 openbase.org
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
