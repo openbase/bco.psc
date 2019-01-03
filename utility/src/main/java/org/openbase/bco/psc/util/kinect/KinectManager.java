@@ -161,7 +161,7 @@ public class KinectManager {
                     LOGGER.info("Location selected by user: " + targetLocation.getLabel() + ", calculating the correct transformation.");
                 } else {
                     LOGGER.info("Finding the correct location id.");
-                    Translation rootTranslation = config.getPlacementConfig().getPosition().getTranslation();
+                    Translation rootTranslation = config.getPlacementConfig().getPose().getTranslation();
                     Vec3DDouble rootVector = Vec3DDouble.newBuilder().setX(rootTranslation.getX()).setY(rootTranslation.getY()).setZ(rootTranslation.getZ()).build();
                     try {
                         System.out.println("root coordinate vector: " + rootVector.toString());
@@ -187,7 +187,7 @@ public class KinectManager {
                 UnitConfig updatedConfig = config.toBuilder()
                         .setPlacementConfig(config.getPlacementConfig().toBuilder()
                                 .setLocationId(targetLocation.getId())
-                                .setPosition(Pose.newBuilder().setRotation(rot).setTranslation(trans)))
+                                .setPose(Pose.newBuilder().setRotation(rot).setTranslation(trans)))
                         .build();
                 LOGGER.info("Updating the placement config in the registry.");
                 return Registries.getUnitRegistry(true).updateUnitConfig(updatedConfig).get();
@@ -244,7 +244,7 @@ public class KinectManager {
                 Translation.Builder trans = Translation.newBuilder().setX(vec.x).setY(vec.y).setZ(vec.z);
                 String rootId = Registries.getUnitRegistry(true).getRootLocationConfig().getId();
                 PlacementConfig.Builder placementBuilder = PlacementConfig.newBuilder()
-                        .setPosition(Pose.newBuilder().setRotation(rot).setTranslation(trans))
+                        .setPose(Pose.newBuilder().setRotation(rot).setTranslation(trans))
                         .setLocationId(rootId);
                 deviceConfigBuilder.setPlacementConfig(placementBuilder);
             } catch (CouldNotPerformException ex) {
