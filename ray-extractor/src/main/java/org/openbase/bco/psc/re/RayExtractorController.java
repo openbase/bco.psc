@@ -125,7 +125,7 @@ public class RayExtractorController extends AbstractEventHandler implements RayE
         RaySelectorInterface raySelector;
         switch (selectorType) {
             case CHOICE:
-                raySelector = new ChoiceSelector(Arrays.asList(new PointingType[]{PointingType.HEAD_HAND, PointingType.SHOULDER_HAND}));
+                raySelector = new ChoiceSelector(Arrays.asList(PointingType.HEAD_HAND, PointingType.SHOULDER_HAND));
                 break;
             case POLYNOMIAL_3:
                 raySelector = new PolynomialSelectorDegree3();
@@ -140,7 +140,7 @@ public class RayExtractorController extends AbstractEventHandler implements RayE
                 raySelector = new DistributedSelector();
                 break;
             default:
-                raySelector = new ChoiceSelector(Arrays.asList(new PointingType[]{PointingType.HEAD_HAND, PointingType.SHOULDER_HAND}));
+                raySelector = new ChoiceSelector(Arrays.asList(PointingType.HEAD_HAND, PointingType.SHOULDER_HAND));
                 break;
         }
         switch (extractorType) {

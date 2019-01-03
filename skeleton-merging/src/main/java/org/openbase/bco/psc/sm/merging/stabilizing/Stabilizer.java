@@ -32,5 +32,5 @@ import org.openbase.bco.psc.sm.merging.Skeleton3D;
  */
 public interface Stabilizer {
 
-    public List<Skeleton3D> stabilize(final List<Skeleton3D> mergedPostures, final MergingHistory history);
+    List<Skeleton3D> stabilize(final List<Skeleton3D> mergedPostures, final MergingHistory history);
 }

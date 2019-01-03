@@ -131,9 +131,9 @@ public class SkeletonMerger implements SkeletonMergerInterface {
 
         final Point3D[] points = new Point3D[Joints.values().length];
         Arrays.fill(points, Point3D.ZERO);
-        final double totalConf[] = new double[Joints.values().length];
+        final double[] totalConf = new double[Joints.values().length];
         Arrays.fill(totalConf, 0.0);
-        final double maxConf[] = new double[Joints.values().length];
+        final double[] maxConf = new double[Joints.values().length];
         Arrays.fill(maxConf, 0.0);
 
         final AtomicInteger mirrorCount = new AtomicInteger();

@@ -37,7 +37,7 @@ public interface LocalConfigProviderInterface {
      *
      * @return the local communication configuration.
      */
-    public default ParticipantConfig getLocalConfig() {
+    default ParticipantConfig getLocalConfig() {
         ParticipantConfig localConfig = Factory.getInstance().getDefaultParticipantConfig().copy();
         Properties localProperties = new Properties();
         localProperties.setProperty("transport.socket.host", "localhost");

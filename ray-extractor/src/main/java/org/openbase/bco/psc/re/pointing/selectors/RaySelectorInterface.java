@@ -30,5 +30,5 @@ import org.openbase.type.tracking.TrackedPosture3DFloatType.TrackedPosture3DFloa
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public interface RaySelectorInterface {
-    public PointingRay3DFloatDistribution getRays(TrackedPosture3DFloat posture, boolean right, double pointingProbability);
+    PointingRay3DFloatDistribution getRays(TrackedPosture3DFloat posture, boolean right, double pointingProbability);
 }

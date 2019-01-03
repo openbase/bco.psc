@@ -30,7 +30,7 @@ import org.openbase.type.tracking.TrackedPostures3DFloatType.TrackedPostures3DFl
  */
 public interface SkeletonMergerInterface {
 
-    public void postureUpdate(final PostureFrame postureFrame);
+    void postureUpdate(final PostureFrame postureFrame);
 
-    public TrackedPostures3DFloat createMergedData();
+    TrackedPostures3DFloat createMergedData();
 }

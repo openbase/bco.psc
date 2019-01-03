@@ -27,7 +27,7 @@ package org.openbase.bco.psc.re.pointing.selectors;
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class PolynomialSelectorDegree5 extends AbstractPolynomialSelector {
-    private static final double PARAMETERS[] = new double[]{-5.20475862e-10, 2.08743028e-07, -3.48681176e-05, 2.90782728e-03, -9.66157841e-02, 4.20892295e-01};
+    private static final double[] PARAMETERS = new double[]{-5.20475862e-10, 2.08743028e-07, -3.48681176e-05, 2.90782728e-03, -9.66157841e-02, 4.20892295e-01};
     
     @Override
     protected double[] getParameters() {

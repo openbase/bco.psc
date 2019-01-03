@@ -29,5 +29,5 @@ import org.openbase.jul.exception.NotAvailableException;
  */
 public interface AbstractSelectable {
 
-    public BoundingBox getBoundingBox() throws NotAvailableException;
+    BoundingBox getBoundingBox() throws NotAvailableException;
 }

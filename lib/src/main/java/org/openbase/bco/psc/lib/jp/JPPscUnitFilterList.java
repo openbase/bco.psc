@@ -68,7 +68,7 @@ public class JPPscUnitFilterList extends AbstractJavaProperty<List<String>> {
      */
     @Override
     protected List<String> getPropertyDefaultValue() throws JPNotAvailableException {
-        return Arrays.asList(new String[]{"POINTING_GESTURE"});
+        return Arrays.asList("POINTING_GESTURE");
     }
 
     /**
