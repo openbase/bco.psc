@@ -29,7 +29,7 @@ import org.openbase.bco.registry.lib.util.UnitConfigProcessor;
 import org.openbase.bco.registry.remote.Registries;
 
 import static org.openbase.bco.registry.remote.Registries.getTemplateRegistry;
-import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
+
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.slf4j.LoggerFactory;
 import org.openbase.type.configuration.MetaConfigType.MetaConfig;
