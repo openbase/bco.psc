@@ -33,9 +33,7 @@ import org.openbase.type.tracking.TrackedPostures3DFloatType.TrackedPostures3DFl
  * The simple extractor returns pointing rays that always have the probability 1 and should not be used.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
- * @deprecated Will be removed in later versions of the software.
  */
-@Deprecated
 public class SimpleExtractor extends AbstractRayExtractor {
 
     /**

@@ -35,10 +35,7 @@ package org.openbase.bco.psc.re.pointing;
 public enum ExtractorType {
     /**
      * Represents the SimpleExtractor assigning a probability of 1 to every pointing action.
-     *
-     * @deprecated will be removed in later versions.
      */
-    @Deprecated
     SIMPLE,
     /**
      * Represents the ArmPostureExtractor which calculates a probability of a pointing gesture based on a model using joint angles which was derived from empirical data.
