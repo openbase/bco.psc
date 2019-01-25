@@ -130,7 +130,6 @@ public abstract class AbstractRSBDualConnection<T extends Message & MessageOrBui
         if (!initialized) {
             throw new CouldNotPerformException("Do not call activate before init!");
         }
-        LOGGER.info("Activating RSB connection.");
         informerWatchDog.activate();
         listenerWatchDog.activate();
     }

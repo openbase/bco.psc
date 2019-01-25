@@ -189,14 +189,13 @@ public class ControlController extends AbstractEventHandler implements Control, 
      */
     @Override
     public void activate() throws CouldNotPerformException, InterruptedException {
-        LOGGER.info("Activating " + getClass().getName() + ".");
         if (!initialized) {
             throw new CouldNotPerformException("Activate can only be called after init.");
         }
         if (!active) {
             active = true;
             Registries.waitForData();
-            LOGGER.info("Activating Registry synchronization.");
+            LOGGER.debug("Activating Registry synchronization.");
             controllableObjectRegistrySynchronizer.activate();
             rsbConnection.activate();
         }

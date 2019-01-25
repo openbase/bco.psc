@@ -150,7 +150,6 @@ public abstract class AbstractRSBListenerConnection implements Launchable<Void>,
         if (!initialized) {
             throw new CouldNotPerformException("Do not call activate before init!");
         }
-        LOGGER.info("Activating RSB connection.");
         listenerWatchDog.activate();
     }
 

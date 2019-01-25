@@ -180,7 +180,7 @@ public class IdentificationController extends AbstractEventHandler implements Id
 
     @Override
     public void activate() throws CouldNotPerformException, InterruptedException {
-        LOGGER.info("Activating " + getClass().getName() + ".");
+        LOGGER.debug("Activating " + getClass().getName() + ".");
         if (!initialized) {
             throw new CouldNotPerformException("Activate can only be called after init.");
         }
@@ -195,7 +195,7 @@ public class IdentificationController extends AbstractEventHandler implements Id
 
     @Override
     public void deactivate() throws CouldNotPerformException, InterruptedException {
-        LOGGER.info("Deactivating " + getClass().getName() + ".");
+        LOGGER.debug("Deactivating " + getClass().getName() + ".");
         if (active) {
             active = false;
             rsbConnection.deactivate();
