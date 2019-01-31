@@ -8,7 +8,6 @@ branches:
       #- /^(?i:release)-.*$/
 
 jdk:
-  - openjdk8
   - openjdk11
   - openjdk-ea
 
