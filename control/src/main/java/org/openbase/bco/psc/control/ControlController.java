@@ -101,20 +101,16 @@ public class ControlController extends AbstractEventHandler implements Control, 
         if ((event.getData() instanceof UnitProbabilityCollection)) {
             UnitProbabilityCollection collection = (UnitProbabilityCollection) event.getData();
             collection.getElementList().stream().filter(x -> x.getProbability() >= threshold).forEach(x -> {
-                try {
-                    if (controllableObjectRegistry.contains(x.getId())) {
-                        try {
-                            if (controllableObjectRegistry.get(x.getId()).switchPowerState()) {
-                                LOGGER.info("Switched power state of unit " + controllableObjectRegistry.get(x.getId()).getConfig().getLabel() + " with id " + x.getId());
-                            } else {
-                                LOGGER.trace("Did not switch power state of unit " + controllableObjectRegistry.get(x.getId()).getConfig().getLabel() + " with id " + x.getId());
-                            }
-                        } catch (CouldNotPerformException ex) {
-                            ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
+                if (controllableObjectRegistry.contains(x.getId())) {
+                    try {
+                        if (controllableObjectRegistry.get(x.getId()).switchPowerState()) {
+                            LOGGER.info("Switched power state of unit " + controllableObjectRegistry.get(x.getId()).getConfig().getLabel() + " with id " + x.getId());
+                        } else {
+                            LOGGER.trace("Did not switch power state of unit " + controllableObjectRegistry.get(x.getId()).getConfig().getLabel() + " with id " + x.getId());
                         }
+                    } catch (CouldNotPerformException ex) {
+                        ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
                     }
-                } catch (CouldNotPerformException ex) {
-                    ExceptionPrinter.printHistory(new CouldNotPerformException("Id of the UnitProbability is not set.", ex), LOGGER, LogLevel.WARN);
                 }
             });
         }
