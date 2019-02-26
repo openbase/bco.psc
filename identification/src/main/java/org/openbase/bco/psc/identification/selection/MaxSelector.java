@@ -43,7 +43,6 @@ public class MaxSelector extends AbstractUnitSelector {
         float p = pointingRays.getRayList().stream()
                 .map((pointingRay) -> (float) (distance.probability(pointingRay.getRay(), boundingBox) * pointingRay.getCertainty()))
                 .reduce(0.0f, (accumulator, _item) -> Math.max(accumulator, _item));
-//        System.out.println("max prob: " + p);
         return p;
     }
 }
