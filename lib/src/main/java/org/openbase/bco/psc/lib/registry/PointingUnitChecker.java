@@ -91,7 +91,7 @@ public class PointingUnitChecker {
         for (ServiceConfig sc : config.getServiceConfigList()) {
             ServiceTemplate.ServiceType type;
             try {
-                type = getTemplateRegistry().getServiceTemplateById(sc.getServiceDescription().getServiceTemplateId()).getType();
+                type = getTemplateRegistry().getServiceTemplateById(sc.getServiceDescription().getServiceTemplateId()).getServiceType();
             } catch (CouldNotPerformException ex) {
                 type = sc.getServiceDescription().getServiceType();
             }
