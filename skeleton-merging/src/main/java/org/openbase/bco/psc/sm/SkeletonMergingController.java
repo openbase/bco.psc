@@ -104,7 +104,7 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
         }
 
         // apply workaround to transform outdated rst TrackedPostures3DFloatType into new openbase type by just serializing the type.
-        if (!(event.getData() instanceof rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat)) {
+        if ((event.getData() instanceof rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat)) {
             LOGGER.info("got old type and try to transform");
             try {
                 event.setData(processor.deserialize(processor.serialize(event.getData()), TrackedPostures3DFloat.class));
