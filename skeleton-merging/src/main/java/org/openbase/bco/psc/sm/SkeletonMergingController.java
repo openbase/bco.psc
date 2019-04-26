@@ -46,6 +46,7 @@ import org.openbase.jul.exception.InitializationException;
 import org.openbase.jul.exception.NotAvailableException;
 import org.openbase.jul.exception.printer.ExceptionPrinter;
 import org.openbase.jul.exception.printer.LogLevel;
+import org.openbase.jul.extension.protobuf.processing.ProtoBufJSonProcessor;
 import org.openbase.jul.iface.Launchable;
 import org.openbase.jul.iface.VoidInitializable;
 import org.openbase.jul.pattern.Observer;
@@ -93,11 +94,29 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
     private boolean initialized;
     private boolean active;
 
+    private ProtoBufJSonProcessor processor = new ProtoBufJSonProcessor();
+
     @Override
     public synchronized void handleEvent(Event event) {
-        if (!(event.getData() instanceof TrackedPostures3DFloat) || rsbConnection.getOutScope().equals(event.getScope())) {
+
+        if (rsbConnection.getOutScope().equals(event.getScope())) {
             return;
         }
+
+        // apply workaround to transform outdated rst TrackedPostures3DFloatType into new openbase type by just serializing the type.
+        if (!(event.getData() instanceof rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat)) {
+            LOGGER.info("got old type and try to transform");
+            try {
+                event.setData(processor.deserialize(processor.serialize(event.getData()), TrackedPostures3DFloat.class));
+            } catch (CouldNotPerformException ex) {
+                ExceptionPrinter.printHistory("Could not upgrate outdated rst type["+rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat.class.getName()+"]!", ex, LOGGER);
+            }
+        }
+
+        if (!(event.getData() instanceof TrackedPostures3DFloat)) {
+            return;
+        }
+
         LOGGER.trace("New TrackedPostures3DFloat event received on scope " + event.getScope().toString());
         Optional<Scope> bestScope = event.getScope().superScopes(true).stream()
                 .filter(s -> scopeIdMap.containsKey(s) || scopeFileTransformerMap.containsKey(s))

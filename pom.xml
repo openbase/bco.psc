@@ -185,6 +185,7 @@
         <dependency.bco.version>2.0-SNAPSHOT</dependency.bco.version>
         <dependency.jul.version>${dependency.bco.version}</dependency.jul.version>
         <dependency.bco.dal.version>${dependency.bco.version}</dependency.bco.dal.version>
+        <dependency.rst.version>0.18</dependency.rst.version>
     </properties>
 
     <dependencies>

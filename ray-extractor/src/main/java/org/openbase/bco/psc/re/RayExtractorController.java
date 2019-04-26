@@ -48,6 +48,7 @@ import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InitializationException;
 import org.openbase.jul.exception.printer.ExceptionPrinter;
 import org.openbase.jul.exception.printer.LogLevel;
+import org.openbase.jul.extension.protobuf.processing.ProtoBufJSonProcessor;
 import org.openbase.jul.iface.Launchable;
 import org.openbase.jul.iface.VoidInitializable;
 import org.slf4j.LoggerFactory;
@@ -71,11 +72,27 @@ public class RayExtractorController extends AbstractEventHandler implements RayE
     private boolean initialized;
     private boolean active;
 
+    private ProtoBufJSonProcessor processor = new ProtoBufJSonProcessor();
+
     @Override
     public void handleEvent(final Event event) {
+
+        // apply workaround to transform outdated rst TrackedPostures3DFloatType into new openbase type by just serializing the type.
+        if (!(event.getData() instanceof rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat)) {
+            LOGGER.info("got old type and try to transform");
+            try {
+                event.setData(processor.deserialize(processor.serialize(event.getData()), TrackedPostures3DFloat.class));
+            } catch (CouldNotPerformException ex) {
+                ExceptionPrinter.printHistory("Could not upgrate outdated rst type["+rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat.class.getName()+"]!", ex, LOGGER);
+            }
+        }
+
         if (!(event.getData() instanceof TrackedPostures3DFloat)) {
             return;
         }
+
+        LOGGER.info("got new type");
+
         LOGGER.trace("New TrackedPostures3DFloat event received.");
         TrackedPostures3DFloat postures = (TrackedPostures3DFloat) event.getData();
         pointingExtractor.updatePostures(postures);

@@ -39,6 +39,7 @@ import rsb.AbstractEventHandler;
 import rsb.Scope;
 import org.openbase.type.tracking.PointingRay3DFloatDistributionCollectionType.PointingRay3DFloatDistributionCollection;
 import org.openbase.type.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
+import rst.tracking.TrackedPostures3DFloatType;
 
 /**
  * This class handles the RSB connections of the project.
@@ -113,6 +114,7 @@ public class RSBConnection extends AbstractRSBDualConnection<PointingRay3DFloatD
         LOGGER.debug("Registering PointingRay3DFloatCollection converter for Informer.");
         registerConverterForType(PointingRay3DFloatDistributionCollection.getDefaultInstance());
         LOGGER.debug("Registering TrackedPostures3DFloat converter for Listener.");
+        registerConverterForType(rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat.getDefaultInstance());
         registerConverterForType(TrackedPostures3DFloat.getDefaultInstance());
     }
 }

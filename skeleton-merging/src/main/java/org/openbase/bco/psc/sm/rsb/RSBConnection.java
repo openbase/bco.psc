@@ -156,5 +156,6 @@ public class RSBConnection extends AbstractRSBDualConnection<TrackedPostures3DFl
     protected void registerConverters() {
         LOGGER.debug("Registering TrackedPostures3DFloat converter for Informer and Listener.");
         registerConverterForType(TrackedPostures3DFloat.getDefaultInstance());
+        registerConverterForType(rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat.getDefaultInstance());
     }
 }
