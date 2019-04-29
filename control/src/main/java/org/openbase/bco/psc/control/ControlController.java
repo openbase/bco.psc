@@ -153,8 +153,8 @@ public class ControlController extends AbstractEventHandler implements Control, 
      */
     private void initializeRegistryConnection() throws InterruptedException, CouldNotPerformException {
         try {
-            LOGGER.info("Initializing Registry synchronization.");
-            Registries.getUnitRegistry().waitForData(3, TimeUnit.SECONDS);
+            LOGGER.info("Waiting for bco registry synchronization...");
+            Registries.getUnitRegistry().waitForData();
 
             controllableObjectRegistrySynchronizer = new RegistrySynchronizer<>(
                     controllableObjectRegistry, getUnitRegistry().getUnitConfigRemoteRegistry(), getUnitRegistry(), ControllableObjectFactory.getInstance());

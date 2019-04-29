@@ -105,11 +105,10 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
 
         // apply workaround to transform outdated rst TrackedPostures3DFloatType into new openbase type by just serializing the type.
         if ((event.getData() instanceof rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat)) {
-            LOGGER.info("got old type and try to transform");
             try {
                 event.setData(processor.deserialize(processor.serialize(event.getData()), TrackedPostures3DFloat.class));
             } catch (CouldNotPerformException ex) {
-                ExceptionPrinter.printHistory("Could not upgrate outdated rst type["+rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat.class.getName()+"]!", ex, LOGGER);
+                ExceptionPrinter.printHistory("Could not upgrade outdated rst type["+rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat.class.getName()+"]!", ex, LOGGER);
             }
         }
 
@@ -205,11 +204,6 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
         Scope pscBaseScope = JPService.getProperty(JPPSCBaseScope.class).getValue();
         Scope outScope = pscBaseScope.concat(JPService.getProperty(JPPostureScope.class).getValue());
 
-        //TODO: Remove this part!
-        if (!(JPService.getProperty(JPFileTransformers.class).isParsed() || JPService.getProperty(JPRegistryTransformers.class).isParsed())) {
-            throw new JPValidationException("At least one of --registry-id or --transform-file has to be specified");
-        }
-
         if (JPService.getProperty(JPFileTransformers.class).isParsed()) {
             for (Entry<Scope, File> entry : JPService.getProperty(JPFileTransformers.class).getValue().entrySet()) {
                 Scope scope = rawBaseScope.concat(entry.getKey());
@@ -251,8 +245,8 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
 
     private void initializeRegistryConnection() throws InterruptedException, CouldNotPerformException {
         try {
-            LOGGER.info("Initializing Registry synchronization.");
-            Registries.getUnitRegistry().waitForData(3, TimeUnit.SECONDS);
+            LOGGER.info("Waiting for bco registry synchronization...");
+            Registries.getUnitRegistry().waitForData();
 
             registryTransformerRegistrySynchronizer = new RegistrySynchronizer<>(
                     registryTransformerRegistry, getUnitRegistry().getUnitConfigRemoteRegistry(), getUnitRegistry(), RegistryTransformerFactory.getInstance());

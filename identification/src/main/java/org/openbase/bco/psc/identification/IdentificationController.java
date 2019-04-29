@@ -95,8 +95,8 @@ public class IdentificationController extends AbstractEventHandler implements Id
 
     private void initializeRegistryConnection() throws InterruptedException, CouldNotPerformException {
         try {
-            LOGGER.info("Initializing Registry synchronization.");
-            Registries.getUnitRegistry().waitForData(3, TimeUnit.SECONDS);
+            LOGGER.info("Waiting for bco registry synchronization...");
+            Registries.getUnitRegistry().waitForData();
 
             selectableObjectRegistrySynchronizer = new RegistrySynchronizer<String, SelectableObject, UnitConfig, UnitConfig.Builder>(
                     selector.getSelectedObjectRegistry(), getUnitRegistry().getUnitConfigRemoteRegistry(), getUnitRegistry(), SelectableObjectFactory.getInstance());

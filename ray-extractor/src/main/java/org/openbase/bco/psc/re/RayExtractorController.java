@@ -79,11 +79,10 @@ public class RayExtractorController extends AbstractEventHandler implements RayE
 
         // apply workaround to transform outdated rst TrackedPostures3DFloatType into new openbase type by just serializing the type.
         if ((event.getData() instanceof rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat)) {
-            LOGGER.info("got old type and try to transform");
             try {
                 event.setData(processor.deserialize(processor.serialize(event.getData()), TrackedPostures3DFloat.class));
             } catch (CouldNotPerformException ex) {
-                ExceptionPrinter.printHistory("Could not upgrate outdated rst type["+rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat.class.getName()+"]!", ex, LOGGER);
+                ExceptionPrinter.printHistory("Could not upgrade outdated rst type["+rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat.class.getName()+"]!", ex, LOGGER);
             }
         }
 
