@@ -90,8 +90,6 @@ public class RayExtractorController extends AbstractEventHandler implements RayE
             return;
         }
 
-        LOGGER.info("got new type");
-
         LOGGER.trace("New TrackedPostures3DFloat event received.");
         TrackedPostures3DFloat postures = (TrackedPostures3DFloat) event.getData();
         pointingExtractor.updatePostures(postures);
