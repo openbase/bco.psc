@@ -23,12 +23,20 @@ package org.openbase.bco.psc.control;
  * #L%
  */
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.openbase.bco.dal.remote.layer.service.PowerStateServiceRemote;
 import org.openbase.bco.dal.remote.layer.service.ServiceRemoteFactoryImpl;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
+import org.openbase.jul.extension.type.processing.LabelProcessor;
 import org.openbase.jul.iface.Configurable;
+import org.openbase.type.domotic.action.ActionInitiatorType.ActionInitiator.InitiatorType;
+import org.openbase.type.domotic.action.ActionParameterType.ActionParameter;
+import org.openbase.type.domotic.action.ActionParameterType.ActionParameter.Builder;
 import org.slf4j.LoggerFactory;
 import org.openbase.type.domotic.service.ServiceTemplateType;
 import org.openbase.type.domotic.state.PowerStateType.PowerState;
@@ -93,9 +101,11 @@ public class ControllableObject implements Configurable<String, UnitConfig> {
                         newState = PowerState.State.OFF;
                         break;
                 }
-                LOGGER.debug("Switching power of " + config.getLabel() + " to " + newState.toString());
-                serviceRemote.setPowerState(PowerState.newBuilder().setValue(newState).build());
-            } catch (CouldNotPerformException ex) {
+                LOGGER.info("Switching power of " + LabelProcessor.getBestMatch(config.getLabel(), "?") + " to " + newState.toString());
+                final ActionParameter.Builder actionParameterBuilder = ActionParameter.newBuilder();
+                actionParameterBuilder.getActionInitiatorBuilder().setInitiatorType(InitiatorType.HUMAN);
+                serviceRemote.setPowerState(PowerState.newBuilder().setValue(newState).build(), actionParameterBuilder.build()).get(5, TimeUnit.SECONDS);
+            } catch (CouldNotPerformException | InterruptedException | ExecutionException | TimeoutException ex) {
                 throw new CouldNotPerformException("Could not switch power state.", ex);
             }
             lastSwitch = currentTime;
