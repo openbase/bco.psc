@@ -86,7 +86,7 @@ public class ControllableObject implements Configurable<String, UnitConfig> {
      * @return true, if the power switch was successful.
      * @throws CouldNotPerformException is thrown if something goes wrong during the power switch.
      */
-    public synchronized boolean switchPowerState() throws CouldNotPerformException {
+    public synchronized boolean switchPowerState() throws CouldNotPerformException, InterruptedException {
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastSwitch > cooldownTime) {
             PowerState.State newState;
@@ -105,7 +105,7 @@ public class ControllableObject implements Configurable<String, UnitConfig> {
                 final ActionParameter.Builder actionParameterBuilder = ActionParameter.newBuilder();
                 actionParameterBuilder.getActionInitiatorBuilder().setInitiatorType(InitiatorType.HUMAN);
                 serviceRemote.setPowerState(PowerState.newBuilder().setValue(newState).build(), actionParameterBuilder.build()).get(5, TimeUnit.SECONDS);
-            } catch (CouldNotPerformException | InterruptedException | ExecutionException | TimeoutException ex) {
+            } catch (CouldNotPerformException | ExecutionException | TimeoutException ex) {
                 throw new CouldNotPerformException("Could not switch power state.", ex);
             }
             lastSwitch = currentTime;

@@ -108,6 +108,8 @@ public class ControlController extends AbstractEventHandler implements Control, 
                         } else {
                             LOGGER.trace("Did not switch power state of unit " + controllableObjectRegistry.get(x.getId()).getConfig().getLabel() + " with id " + x.getId());
                         }
+                    } catch (InterruptedException ex) {
+                        // skip run because of interruption
                     } catch (CouldNotPerformException ex) {
                         ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
                     }
