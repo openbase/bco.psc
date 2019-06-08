@@ -11,25 +11,25 @@ package org.openbase.bco.psc.control;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+
+import org.openbase.bco.dal.lib.action.ActionDescriptionProcessor;
+import org.openbase.bco.dal.remote.action.RemoteAction;
 import org.openbase.bco.psc.control.jp.JPControlThreshold;
 import org.openbase.bco.psc.control.rsb.RSBConnection;
 import org.openbase.bco.psc.lib.jp.JPPscUnitFilterList;
 import org.openbase.bco.psc.lib.registry.PointingUnitChecker;
 import org.openbase.bco.registry.remote.Registries;
-import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
 import org.openbase.jps.core.JPService;
 import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -41,11 +41,22 @@ import org.openbase.jul.iface.Launchable;
 import org.openbase.jul.iface.VoidInitializable;
 import org.openbase.jul.storage.registry.RegistrySynchronizer;
 import org.openbase.jul.storage.registry.SynchronizableRegistryImpl;
+import org.openbase.type.domotic.action.ActionDescriptionType;
+import org.openbase.type.domotic.action.ActionParameterType;
+import org.openbase.type.domotic.service.ServiceTemplateType;
+import org.openbase.type.domotic.unit.UnitConfigType;
+import org.openbase.type.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
+import org.openbase.type.domotic.unit.UnitProbabilityType.UnitProbability;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Event;
-import org.openbase.type.domotic.unit.UnitConfigType;
-import org.openbase.type.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
+
+import java.util.List;
+import java.util.Stack;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
+
+import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
 
 /**
  * The controller class of this application.
@@ -90,6 +101,10 @@ public class ControlController extends AbstractEventHandler implements Control, 
      */
     private boolean initialized = false;
 
+    private Stack<Event> selectedUnitIntents;
+
+    private Stack<Event> receivedStatesIntents;
+
     /**
      * {@inheritDoc}
      *
@@ -98,23 +113,60 @@ public class ControlController extends AbstractEventHandler implements Control, 
     @Override
     public void handleEvent(final Event event) {
         LOGGER.trace(event.toString());
+
         if ((event.getData() instanceof UnitProbabilityCollection)) {
-            UnitProbabilityCollection collection = (UnitProbabilityCollection) event.getData();
-            collection.getElementList().stream().filter(x -> x.getProbability() >= threshold).forEach(x -> {
-                if (controllableObjectRegistry.contains(x.getId())) {
-                    try {
-                        if (controllableObjectRegistry.get(x.getId()).switchPowerState()) {
-                            LOGGER.info("Switched power state of unit " + controllableObjectRegistry.get(x.getId()).getConfig().getLabel() + " with id " + x.getId());
-                        } else {
-                            LOGGER.trace("Did not switch power state of unit " + controllableObjectRegistry.get(x.getId()).getConfig().getLabel() + " with id " + x.getId());
+            selectedUnitIntents.add(event);
+        } else { // assume we got a State, we should only receive (Power,..)States and UnitProbabilityCollections
+            receivedStatesIntents.add(event);
+        }
+        cleanIntents();
+
+        try {
+            matchIntents();
+        } catch (CouldNotPerformException ex) {
+            ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
+        }
+    }
+
+    private void cleanIntents() {
+        long currentTime = System.currentTimeMillis();
+        int selectionTime = 5000;  // ToDo create a JavaProperty for this
+        selectedUnitIntents.removeIf(event -> currentTime + selectionTime > event.getMetaData().getDeliverTime());
+        receivedStatesIntents.removeIf(event -> currentTime + selectionTime > event.getMetaData().getDeliverTime());
+    }
+
+    public void matchIntents() throws CouldNotPerformException {
+        try {
+            for (Event selectedUnit : selectedUnitIntents) {
+                UnitProbabilityCollection collection = (UnitProbabilityCollection) selectedUnit.getData();
+                for (UnitProbability unitProbability : collection.getElementList().stream().filter(x -> x.getProbability() >= threshold).collect(Collectors.toList())) {
+                    for (Event receivedState : receivedStatesIntents) {
+                        if (unitProbability.getProbability() >= threshold) {
+                            UnitConfigType.UnitConfig unitConfig = getUnitRegistry().getUnitConfigById(unitProbability.getId());
+                            ActionParameterType.ActionParameter actionParameter = (ActionParameterType.ActionParameter) receivedState.getData();
+                            ServiceTemplateType.ServiceTemplate.ServiceType serviceType = actionParameter.getServiceStateDescription().getServiceType();
+                            //getUnitRegistry().getUnitConfigsByServices(serviceType);
+                            if (unitConfig.getServiceConfigList().stream().anyMatch(x -> x.getServiceDescription().getServiceType() == serviceType && x.getServiceDescription().getPattern() == ServiceTemplateType.ServiceTemplate.ServicePattern.OPERATION)) {
+                                completeActionDescription(actionParameter, unitConfig.getId());
+                            }
                         }
-                    } catch (InterruptedException ex) {
-                        // skip run because of interruption
-                    } catch (CouldNotPerformException ex) {
-                        ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
                     }
                 }
-            });
+            }
+        } catch (CouldNotPerformException ex) {
+            throw new CouldNotPerformException("cannot match intents.", ex);
+        }
+
+    }
+
+    public Future<ActionDescriptionType.ActionDescription> completeActionDescription(ActionParameterType.ActionParameter actionParameter, String unitId) throws CouldNotPerformException {
+        try {
+            ActionDescriptionType.ActionDescription.Builder builder = ActionDescriptionProcessor.generateActionDescriptionBuilder(actionParameter);
+            builder.getServiceStateDescriptionBuilder().setUnitId(unitId);
+            RemoteAction remoteAction = new RemoteAction(builder.build());
+            return remoteAction.execute();
+        } catch (CouldNotPerformException ex) {
+            throw new CouldNotPerformException("could not complete action.", ex);
         }
     }
 
@@ -122,7 +174,7 @@ public class ControlController extends AbstractEventHandler implements Control, 
      * {@inheritDoc}
      *
      * @throws InitializationException {@inheritDoc}
-     * @throws InterruptedException {@inheritDoc}
+     * @throws InterruptedException    {@inheritDoc}
      */
     @Override
     public void init() throws InitializationException, InterruptedException {
@@ -144,13 +196,15 @@ public class ControlController extends AbstractEventHandler implements Control, 
             } catch (JPNotAvailableException | CouldNotPerformException ex) {
                 throw new InitializationException(ControlController.class, ex);
             }
+            selectedUnitIntents = new Stack<>();
+            receivedStatesIntents = new Stack<>();
         }
     }
 
     /**
      * Initializes the synchronization of the internal controllableObjectRegistry with the unit registry.
      *
-     * @throws InterruptedException is thrown in case of an external interruption.
+     * @throws InterruptedException     is thrown in case of an external interruption.
      * @throws CouldNotPerformException is thrown, if the registry synchronization could not be initialized.
      */
     private void initializeRegistryConnection() throws InterruptedException, CouldNotPerformException {
@@ -161,17 +215,17 @@ public class ControlController extends AbstractEventHandler implements Control, 
             controllableObjectRegistrySynchronizer = new RegistrySynchronizer<>(
                     controllableObjectRegistry, getUnitRegistry().getUnitConfigRemoteRegistry(), getUnitRegistry(), ControllableObjectFactory.getInstance());
             controllableObjectRegistrySynchronizer.addFilter(config -> {
-                    try {
-                        return !PointingUnitChecker.isPointingControlUnit(config, registryFlags);
-                    } catch (InterruptedException ex) {
-                        Thread.currentThread().interrupt();
-                        ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
-                        return true;
-                    } catch (CouldNotPerformException ex) {
-                        ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.WARN);
-                        return true;
-                    }
-                });
+                try {
+                    return !PointingUnitChecker.isPointingControlUnit(config, registryFlags);
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
+                    return true;
+                } catch (CouldNotPerformException ex) {
+                    ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.WARN);
+                    return true;
+                }
+            });
         } catch (NotAvailableException ex) {
             throw new CouldNotPerformException("Could not connect to the registry.", ex);
         } catch (CouldNotPerformException ex) {
@@ -183,7 +237,7 @@ public class ControlController extends AbstractEventHandler implements Control, 
      * {@inheritDoc}
      *
      * @throws CouldNotPerformException {@inheritDoc}
-     * @throws InterruptedException {@inheritDoc}
+     * @throws InterruptedException     {@inheritDoc}
      */
     @Override
     public void activate() throws CouldNotPerformException, InterruptedException {
@@ -203,7 +257,7 @@ public class ControlController extends AbstractEventHandler implements Control, 
      * {@inheritDoc}
      *
      * @throws CouldNotPerformException {@inheritDoc}
-     * @throws InterruptedException {@inheritDoc}
+     * @throws InterruptedException     {@inheritDoc}
      */
     @Override
     public void deactivate() throws CouldNotPerformException, InterruptedException {
