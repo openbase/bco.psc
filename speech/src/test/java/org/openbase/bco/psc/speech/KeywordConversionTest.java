@@ -62,29 +62,6 @@ public class KeywordConversionTest {
     @Before
     public void setUp() {
 
-
-        try {
-
-            keywordManager = new KeywordManager();
-
-
-            PowerStateType.PowerState onState = PowerStateType.PowerState.newBuilder().setValue(PowerStateType.PowerState.State.ON).build();
-
-            ServiceTemplateType.ServiceTemplate.ServiceType powerServiceType = ServiceTemplateType.ServiceTemplate.ServiceType.POWER_STATE_SERVICE;
-
-            ActionParameterType.ActionParameter.Builder builder = ActionDescriptionProcessor.generateDefaultActionParameter(onState, powerServiceType);
-            builder.getActionInitiatorBuilder().setInitiatorType(ActionInitiatorType.ActionInitiator.InitiatorType.HUMAN);
-
-            ActionParameterType.ActionParameter powerOn = builder.build();
-            keywordManager.addKeywordActionPair("anmachen", powerOn);
-
-
-
-            keywordConverter = new KeywordConverter("servicekeywords.dat");
-        } catch (CouldNotPerformException | IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
     }
 
     @After

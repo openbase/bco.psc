@@ -23,6 +23,7 @@ package org.openbase.bco.psc.speech;
  * #L%
  */
 
+import org.openbase.bco.dal.lib.action.ActionDescriptionProcessor;
 import org.openbase.bco.psc.lib.jp.JPPscUnitFilterList;
 import org.openbase.bco.psc.speech.conversion.KeywordConverter;
 import org.openbase.bco.psc.speech.rsb.RSBConnection;
@@ -36,8 +37,13 @@ import org.openbase.jul.exception.printer.ExceptionPrinter;
 import org.openbase.jul.exception.printer.LogLevel;
 import org.openbase.jul.iface.Launchable;
 import org.openbase.jul.iface.VoidInitializable;
+import org.openbase.type.domotic.action.ActionInitiatorType;
 import org.openbase.type.domotic.action.ActionParameterType;
 import org.openbase.type.domotic.action.ActionParameterType.ActionParameter;
+import org.openbase.type.domotic.service.ServiceTemplateType;
+import org.openbase.type.domotic.state.BrightnessStateType;
+import org.openbase.type.domotic.state.PowerStateType;
+import org.openbase.type.domotic.unit.UnitTemplateType;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Event;
@@ -46,6 +52,7 @@ import rst.dialog.SpeechHypothesisType.SpeechHypothesis;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -66,7 +73,6 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
 
     @Override
     public void handleEvent(final Event event) {
-
         LOGGER.trace(event.toString());
 
         if (event.getData() instanceof SpeechHypothesis) {
@@ -87,8 +93,9 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             }
         } else if (event.getData() instanceof String) {
             String[] keywords = ((String) event.getData()).split(" ");
-            LOGGER.info("keywords:" + keywords);
+            for (String kw : keywords) LOGGER.info("keywords:" + kw);
             try {
+                //todo
                 ArrayList<ActionParameter> actionParameters = keywordConverter.getActions(keywords);
                 for (ActionParameter ap : actionParameters) {
                     rsbConnection.publishData(ap);
@@ -131,6 +138,7 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
 
     @Override
     public void init() throws InitializationException, InterruptedException {
+        LOGGER.info("-----------------------------------------------------");
         if (!initialized) {
             try {
                 initKeywordConverter();
@@ -180,10 +188,33 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
     }
 
     private void initKeywordConverter() throws IOException {
+        HashMap<String, ActionParameter> keywordServiceMap = new HashMap<>();
         try {
-            keywordConverter = new KeywordConverter("servicekeywords.dat");
+        PowerStateType.PowerState onState = PowerStateType.PowerState.newBuilder().setValue(PowerStateType.PowerState.State.ON).build();
+        PowerStateType.PowerState offState = PowerStateType.PowerState.newBuilder().setValue(PowerStateType.PowerState.State.OFF).build();
+        BrightnessStateType.BrightnessState brightState = BrightnessStateType.BrightnessState.newBuilder().setBrightness(0.5).build();
+        //ColorState colorState = ColorState.newBuilder().setColor()
+        UnitTemplateType.UnitTemplate light = UnitTemplateType.UnitTemplate.newBuilder().setUnitType(UnitTemplateType.UnitTemplate.UnitType.LIGHT).build();
+
+
+        ServiceTemplateType.ServiceTemplate.ServiceType powerServiceType = ServiceTemplateType.ServiceTemplate.ServiceType.POWER_STATE_SERVICE;
+
+        ActionParameter.Builder builder = ActionDescriptionProcessor.generateDefaultActionParameter(onState, powerServiceType);
+        builder.getActionInitiatorBuilder().setInitiatorType(ActionInitiatorType.ActionInitiator.InitiatorType.HUMAN);
+
+        ActionParameter powerOn = builder.build();
+        keywordServiceMap.put("anmachen", powerOn);
+
+            LOGGER.info("****************************************");
+            for (String key : keywordServiceMap.keySet()) {
+                LOGGER.info(key + ": " + keywordServiceMap.get(key));
+            }
+
+            keywordConverter = new KeywordConverter(keywordServiceMap);
         } catch (IOException | ClassNotFoundException ex) {
             throw new IOException("Keyword Converter could not be initialized.", ex);
+        } catch (CouldNotPerformException e) {
+            e.printStackTrace();
         }
     }
 

@@ -118,5 +118,10 @@
             <artifactId>bco.psc.control</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.openbase</groupId>
+            <artifactId>bco.psc.speech</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

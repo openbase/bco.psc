@@ -42,15 +42,9 @@ public class KeywordConverter {
     private HashMap<String, ActionParameter> keywordServiceMap;
 
 
-    public KeywordConverter(String fileName) throws IOException, ClassNotFoundException {
-        File file = new File(fileName);
-        ObjectInputStream input = new ObjectInputStream(new GZIPInputStream(new FileInputStream(file)));
-        Object readObject = input.readObject();
-        input.close();
+    public KeywordConverter(HashMap<String, ActionParameter> map)  throws IOException, ClassNotFoundException {
 
-        if (!(readObject instanceof HashMap)) throw new IOException("Data is not a hashmap");
-
-        keywordServiceMap = (HashMap<String, ActionParameter>) readObject;
+        keywordServiceMap = map;
 
         for (String key : keywordServiceMap.keySet()) {
             LOGGER.info(key + ": " + keywordServiceMap.get(key));
@@ -64,9 +58,10 @@ public class KeywordConverter {
         LOGGER.info("Speech hypothesis list of words: " + keywords);
 
         ArrayList<ActionParameter> actionParameters = new ArrayList<>();
-
+        for (String kw : keywordServiceMap.keySet()) LOGGER.info("keywords map:" + kw);
         for (String kw : keywords) {
-            if (keywordServiceMap.containsValue(kw)) {
+            if (keywordServiceMap.containsValue(kw)){
+
 
                 ActionParameter event = keywordServiceMap.get(kw);
                 actionParameters.add(event);
