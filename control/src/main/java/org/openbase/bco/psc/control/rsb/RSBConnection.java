@@ -21,6 +21,7 @@ package org.openbase.bco.psc.control.rsb;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+import org.openbase.bco.psc.lib.jp.JPActionScope;
 import org.openbase.bco.psc.lib.jp.JPLocalInput;
 import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
 import org.openbase.bco.psc.lib.jp.JPSelectedUnitScope;
@@ -78,7 +79,9 @@ public class RSBConnection extends AbstractRSBListenerConnection {
     @Override
     protected RSBListener getInitializedListener() throws InitializationException {
         try {
-            Scope selectedUnitScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPSelectedUnitScope.class).getValue());
+            Scope selectedUnitScope = JPService.getProperty(JPPSCBaseScope.class).getValue()
+                    .concat(JPService.getProperty(JPSelectedUnitScope.class).getValue())
+                    .concat(JPService.getProperty(JPActionScope.class).getValue());
             LOGGER.info("Initializing RSB Selected Unit Listener on scope: " + selectedUnitScope);
             if (JPService.getProperty(JPLocalInput.class).getValue()) {
                 LOGGER.warn("RSB input set to socket and localhost.");

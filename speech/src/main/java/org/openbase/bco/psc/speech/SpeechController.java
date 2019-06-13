@@ -85,6 +85,21 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
                 Thread.currentThread().interrupt();
                 ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
             }
+        } else if (event.getData() instanceof String) {
+            String[] keywords = ((String) event.getData()).split(" ");
+            LOGGER.info("keywords:" + keywords);
+            try {
+                ArrayList<ActionParameter> actionParameters = keywordConverter.getActions(keywords);
+                for (ActionParameter ap : actionParameters) {
+                    rsbConnection.publishData(ap);
+                    LOGGER.info("Data published: " + ap);
+                }
+            } catch (CouldNotPerformException ex) {
+                ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
+            }
         }
     }
 
