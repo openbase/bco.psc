@@ -26,6 +26,7 @@ package org.openbase.bco.psc.control;
 import org.openbase.bco.dal.lib.action.ActionDescriptionProcessor;
 import org.openbase.bco.dal.remote.action.RemoteAction;
 import org.openbase.bco.psc.control.jp.JPControlThreshold;
+import org.openbase.bco.psc.control.jp.JPIntentTimeout;
 import org.openbase.bco.psc.control.rsb.RSBConnection;
 import org.openbase.bco.psc.lib.jp.JPPscUnitFilterList;
 import org.openbase.bco.psc.lib.registry.PointingUnitChecker;
@@ -43,7 +44,10 @@ import org.openbase.jul.storage.registry.RegistrySynchronizer;
 import org.openbase.jul.storage.registry.SynchronizableRegistryImpl;
 import org.openbase.type.domotic.action.ActionDescriptionType;
 import org.openbase.type.domotic.action.ActionParameterType;
-import org.openbase.type.domotic.service.ServiceTemplateType;
+import org.openbase.type.domotic.action.ActionParameterType.ActionParameter;
+import org.openbase.type.domotic.service.ServiceConfigType;
+import org.openbase.type.domotic.service.ServiceTemplateType.ServiceTemplate;
+import org.openbase.type.domotic.service.ServiceTemplateType.ServiceTemplate.ServiceType;
 import org.openbase.type.domotic.unit.UnitConfigType;
 import org.openbase.type.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
 import org.openbase.type.domotic.unit.UnitProbabilityType.UnitProbability;
@@ -54,6 +58,7 @@ import rsb.Event;
 import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.Future;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
@@ -93,6 +98,10 @@ public class ControlController extends AbstractEventHandler implements Control, 
      */
     private double threshold;
     /**
+     * Timeout for keeping and matching intent events.
+     */
+    private Integer intentTimeout;
+    /**
      * Activation state of this class.
      */
     private boolean active = false;
@@ -114,41 +123,41 @@ public class ControlController extends AbstractEventHandler implements Control, 
     public void handleEvent(final Event event) {
         LOGGER.trace(event.toString());
 
-        if ((event.getData() instanceof UnitProbabilityCollection)) {
+        if ((event.getData() instanceof UnitProbabilityCollection)) {  // this could also be done with event.scope
             selectedUnitIntents.add(event);
         } else { // assume we got a State, we should only receive (Power,..)States and UnitProbabilityCollections
             receivedStatesIntents.add(event);
         }
-        cleanIntents();
+        removeOldIntents();
 
         try {
-            matchIntents();
+            executeMatchingIntents();
         } catch (CouldNotPerformException ex) {
             ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
         }
     }
 
-    private void cleanIntents() {
+    private void removeOldIntents() {
         long currentTime = System.currentTimeMillis();
-        int selectionTime = 5000;  // ToDo create a JavaProperty for this
-        selectedUnitIntents.removeIf(event -> currentTime + selectionTime > event.getMetaData().getDeliverTime());
-        receivedStatesIntents.removeIf(event -> currentTime + selectionTime > event.getMetaData().getDeliverTime());
+        selectedUnitIntents.removeIf(event -> currentTime > intentTimeout + event.getMetaData().getDeliverTime());
+        receivedStatesIntents.removeIf(event -> currentTime > intentTimeout + event.getMetaData().getDeliverTime());
     }
 
-    public void matchIntents() throws CouldNotPerformException {
+    private void executeMatchingIntents() throws CouldNotPerformException {
         try {
             for (Event selectedUnit : selectedUnitIntents) {
                 UnitProbabilityCollection collection = (UnitProbabilityCollection) selectedUnit.getData();
-                for (UnitProbability unitProbability : collection.getElementList().stream().filter(x -> x.getProbability() >= threshold).collect(Collectors.toList())) {
+                List<String> selectedUnitIds = collection.getElementList().stream()
+                        .filter(x -> x.getProbability() >= threshold)
+                        .map(UnitProbability::getId)
+                        .collect(Collectors.toList());
+                for (String unitId : selectedUnitIds) {
+                    UnitConfigType.UnitConfig unitConfig = getUnitRegistry().getUnitConfigById(unitId);
                     for (Event receivedState : receivedStatesIntents) {
-                        if (unitProbability.getProbability() >= threshold) {
-                            UnitConfigType.UnitConfig unitConfig = getUnitRegistry().getUnitConfigById(unitProbability.getId());
-                            ActionParameterType.ActionParameter actionParameter = (ActionParameterType.ActionParameter) receivedState.getData();
-                            ServiceTemplateType.ServiceTemplate.ServiceType serviceType = actionParameter.getServiceStateDescription().getServiceType();
-                            //getUnitRegistry().getUnitConfigsByServices(serviceType);
-                            if (unitConfig.getServiceConfigList().stream().anyMatch(x -> x.getServiceDescription().getServiceType() == serviceType && x.getServiceDescription().getPattern() == ServiceTemplateType.ServiceTemplate.ServicePattern.OPERATION)) {
-                                completeActionDescription(actionParameter, unitConfig.getId());
-                            }
+                        ActionParameter actionParameter = (ActionParameter) receivedState.getData();
+                        ServiceType serviceType = actionParameter.getServiceStateDescription().getServiceType();
+                        if (unitConfig.getServiceConfigList().stream().anyMatch(isMatchingAndOperationServiceType(serviceType))) {
+                            completeActionDescription(actionParameter, unitId);
                         }
                     }
                 }
@@ -156,10 +165,14 @@ public class ControlController extends AbstractEventHandler implements Control, 
         } catch (CouldNotPerformException ex) {
             throw new CouldNotPerformException("cannot match intents.", ex);
         }
-
     }
 
-    public Future<ActionDescriptionType.ActionDescription> completeActionDescription(ActionParameterType.ActionParameter actionParameter, String unitId) throws CouldNotPerformException {
+    private Predicate<ServiceConfigType.ServiceConfig> isMatchingAndOperationServiceType(ServiceType serviceType) {
+        return x -> x.getServiceDescription().getServiceType() == serviceType
+                && x.getServiceDescription().getPattern() == ServiceTemplate.ServicePattern.OPERATION;
+    }
+
+    private Future<ActionDescriptionType.ActionDescription> completeActionDescription(ActionParameterType.ActionParameter actionParameter, String unitId) throws CouldNotPerformException {
         try {
             ActionDescriptionType.ActionDescription.Builder builder = ActionDescriptionProcessor.generateActionDescriptionBuilder(actionParameter);
             builder.getServiceStateDescriptionBuilder().setUnitId(unitId);
@@ -187,6 +200,8 @@ public class ControlController extends AbstractEventHandler implements Control, 
                 LOGGER.info("Selected Control Registry flags: " + registryFlags.toString());
                 threshold = JPService.getProperty(JPControlThreshold.class).getValue();
                 LOGGER.info("Selected Control threshold: " + threshold);
+                intentTimeout = JPService.getProperty(JPIntentTimeout.class).getValue();
+                LOGGER.info("Selected intent timeout: " + intentTimeout);
 
                 initializeRegistryConnection();
 
