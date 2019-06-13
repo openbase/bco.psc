@@ -24,29 +24,14 @@ package org.openbase.bco.psc.speech;
 
 import org.junit.After;
 import org.junit.AfterClass;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openbase.bco.dal.lib.action.ActionDescriptionProcessor;
 import org.openbase.bco.psc.speech.conversion.KeywordConverter;
-import org.openbase.bco.psc.speech.conversion.KeywordManager;
-import org.openbase.jul.exception.CouldNotPerformException;
-import org.openbase.jul.exception.printer.ExceptionPrinter;
-import org.openbase.jul.exception.printer.LogLevel;
-import org.openbase.type.domotic.action.ActionInitiatorType;
-import org.openbase.type.domotic.action.ActionParameterType;
-import org.openbase.type.domotic.service.ServiceTemplateType;
-import org.openbase.type.domotic.state.BrightnessStateType;
-import org.openbase.type.domotic.state.PowerStateType;
-import org.openbase.type.domotic.unit.UnitTemplateType;
-
-import java.io.IOException;
 
 public class KeywordConversionTest {
 
     private KeywordConverter keywordConverter;
-    private KeywordManager keywordManager;
 
     public KeywordConversionTest() {
     }

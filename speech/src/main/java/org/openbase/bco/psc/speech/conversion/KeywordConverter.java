@@ -26,11 +26,9 @@ import org.openbase.type.domotic.action.ActionParameterType.ActionParameter;
 import org.slf4j.LoggerFactory;
 import rst.dialog.SpeechHypothesisType.SpeechHypothesis;
 
-
-import java.io.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.zip.GZIPInputStream;
 
 
 public class KeywordConverter {
@@ -42,10 +40,11 @@ public class KeywordConverter {
     private HashMap<String, ActionParameter> keywordServiceMap;
 
 
-    public KeywordConverter(HashMap<String, ActionParameter> map)  throws IOException, ClassNotFoundException {
+    public KeywordConverter(HashMap<String, ActionParameter> map) throws IOException, ClassNotFoundException {
 
         keywordServiceMap = map;
 
+        LOGGER.info("Map <String, ActionParameter> :");
         for (String key : keywordServiceMap.keySet()) {
             LOGGER.info(key + ": " + keywordServiceMap.get(key));
         }
@@ -60,7 +59,7 @@ public class KeywordConverter {
         ArrayList<ActionParameter> actionParameters = new ArrayList<>();
         for (String kw : keywordServiceMap.keySet()) LOGGER.info("keywords map:" + kw);
         for (String kw : keywords) {
-            if (keywordServiceMap.containsValue(kw)){
+            if (keywordServiceMap.containsValue(kw)) {
 
 
                 ActionParameter event = keywordServiceMap.get(kw);
@@ -73,18 +72,16 @@ public class KeywordConverter {
 
 
     public ArrayList<ActionParameter> getActions(String[] keywords) {
-
-        // todo intent
-        LOGGER.info("Speech hypothesis list of words: " + keywords);
+        LOGGER.info("Converting keywords -> actions");
 
         ArrayList<ActionParameter> actionParameters = new ArrayList<>();
-
         for (String kw : keywords) {
             if (keywordServiceMap.containsValue(kw)) {
-
                 ActionParameter event = keywordServiceMap.get(kw);
                 actionParameters.add(event);
-                LOGGER.info("Keyword detected:" + kw + " corresponding event: " + event);
+                LOGGER.info("Keyword detected: " + kw + " corresponding event: " + event);
+            } else {
+                LOGGER.info("Keyword (" + kw + ") not in Map.");
             }
         }
         return actionParameters;
