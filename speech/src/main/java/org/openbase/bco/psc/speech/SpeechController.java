@@ -11,19 +11,18 @@ package org.openbase.bco.psc.speech;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public
  * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
 
-import com.google.protobuf.Message;
 import org.openbase.bco.psc.lib.jp.JPPscUnitFilterList;
 import org.openbase.bco.psc.speech.conversion.KeywordConverter;
 import org.openbase.bco.psc.speech.rsb.RSBConnection;
@@ -37,10 +36,13 @@ import org.openbase.jul.exception.printer.ExceptionPrinter;
 import org.openbase.jul.exception.printer.LogLevel;
 import org.openbase.jul.iface.Launchable;
 import org.openbase.jul.iface.VoidInitializable;
-import org.openbase.type.tracking.PointingRay3DFloatDistributionCollectionType.PointingRay3DFloatDistributionCollection;
+import org.openbase.type.domotic.action.ActionParameterType;
+import org.openbase.type.domotic.action.ActionParameterType.ActionParameter;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Event;
+import rst.dialog.SpeechHypothesisType.SpeechHypothesis;
+
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -57,6 +59,8 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
 
     private List<String> registryFlags;
 
+    private KeywordConverter keywordConverter;
+
     private boolean initialized = false;
     private boolean active = false;
 
@@ -65,28 +69,20 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
 
         LOGGER.trace(event.toString());
 
-        if ((event.getData() instanceof PointingRay3DFloatDistributionCollection)) { // todo SpeechHypothesis (scope)
-            PointingRay3DFloatDistributionCollection collection = (PointingRay3DFloatDistributionCollection) event.getData();
-
-            String[] words = new String[0]; // todo get from event
-            // todo try with intents (map intents to services)
+        if (event.getData() instanceof SpeechHypothesis) {
+            SpeechHypothesis speechHypothesis = (SpeechHypothesis) event.getData();
+            LOGGER.info("SpeechHypothesis detected: " + speechHypothesis);
 
             try {
-                KeywordConverter keywordConverter = new KeywordConverter("servicekeywords.dat");
-                ArrayList<Message> msgs = keywordConverter.getMessages(words);
-                for (Message m : msgs) {
-                    rsbConnection.publishData(m);
-                    LOGGER.info("Data published: " + m);
+                ArrayList<ActionParameter> actionParameters = keywordConverter.getActions(speechHypothesis);
+                for (ActionParameter ap : actionParameters) {
+                    rsbConnection.publishData(ap);
+                    LOGGER.info("Data published: " + ap);
                 }
-
             } catch (CouldNotPerformException ex) {
                 ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
-                ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
-            } catch (IOException ex) {
-                ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
-            } catch (ClassNotFoundException ex) {
                 ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
             }
         }
@@ -122,14 +118,17 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
     public void init() throws InitializationException, InterruptedException {
         if (!initialized) {
             try {
-                registryFlags = JPService.getProperty(JPPscUnitFilterList.class).getValue();
+                initKeywordConverter();
 
+                registryFlags = JPService.getProperty(JPPscUnitFilterList.class).getValue();
                 initializeRegistryConnection();
                 rsbConnection = new RSBConnection(this);
                 rsbConnection.init();
                 initialized = true;
             } catch (JPNotAvailableException | CouldNotPerformException ex) {
                 throw new InitializationException(SpeechController.class, ex);
+            } catch (IOException ex) {
+                ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
             }
         }
     }
@@ -163,6 +162,14 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
     @Override
     public boolean isActive() {
         return active;
+    }
+
+    private void initKeywordConverter() throws IOException {
+        try {
+            keywordConverter = new KeywordConverter("servicekeywords.dat");
+        } catch (IOException | ClassNotFoundException ex) {
+            throw new IOException("Keyword Converter could not be initialized.", ex);
+        }
     }
 
 }

@@ -84,5 +84,18 @@
             <artifactId>bco.psc.lib</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+
+            <dependency>
+                <groupId>org.openbase</groupId>
+                <artifactId>bco.psc.lib</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>rsb</groupId>
+                <artifactId>rst</artifactId>
+                <version>${dependency.rst.version}</version>
+            </dependency>
+
     </dependencies>
 </project>

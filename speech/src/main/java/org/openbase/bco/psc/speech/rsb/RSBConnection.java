@@ -10,12 +10,12 @@ package org.openbase.bco.psc.speech.rsb;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -61,8 +61,9 @@ public class RSBConnection extends AbstractRSBDualConnection<Message> {
     @Override
     protected RSBListener getInitializedListener() throws InitializationException {
         try {
-            // todo add speech events to JPPSCBaseScope
-            Scope inScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPPSCBaseScope.class).getValue());
+            // todo test inscope
+            //Scope inScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPPSCBaseScope.class).getValue());
+            Scope inScope = JPService.getProperty(JPSpeechScope.class).getValue();
             LOGGER.info("Initializing RSB Listener on scope: " + inScope);
             if (JPService.getProperty(JPLocalInput.class).getValue()) {
                 return RSBFactoryImpl.getInstance().createSynchronizedListener(inScope, getLocalConfig());
@@ -84,8 +85,8 @@ public class RSBConnection extends AbstractRSBDualConnection<Message> {
     protected RSBInformer<Message> getInitializedInformer() throws InitializationException {
         // RSBInformer<T> T extends Message & MessageOrBuilder  see AbstractRSBDualConnection
         try {
-            // todo outscope JPSpeechMsgScope. see lib JPSelectedUnitScope
-            Scope outScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPSelectedUnitScope.class).getValue());
+            // todo test outscope
+            Scope outScope = JPService.getProperty(JPActionScope.class).getValue().concat(JPService.getProperty(JPSelectedUnitScope.class).getValue());
             LOGGER.info("Initializing RSB Informer on scope: " + outScope);
             if (JPService.getProperty(JPLocalOutput.class).getValue()) {
                 LOGGER.warn("RSB output set to socket and localhost."); // what ??

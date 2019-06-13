@@ -10,23 +10,33 @@ package org.openbase.bco.psc.speech.conversion;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
 
-import com.google.protobuf.Message;
+import org.openbase.bco.dal.lib.action.ActionDescriptionProcessor;
+import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.printer.ExceptionPrinter;
 import org.openbase.jul.exception.printer.LogLevel;
+import org.openbase.type.domotic.action.ActionInitiatorType;
+import org.openbase.type.domotic.action.ActionParameterType.ActionParameter;
 import org.openbase.type.domotic.state.PowerStateType.PowerState;
+import org.openbase.type.domotic.service.ServiceTemplateType.ServiceTemplate.ServiceType;
+
+
 import org.openbase.type.domotic.state.BrightnessStateType.BrightnessState;
+import org.openbase.type.domotic.unit.UnitTemplateType.UnitTemplate.UnitType;
+import org.openbase.type.domotic.unit.UnitTemplateType.UnitTemplate;
+
+
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
@@ -40,13 +50,13 @@ public class KeywordManager {
      * Logger instance.
      */
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(KeywordConverter.class);
-    private HashMap<String, Message> keywordServiceMap;
-    //private HashMap<String, ?> keywordUnitMap;
+    private HashMap<String, ActionParameter> keywordServiceMap;
+    //private HashMap<String, UnitProbabilityCollection> keywordUnitMap;
 
     /**
      * Class to manage the mapping of keywords to services and unit types
      *
-     * @param fileName file to read existing mapping (<String, Message>) from
+     * @param fileName file to read existing mapping (<String, ActionParameter>) from
      * @throws IOException
      * @throws ClassNotFoundException
      */
@@ -55,7 +65,6 @@ public class KeywordManager {
             keywordServiceMap = readFile(fileName);
         } else {
             keywordServiceMap = new HashMap<>();
-            //keywordUnitMap = new HashMap<>();
         }
     }
 
@@ -67,7 +76,6 @@ public class KeywordManager {
      */
     public KeywordManager() {
         keywordServiceMap = new HashMap<>();
-        //keywordUnitMap = new HashMap<>();
     }
 
 
@@ -75,16 +83,16 @@ public class KeywordManager {
      * Add a keyword with its corresponding service to the mapping
      *
      * @param keyword Keyword to be recognized such as "anschalten"
-     * @param service Corresponding service such as PowerState.ON
+     * @param action Corresponding action
      * @throws IOException
      * @throws ClassNotFoundException
      */
-    public void addKeywordServicePair(String keyword, Message service) throws IOException, ClassNotFoundException {
-        keywordServiceMap.put(keyword, service);
+    public void addKeywordActionPair(String keyword, ActionParameter action) throws IOException, ClassNotFoundException {
+        keywordServiceMap.put(keyword, action);
         saveFile();
     }
 
-    private HashMap<String, Message> readFile(String fileName) throws IOException, ClassNotFoundException {
+    private HashMap<String, ActionParameter> readFile(String fileName) throws IOException, ClassNotFoundException {
 
         File file = new File(fileName);
         ObjectInputStream input = new ObjectInputStream(new GZIPInputStream(new FileInputStream(file)));
@@ -93,7 +101,7 @@ public class KeywordManager {
 
         if (!(readObject instanceof HashMap)) throw new IOException("Data is not a hashmap");
 
-        return (HashMap<String, Message>) readObject;
+        return (HashMap<String, ActionParameter>) readObject;
     }
 
 
@@ -106,30 +114,32 @@ public class KeywordManager {
         output.close();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws CouldNotPerformException {
 
         // todo add keywords via cmd (see JPService)
-        // todo method that transforms strings into Message objects (for cmd tool)?
 
         KeywordManager keywordManager = new KeywordManager();
 
         PowerState onState = PowerState.newBuilder().setValue(PowerState.State.ON).build();
         PowerState offState = PowerState.newBuilder().setValue(PowerState.State.OFF).build();
         BrightnessState brightState = BrightnessState.newBuilder().setBrightness(0.5).build();
+        //ColorState colorState = ColorState.newBuilder().setColor()
+        UnitTemplate light = UnitTemplate.newBuilder().setUnitType(UnitType.LIGHT).build();
+
+
+        ServiceType powerServiceType = ServiceType.POWER_STATE_SERVICE;
+
+        ActionParameter.Builder builder = ActionDescriptionProcessor.generateDefaultActionParameter(onState, powerServiceType);
+        builder.getActionInitiatorBuilder().setInitiatorType(ActionInitiatorType.ActionInitiator.InitiatorType.HUMAN);
+
+        ActionParameter powerOn = builder.build();
+
 
         try {
-            keywordManager.addKeywordServicePair("anmachen", onState);
-            keywordManager.addKeywordServicePair("an", onState);
+            keywordManager.addKeywordActionPair("anmachen", powerOn);
 
-            keywordManager.addKeywordServicePair("ausmachen", offState);
-            keywordManager.addKeywordServicePair("aus", offState);
 
-            keywordManager.addKeywordServicePair("dimmen", brightState);
-
-        } catch (IOException ex) {
-            ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
-
-        } catch (ClassNotFoundException ex) {
+        } catch (IOException | ClassNotFoundException ex) {
             ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
 
         }
