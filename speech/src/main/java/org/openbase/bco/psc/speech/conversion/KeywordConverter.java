@@ -53,21 +53,10 @@ public class KeywordConverter {
     public ArrayList<ActionParameter> getActions(SpeechHypothesis speechHypothesis) {
 
         String[] keywords = (String[]) speechHypothesis.getWordsList().stream().map(SpeechHypothesis.Word::getWord).toArray();
-        // todo intent
+        // todo intent !
         //LOGGER.info("Speech hypothesis list of words: " + keywords);
 
-        ArrayList<ActionParameter> actionParameters = new ArrayList<>();
-        for (String kw : keywordServiceMap.keySet()) LOGGER.info("keywords map:" + kw);
-        for (String kw : keywords) {
-            if (keywordServiceMap.containsValue(kw)) {
-
-
-                ActionParameter event = keywordServiceMap.get(kw);
-                actionParameters.add(event);
-                LOGGER.info("Keyword detected:" + kw + " corresponding event: " + event);
-            }
-        }
-        return actionParameters;
+        return getActions(keywords);
     }
 
 
@@ -86,4 +75,7 @@ public class KeywordConverter {
         }
         return actionParameters;
     }
+
+
+
 }
