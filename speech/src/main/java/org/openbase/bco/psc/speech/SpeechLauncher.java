@@ -45,7 +45,7 @@ public class SpeechLauncher extends AbstractLauncher<SpeechController> {
         // Scopes
         JPService.registerProperty(JPPSCBaseScope.class);
         //JPService.registerProperty(JPRayScope.class);
-        //JPService.registerProperty(JPSelectedUnitScope.class);
+        //JPService.registerProperty(JPIntentScope.class);
 
         // Threshold
         //JPService.registerProperty(JPIdentificationThreshold.class);

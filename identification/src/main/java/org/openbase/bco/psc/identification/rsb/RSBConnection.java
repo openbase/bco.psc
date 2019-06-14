@@ -21,11 +21,8 @@ package org.openbase.bco.psc.identification.rsb;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import org.openbase.bco.psc.lib.jp.JPLocalInput;
-import org.openbase.bco.psc.lib.jp.JPLocalOutput;
-import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
-import org.openbase.bco.psc.lib.jp.JPRayScope;
-import org.openbase.bco.psc.lib.jp.JPSelectedUnitScope;
+import org.openbase.bco.psc.lib.jp.*;
+import org.openbase.bco.psc.lib.jp.JPIntentScope;
 import org.openbase.bco.psc.lib.rsb.AbstractRSBDualConnection;
 import org.openbase.jps.core.JPService;
 import org.openbase.jps.exception.JPNotAvailableException;
@@ -91,7 +88,7 @@ public class RSBConnection extends AbstractRSBDualConnection<UnitProbabilityColl
     @Override
     protected RSBInformer<UnitProbabilityCollection> getInitializedInformer() throws InitializationException {
         try {
-            Scope outScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPSelectedUnitScope.class).getValue());
+            Scope outScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPIntentScope.class).getValue());
             LOGGER.info("Initializing RSB Informer on scope: " + outScope);
             if (JPService.getProperty(JPLocalOutput.class).getValue()) {
                 LOGGER.warn("RSB output set to socket and localhost.");

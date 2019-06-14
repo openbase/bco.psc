@@ -27,6 +27,7 @@ import org.openbase.jps.exception.JPBadArgumentException;
 import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jps.preset.AbstractJPDouble;
 import org.openbase.jps.preset.AbstractJPInteger;
+import org.openbase.jps.preset.AbstractJPLong;
 
 import java.util.List;
 
@@ -35,7 +36,7 @@ import java.util.List;
  *
  * @author <a href="mailto:dreinsch@techfak.uni-bielefeld.de">Dennis Reinsch</a>
  */
-public abstract class AbstractJPTimeout extends AbstractJPInteger {
+public abstract class AbstractJPTimeout extends AbstractJPLong {
 
     public AbstractJPTimeout(String[] commandIdentifier) {
         super(commandIdentifier);
@@ -49,8 +50,8 @@ public abstract class AbstractJPTimeout extends AbstractJPInteger {
      * @throws JPBadArgumentException {@inheritDoc}
      */
     @Override
-    protected Integer parse(List<String> arguments) throws JPBadArgumentException {
-        Integer i = super.parse(arguments);
+    protected Long parse(List<String> arguments) throws JPBadArgumentException {
+        Long i = super.parse(arguments);
         if (i < 0.0) {
             throw new JPBadArgumentException("Timeout needs to be positive!");
         }

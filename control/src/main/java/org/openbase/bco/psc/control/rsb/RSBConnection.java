@@ -21,10 +21,9 @@ package org.openbase.bco.psc.control.rsb;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import org.openbase.bco.psc.lib.jp.JPActionScope;
 import org.openbase.bco.psc.lib.jp.JPLocalInput;
 import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
-import org.openbase.bco.psc.lib.jp.JPSelectedUnitScope;
+import org.openbase.bco.psc.lib.jp.JPIntentScope;
 import org.openbase.bco.psc.lib.rsb.AbstractRSBListenerConnection;
 import org.openbase.jps.core.JPService;
 import org.openbase.jps.exception.JPNotAvailableException;
@@ -59,18 +58,6 @@ public class RSBConnection extends AbstractRSBListenerConnection {
     }
 
     /**
-     * Initializes the RSB Listeners.
-     *
-     * @param handler is used to handle incoming events.
-     * @throws InitializationException is thrown, if the initialization of the
-     * Listeners fails.
-     * @throws InterruptedException is thrown in case of an external
-     * interruption.
-     */
-    private void initializeListener(AbstractEventHandler handler) throws InitializationException, InterruptedException {
-    }
-
-    /**
      * {@inheritDoc}
      *
      * @return {@inheritDoc}
@@ -79,15 +66,15 @@ public class RSBConnection extends AbstractRSBListenerConnection {
     @Override
     protected RSBListener getInitializedListener() throws InitializationException {
         try {
-            Scope selectedUnitScope = JPService.getProperty(JPPSCBaseScope.class).getValue()
-                    .concat(JPService.getProperty(JPSelectedUnitScope.class).getValue())
-                    .concat(JPService.getProperty(JPActionScope.class).getValue());
-            LOGGER.info("Initializing RSB Selected Unit Listener on scope: " + selectedUnitScope);
+            Scope inScope = JPService.getProperty(JPPSCBaseScope.class).getValue()
+                    .concat(JPService.getProperty(JPIntentScope.class).getValue());
+                    //.concat(JPService.getProperty(JPActionScope.class).getValue());
+            LOGGER.info("Initializing RSB Control Listener on scope: " + inScope);
             if (JPService.getProperty(JPLocalInput.class).getValue()) {
                 LOGGER.warn("RSB input set to socket and localhost.");
-                return RSBFactoryImpl.getInstance().createSynchronizedListener(selectedUnitScope, getLocalConfig());
+                return RSBFactoryImpl.getInstance().createSynchronizedListener(inScope, getLocalConfig());
             } else {
-                return RSBFactoryImpl.getInstance().createSynchronizedListener(selectedUnitScope);
+                return RSBFactoryImpl.getInstance().createSynchronizedListener(inScope);
             }
         } catch (CouldNotPerformException | JPNotAvailableException ex) {
             throw new InitializationException(RSBConnection.class, ex);
@@ -99,6 +86,8 @@ public class RSBConnection extends AbstractRSBListenerConnection {
      */
     @Override
     protected void registerConverters() {
+        LOGGER.debug("Registering UnitProbabilityCollection converter for Listener.");
+        registerConverterForType(UnitProbabilityCollection.getDefaultInstance());
         LOGGER.debug("Registering UnitProbabilityCollection converter for Listener.");
         registerConverterForType(UnitProbabilityCollection.getDefaultInstance());
     }

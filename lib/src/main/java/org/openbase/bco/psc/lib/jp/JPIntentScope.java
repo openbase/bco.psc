@@ -30,8 +30,7 @@ import rsb.Scope;
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class JPSelectedUnitScope extends AbstractJPScope {
-
+public class JPIntentScope extends AbstractJPScope {
     /**
      * The identifiers that can be used in front of the command line argument.
      */
@@ -40,7 +39,7 @@ public class JPSelectedUnitScope extends AbstractJPScope {
     /**
      * Constructor.
      */
-    public JPSelectedUnitScope() {
+    public JPIntentScope() {
         super(COMMAND_IDENTIFIERS);
     }
 
@@ -62,7 +61,7 @@ public class JPSelectedUnitScope extends AbstractJPScope {
      */
     @Override
     protected Scope getPropertyDefaultValue() throws JPNotAvailableException {
-        return new Scope("/selected_units");
+        return new Scope("/intents");
     }
 
 }

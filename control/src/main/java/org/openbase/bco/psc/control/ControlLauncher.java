@@ -24,10 +24,10 @@ package org.openbase.bco.psc.control;
  */
 import org.openbase.bco.psc.control.jp.JPControlThreshold;
 import org.openbase.bco.psc.control.jp.JPCooldownTime;
+import org.openbase.bco.psc.lib.jp.JPIntentScope;
 import org.openbase.bco.psc.lib.jp.JPLocalInput;
 import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
 import org.openbase.bco.psc.lib.jp.JPPscUnitFilterList;
-import org.openbase.bco.psc.lib.jp.JPSelectedUnitScope;
 import org.openbase.bco.authentication.lib.BCO;
 import org.openbase.jps.core.JPService;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -57,7 +57,7 @@ public class ControlLauncher extends AbstractLauncher<ControlController> {
     protected void loadProperties() {
         // Scopes
         JPService.registerProperty(JPPSCBaseScope.class);
-        JPService.registerProperty(JPSelectedUnitScope.class);
+        JPService.registerProperty(JPIntentScope.class);
 
         // Threshold
         JPService.registerProperty(JPControlThreshold.class);

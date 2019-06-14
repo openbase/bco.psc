@@ -106,7 +106,7 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
 
                     // publish unit for testing
                     UnitProbabilityCollection.Builder collectionBuilder = UnitProbabilityCollection.newBuilder();
-                    collectionBuilder.addElementBuilder().setId("fab86638-192e-4231-a813-25a920a08089").setProbability(1.0f);
+                    collectionBuilder.addElementBuilder().setId("47e63f5a-ff30-4b0d-905a-815f94aa8b50").setProbability(1.0f);
                     UnitProbabilityCollection unit = collectionBuilder.build();
                     rsbConnection.publishData(unit);
                     LOGGER.info("PUBLISHED unit");
@@ -218,6 +218,15 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
 
             ActionParameter powerOn = builder.build();
             keywordServiceMap.put("anmachen", powerOn);
+
+
+            // Create ActionParameter for PowerState=OFF
+            PowerStateType.PowerState offState = PowerStateType.PowerState.newBuilder().setValue(PowerStateType.PowerState.State.OFF).build();
+            builder = ActionDescriptionProcessor.generateDefaultActionParameter(offState, powerServiceType);
+            builder.getActionInitiatorBuilder().setInitiatorType(ActionInitiatorType.ActionInitiator.InitiatorType.HUMAN);
+
+            ActionParameter powerOff = builder.build();
+            keywordServiceMap.put("ausmachen", powerOff);
 
             keywordConverter = new KeywordConverter(keywordServiceMap);
 

@@ -32,6 +32,8 @@ import org.openbase.jul.exception.InitializationException;
 import org.openbase.jul.extension.rsb.com.RSBFactoryImpl;
 import org.openbase.jul.extension.rsb.iface.RSBInformer;
 import org.openbase.jul.extension.rsb.iface.RSBListener;
+import org.openbase.type.domotic.action.ActionParameterType.ActionParameter;
+import org.openbase.type.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Scope;
@@ -86,7 +88,7 @@ public class RSBConnection extends AbstractRSBDualConnection<Message> {
         // RSBInformer<T> T extends Message & MessageOrBuilder  see AbstractRSBDualConnection
         try {
             // todo test outscope
-            Scope outScope = JPService.getProperty(JPActionScope.class).getValue().concat(JPService.getProperty(JPSelectedUnitScope.class).getValue());
+            Scope outScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPIntentScope.class).getValue());
             LOGGER.info("Initializing RSB Informer on scope: " + outScope);
             if (JPService.getProperty(JPLocalOutput.class).getValue()) {
                 LOGGER.warn("RSB output set to socket and localhost."); // what ??
@@ -106,9 +108,9 @@ public class RSBConnection extends AbstractRSBDualConnection<Message> {
      */
     @Override
     protected void registerConverters() {
-        //LOGGER.debug("Registering PointingRay3DFloatCollection converter for Listener.");
-        //registerConverterForType(PointingRay3DFloatDistributionCollection.getDefaultInstance());
-        //LOGGER.debug("Registering UnitProbabilityCollection converter for Informer.");
-        //registerConverterForType(UnitProbabilityCollection.getDefaultInstance());
+        LOGGER.debug("Registering ActionParameter converter for Listener.");
+        registerConverterForType(ActionParameter.getDefaultInstance());
+        LOGGER.debug("Registering UnitProbabilityCollection converter for Informer.");
+        registerConverterForType(UnitProbabilityCollection.getDefaultInstance());
     }
 }

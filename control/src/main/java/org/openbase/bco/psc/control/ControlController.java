@@ -25,6 +25,7 @@ package org.openbase.bco.psc.control;
 
 import org.openbase.bco.dal.lib.action.ActionDescriptionProcessor;
 import org.openbase.bco.dal.remote.action.RemoteAction;
+import org.openbase.bco.dal.remote.layer.unit.Units;
 import org.openbase.bco.psc.control.jp.JPControlThreshold;
 import org.openbase.bco.psc.control.jp.JPIntentTimeout;
 import org.openbase.bco.psc.control.rsb.RSBConnection;
@@ -43,6 +44,7 @@ import org.openbase.jul.iface.VoidInitializable;
 import org.openbase.jul.storage.registry.RegistrySynchronizer;
 import org.openbase.jul.storage.registry.SynchronizableRegistryImpl;
 import org.openbase.type.domotic.action.ActionDescriptionType;
+import org.openbase.type.domotic.action.ActionDescriptionType.ActionDescription;
 import org.openbase.type.domotic.action.ActionParameterType;
 import org.openbase.type.domotic.action.ActionParameterType.ActionParameter;
 import org.openbase.type.domotic.service.ServiceConfigType;
@@ -51,6 +53,7 @@ import org.openbase.type.domotic.service.ServiceTemplateType.ServiceTemplate.Ser
 import org.openbase.type.domotic.unit.UnitConfigType;
 import org.openbase.type.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
 import org.openbase.type.domotic.unit.UnitProbabilityType.UnitProbability;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Event;
@@ -100,7 +103,7 @@ public class ControlController extends AbstractEventHandler implements Control, 
     /**
      * Timeout for keeping and matching intent events.
      */
-    private Integer intentTimeout;
+    private Long intentTimeout;
     /**
      * Activation state of this class.
      */
@@ -122,13 +125,18 @@ public class ControlController extends AbstractEventHandler implements Control, 
     @Override
     public void handleEvent(final Event event) {
         LOGGER.trace(event.toString());
+        LOGGER.info("enter handleEvent");
 
         if ((event.getData() instanceof UnitProbabilityCollection)) {  // this could also be done with event.scope
             selectedUnitIntents.add(event);
+            LOGGER.info("received unit " + event.getData());
         } else { // assume we got a State, we should only receive (Power,..)States and UnitProbabilityCollections
             receivedStatesIntents.add(event);
+            LOGGER.info("received state " + event.getData());
         }
+        LOGGER.info("Updated stack: #units: " + selectedUnitIntents.size() + " #states: " + receivedStatesIntents.size());
         removeOldIntents();
+        LOGGER.info("After remove: #units: " + selectedUnitIntents.size() + " #states: " + receivedStatesIntents.size());
 
         try {
             executeMatchingIntents();
@@ -139,8 +147,14 @@ public class ControlController extends AbstractEventHandler implements Control, 
 
     private void removeOldIntents() {
         long currentTime = System.currentTimeMillis();
-        selectedUnitIntents.removeIf(event -> currentTime > intentTimeout + event.getMetaData().getDeliverTime());
-        receivedStatesIntents.removeIf(event -> currentTime > intentTimeout + event.getMetaData().getDeliverTime());
+
+
+        LOGGER.info("Remove: time " + currentTime + " timeout: " + intentTimeout);
+        selectedUnitIntents.forEach(event -> LOGGER.info("unit deliver time " + event.getMetaData().getReceiveTime()));
+        receivedStatesIntents.forEach(event -> LOGGER.info("state deliver time " + event.getMetaData().getReceiveTime()));
+
+        selectedUnitIntents.removeIf(event -> currentTime > intentTimeout + event.getMetaData().getReceiveTime());
+        receivedStatesIntents.removeIf(event -> currentTime > intentTimeout + event.getMetaData().getReceiveTime());
     }
 
     private void executeMatchingIntents() throws CouldNotPerformException {
@@ -152,11 +166,14 @@ public class ControlController extends AbstractEventHandler implements Control, 
                         .map(UnitProbability::getId)
                         .collect(Collectors.toList());
                 for (String unitId : selectedUnitIds) {
+                    LOGGER.info("unitId " + unitId + " used for matching");
                     UnitConfigType.UnitConfig unitConfig = getUnitRegistry().getUnitConfigById(unitId);
                     for (Event receivedState : receivedStatesIntents) {
                         ActionParameter actionParameter = (ActionParameter) receivedState.getData();
                         ServiceType serviceType = actionParameter.getServiceStateDescription().getServiceType();
+                        LOGGER.info(" >   matching with " + actionParameter + " with " + serviceType);
                         if (unitConfig.getServiceConfigList().stream().anyMatch(isMatchingAndOperationServiceType(serviceType))) {
+                            LOGGER.info(" >>>>>>>>>>> MATCH <<<<<<<<<<<<<<<");
                             completeActionDescription(actionParameter, unitId);
                         }
                     }
@@ -172,14 +189,27 @@ public class ControlController extends AbstractEventHandler implements Control, 
                 && x.getServiceDescription().getPattern() == ServiceTemplate.ServicePattern.OPERATION;
     }
 
-    private Future<ActionDescriptionType.ActionDescription> completeActionDescription(ActionParameterType.ActionParameter actionParameter, String unitId) throws CouldNotPerformException {
+    private void completeActionDescription(ActionParameterType.ActionParameter actionParameter, String unitId) throws CouldNotPerformException {
         try {
-            ActionDescriptionType.ActionDescription.Builder builder = ActionDescriptionProcessor.generateActionDescriptionBuilder(actionParameter);
-            builder.getServiceStateDescriptionBuilder().setUnitId(unitId);
-            RemoteAction remoteAction = new RemoteAction(builder.build());
-            return remoteAction.execute();
+            //ActionDescription.Builder builder = ActionDescriptionProcessor.generateActionDescriptionBuilder(actionParameter);
+            ActionParameter.Builder apBuilder = actionParameter.toBuilder();
+            apBuilder.getServiceStateDescriptionBuilder().setUnitId(unitId);
+            //builder.getServiceStateDescriptionBuilder().setUnitId(unitId);
+            //ActionDescription actionDescription = builder.build();
+            ActionParameter actionParameterNew = apBuilder.build();
+            UnitConfigType.UnitConfig unitConfig = getUnitRegistry().getUnitConfigById(unitId);
+
+            RemoteAction remoteAction = new RemoteAction(Units.getUnit(actionParameter.getServiceStateDescription().getUnitId(), true), actionParameter);
+            LOGGER.info("executed ActionDescription: remoteAction " + remoteAction + "  ");
+
+
+            remoteAction.execute();
+
+
         } catch (CouldNotPerformException ex) {
             throw new CouldNotPerformException("could not complete action.", ex);
+        } catch (InterruptedException ex) {
+           Thread.interrupted();
         }
     }
 
