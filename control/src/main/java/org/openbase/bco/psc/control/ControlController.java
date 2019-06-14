@@ -199,7 +199,7 @@ public class ControlController extends AbstractEventHandler implements Control, 
             ActionParameter actionParameterNew = builder.build();
             RemoteAction remoteAction = new RemoteAction(actionParameterNew);
             remoteAction.execute().get(5, TimeUnit.SECONDS);
-            remoteAction.waitUntilDone();
+            //remoteAction.waitUntilDone();
             LOGGER.info("executed ActionDescription: remoteAction " + remoteAction + "  ");
 
         } catch (CouldNotPerformException | ExecutionException | TimeoutException ex) {
