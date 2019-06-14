@@ -43,6 +43,7 @@ import org.openbase.type.domotic.service.ServiceTemplateType;
 import org.openbase.type.domotic.state.BrightnessStateType;
 import org.openbase.type.domotic.state.PowerStateType;
 import org.openbase.type.domotic.unit.UnitTemplateType;
+import org.openbase.type.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Event;
@@ -95,11 +96,21 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
                 LOGGER.info("Detected word:" + kw);
             }
             try {
-                //todo
                 ArrayList<ActionParameter> actionParameters = keywordConverter.getActions(keywords);
+                if (actionParameters.size() < 1) {
+                    LOGGER.warn("No matching action found.");
+                }
                 for (ActionParameter ap : actionParameters) {
                     rsbConnection.publishData(ap);
-                    LOGGER.info("Action published: " + ap);
+                    LOGGER.info("PUBLISHED action: " + ap);
+
+                    // publish unit for testing
+                    UnitProbabilityCollection.Builder collectionBuilder = UnitProbabilityCollection.newBuilder();
+                    collectionBuilder.addElementBuilder().setId("fab86638-192e-4231-a813-25a920a08089").setProbability(1.0f);
+                    UnitProbabilityCollection unit = collectionBuilder.build();
+                    rsbConnection.publishData(unit);
+                    LOGGER.info("PUBLISHED unit");
+
                 }
             } catch (CouldNotPerformException ex) {
                 ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
@@ -207,11 +218,6 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
 
             ActionParameter powerOn = builder.build();
             keywordServiceMap.put("anmachen", powerOn);
-//
-//            LOGGER.info("****************************************");
-//            for (String key : keywordServiceMap.keySet()) {
-//                LOGGER.info(key + ": " + keywordServiceMap.get(key));
-//            }
 
             keywordConverter = new KeywordConverter(keywordServiceMap);
 
