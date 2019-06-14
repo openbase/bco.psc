@@ -31,6 +31,8 @@ import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InitializationException;
 import org.openbase.jul.extension.rsb.com.RSBFactoryImpl;
 import org.openbase.jul.extension.rsb.iface.RSBListener;
+import org.openbase.type.domotic.action.ActionParameterType;
+import org.openbase.type.domotic.action.ActionParameterType.ActionParameter;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Scope;
@@ -86,8 +88,8 @@ public class RSBConnection extends AbstractRSBListenerConnection {
      */
     @Override
     protected void registerConverters() {
-        LOGGER.debug("Registering UnitProbabilityCollection converter for Listener.");
-        registerConverterForType(UnitProbabilityCollection.getDefaultInstance());
+        LOGGER.debug("Registering ActionParameter converter for Listener.");
+        registerConverterForType(ActionParameter.getDefaultInstance());
         LOGGER.debug("Registering UnitProbabilityCollection converter for Listener.");
         registerConverterForType(UnitProbabilityCollection.getDefaultInstance());
     }

@@ -60,7 +60,10 @@ import rsb.Event;
 
 import java.util.List;
 import java.util.Stack;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -123,7 +126,7 @@ public class ControlController extends AbstractEventHandler implements Control, 
      * @param event {@inheritDoc}
      */
     @Override
-    public void handleEvent(final Event event) {
+    public void handleEvent(final Event event) throws InterruptedException {
         LOGGER.trace(event.toString());
         LOGGER.info("enter handleEvent");
 
@@ -157,7 +160,7 @@ public class ControlController extends AbstractEventHandler implements Control, 
         receivedStatesIntents.removeIf(event -> currentTime > intentTimeout + event.getMetaData().getReceiveTime());
     }
 
-    private void executeMatchingIntents() throws CouldNotPerformException {
+    private void executeMatchingIntents() throws CouldNotPerformException, InterruptedException {
         try {
             for (Event selectedUnit : selectedUnitIntents) {
                 UnitProbabilityCollection collection = (UnitProbabilityCollection) selectedUnit.getData();
@@ -189,27 +192,18 @@ public class ControlController extends AbstractEventHandler implements Control, 
                 && x.getServiceDescription().getPattern() == ServiceTemplate.ServicePattern.OPERATION;
     }
 
-    private void completeActionDescription(ActionParameterType.ActionParameter actionParameter, String unitId) throws CouldNotPerformException {
+    private void completeActionDescription(ActionParameterType.ActionParameter actionParameter, String unitId) throws CouldNotPerformException, InterruptedException {
         try {
-            //ActionDescription.Builder builder = ActionDescriptionProcessor.generateActionDescriptionBuilder(actionParameter);
-            ActionParameter.Builder apBuilder = actionParameter.toBuilder();
-            apBuilder.getServiceStateDescriptionBuilder().setUnitId(unitId);
-            //builder.getServiceStateDescriptionBuilder().setUnitId(unitId);
-            //ActionDescription actionDescription = builder.build();
-            ActionParameter actionParameterNew = apBuilder.build();
-            UnitConfigType.UnitConfig unitConfig = getUnitRegistry().getUnitConfigById(unitId);
-
-            RemoteAction remoteAction = new RemoteAction(Units.getUnit(actionParameter.getServiceStateDescription().getUnitId(), true), actionParameter);
+            ActionParameter.Builder builder = actionParameter.toBuilder();
+            builder.getServiceStateDescriptionBuilder().setUnitId(unitId);
+            ActionParameter actionParameterNew = builder.build();
+            RemoteAction remoteAction = new RemoteAction(actionParameterNew);
+            remoteAction.execute().get(5, TimeUnit.SECONDS);
+            remoteAction.waitUntilDone();
             LOGGER.info("executed ActionDescription: remoteAction " + remoteAction + "  ");
 
-
-            remoteAction.execute();
-
-
-        } catch (CouldNotPerformException ex) {
+        } catch (CouldNotPerformException | ExecutionException | TimeoutException ex) {
             throw new CouldNotPerformException("could not complete action.", ex);
-        } catch (InterruptedException ex) {
-           Thread.interrupted();
         }
     }
 
