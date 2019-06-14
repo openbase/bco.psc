@@ -54,7 +54,7 @@ public class KeywordConverter {
 
         String[] keywords = (String[]) speechHypothesis.getWordsList().stream().map(SpeechHypothesis.Word::getWord).toArray();
         // todo intent
-        LOGGER.info("Speech hypothesis list of words: " + keywords);
+        //LOGGER.info("Speech hypothesis list of words: " + keywords);
 
         ArrayList<ActionParameter> actionParameters = new ArrayList<>();
         for (String kw : keywordServiceMap.keySet()) LOGGER.info("keywords map:" + kw);
@@ -76,7 +76,7 @@ public class KeywordConverter {
 
         ArrayList<ActionParameter> actionParameters = new ArrayList<>();
         for (String kw : keywords) {
-            if (keywordServiceMap.containsValue(kw)) {
+            if (keywordServiceMap.containsKey(kw)) {
                 ActionParameter event = keywordServiceMap.get(kw);
                 actionParameters.add(event);
                 LOGGER.info("Keyword detected: " + kw + " corresponding event: " + event);
