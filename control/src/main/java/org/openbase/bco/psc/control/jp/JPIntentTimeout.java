@@ -53,7 +53,7 @@ public class JPIntentTimeout extends AbstractJPTimeout {
      */
     @Override
     protected Long getPropertyDefaultValue() throws JPNotAvailableException {
-        return 5000L;
+        return 5000000L;
     }
 
     /**

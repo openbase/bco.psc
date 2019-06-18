@@ -51,6 +51,7 @@ import rst.dialog.SpeechHypothesisType.SpeechHypothesis;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -78,20 +79,21 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             SpeechHypothesis speechHypothesis = (SpeechHypothesis) event.getData();
             LOGGER.info("SpeechHypothesis detected: " + speechHypothesis);
 
-            try {
-                ArrayList<ActionParameter> actionParameters = keywordConverter.getActions(speechHypothesis);
-                for (ActionParameter ap : actionParameters) {
-                    rsbConnection.publishData(ap);
-                    LOGGER.info("Data published: " + ap);
-                }
-            } catch (CouldNotPerformException ex) {
-                ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
-            } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
-                ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
-            }
+//            try {
+//                ArrayList<ActionParameter> actionParameters = keywordConverter.getActions(speechHypothesis);
+//                for (ActionParameter ap : actionParameters) {
+//                    rsbConnection.publishData(ap);
+//                    LOGGER.info("Data published: " + ap);
+//                }
+//            } catch (CouldNotPerformException ex) {
+//                ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
+//            } catch (InterruptedException ex) {
+//                Thread.currentThread().interrupt();
+//                ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
+//            }
         } else if (event.getData() instanceof String) {
-            String[] keywords = ((String) event.getData()).split(" ");
+            String eventData = (String) event.getData();
+            ArrayList<String> keywords = new ArrayList(Arrays.asList(eventData.split(" ")));
             for (String kw : keywords) {
                 LOGGER.info("Detected word:" + kw);
             }
@@ -100,16 +102,17 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
                 if (actionParameters.size() < 1) {
                     LOGGER.warn("No matching action found.");
                 }
-                for (ActionParameter ap : actionParameters) {
-                    rsbConnection.publishData(ap);
-                    LOGGER.info("PUBLISHED action: " + ap);
-
+                if (keywords.contains("unit")) {
                     // publish unit for testing
                     UnitProbabilityCollection.Builder collectionBuilder = UnitProbabilityCollection.newBuilder();
                     collectionBuilder.addElementBuilder().setId("47e63f5a-ff30-4b0d-905a-815f94aa8b50").setProbability(1.0f);
                     UnitProbabilityCollection unit = collectionBuilder.build();
                     rsbConnection.publishData(unit);
                     LOGGER.info("PUBLISHED unit");
+                }
+                for (ActionParameter ap : actionParameters) {
+                    rsbConnection.publishData(ap);
+                    LOGGER.info("PUBLISHED action: " + ap);
 
                 }
             } catch (CouldNotPerformException ex) {

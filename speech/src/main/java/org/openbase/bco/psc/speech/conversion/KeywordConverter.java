@@ -50,17 +50,7 @@ public class KeywordConverter {
         }
     }
 
-    public ArrayList<ActionParameter> getActions(SpeechHypothesis speechHypothesis) {
-
-        String[] keywords = (String[]) speechHypothesis.getWordsList().stream().map(SpeechHypothesis.Word::getWord).toArray();
-        // todo intent !
-        //LOGGER.info("Speech hypothesis list of words: " + keywords);
-
-        return getActions(keywords);
-    }
-
-
-    public ArrayList<ActionParameter> getActions(String[] keywords) {
+    public ArrayList<ActionParameter> getActions(ArrayList<String> keywords) {
         LOGGER.info("Converting keywords -> actions");
 
         ArrayList<ActionParameter> actionParameters = new ArrayList<>();
