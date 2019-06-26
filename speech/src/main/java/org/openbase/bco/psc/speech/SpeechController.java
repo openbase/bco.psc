@@ -78,38 +78,26 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
         if (event.getData() instanceof SpeechHypothesis) {
             SpeechHypothesis speechHypothesis = (SpeechHypothesis) event.getData();
             LOGGER.info("SpeechHypothesis detected: " + speechHypothesis);
+            String intent = speechHypothesis.getGrammarTree();
+            LOGGER.info("Grammar tree: " + intent);
+            ArrayList<String>  intents = new ArrayList<>();
+            intents.add(intent);
 
-//            try {
-//                ArrayList<ActionParameter> actionParameters = keywordConverter.getActions(speechHypothesis);
-//                for (ActionParameter ap : actionParameters) {
-//                    rsbConnection.publishData(ap);
-//                    LOGGER.info("Data published: " + ap);
-//                }
-//            } catch (CouldNotPerformException ex) {
-//                ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
-//            } catch (InterruptedException ex) {
-//                Thread.currentThread().interrupt();
-//                ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
-//            }
-        } else if (event.getData() instanceof String) {
-            String eventData = (String) event.getData();
-            ArrayList<String> keywords = new ArrayList(Arrays.asList(eventData.split(" ")));
-            for (String kw : keywords) {
-                LOGGER.info("Detected word:" + kw);
-            }
+
+//
             try {
-                ArrayList<ActionParameter> actionParameters = keywordConverter.getActions(keywords);
+                ArrayList<ActionParameter> actionParameters = keywordConverter.getActions(intents);
                 if (actionParameters.size() < 1) {
                     LOGGER.warn("No matching action found.");
                 }
-                if (keywords.contains("unit")) {
+
                     // publish unit for testing
                     UnitProbabilityCollection.Builder collectionBuilder = UnitProbabilityCollection.newBuilder();
                     collectionBuilder.addElementBuilder().setId("47e63f5a-ff30-4b0d-905a-815f94aa8b50").setProbability(1.0f);
                     UnitProbabilityCollection unit = collectionBuilder.build();
                     rsbConnection.publishData(unit);
                     LOGGER.info("PUBLISHED unit");
-                }
+
                 for (ActionParameter ap : actionParameters) {
                     rsbConnection.publishData(ap);
                     LOGGER.info("PUBLISHED action: " + ap);
@@ -221,6 +209,8 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
 
             ActionParameter powerOn = builder.build();
             keywordServiceMap.put("anmachen", powerOn);
+            keywordServiceMap.put("lights_on", powerOn);
+
 
 
             // Create ActionParameter for PowerState=OFF
@@ -230,6 +220,8 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
 
             ActionParameter powerOff = builder.build();
             keywordServiceMap.put("ausmachen", powerOff);
+            keywordServiceMap.put("lights_off", powerOff);
+
 
             keywordConverter = new KeywordConverter(keywordServiceMap);
 

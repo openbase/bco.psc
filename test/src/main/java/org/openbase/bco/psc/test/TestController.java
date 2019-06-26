@@ -62,7 +62,8 @@ public class TestController extends AbstractEventHandler implements SpeechHypoth
             try {
                 if (keywords.contains("SpeechHypothesis")) {
                     // publish SpeechHypothesis for testing
-                    SpeechHypothesis speechHypothesis = SpeechHypothesis.getDefaultInstance();
+                    SpeechHypothesis speechHypothesis = SpeechHypothesis.newBuilder().setGrammarTree(keywords.get(1)).build();
+
 
                     rsbConnection.publishData(speechHypothesis);
                     LOGGER.info("PUBLISHED SpeechHypothesis");
