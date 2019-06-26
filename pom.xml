@@ -177,6 +177,7 @@
         <module>control</module>
         <module>utility</module>
         <module>speech</module>
+        <module>test</module>
     </modules>
     
     <properties>

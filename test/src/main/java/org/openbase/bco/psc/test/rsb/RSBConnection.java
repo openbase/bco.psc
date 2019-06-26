@@ -1,8 +1,8 @@
-package org.openbase.bco.psc.speech.rsb;
+package org.openbase.bco.psc.test.rsb;
 
 /*-
  * #%L
- * BCO PSC Speech
+ * BCO PSC Test
  * %%
  * Copyright (C) 2016 - 2019 openbase.org
  * %%
@@ -37,7 +37,9 @@ import org.openbase.type.domotic.unit.UnitProbabilityCollectionType.UnitProbabil
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Scope;
-import rst.dialog.SpeechHypothesisType.SpeechHypothesis;
+import rst.dialog.SpeechHypothesisType;
+
+import static rst.dialog.SpeechHypothesisType.*;
 
 public class RSBConnection extends AbstractRSBDualConnection<Message> {
 
@@ -89,7 +91,7 @@ public class RSBConnection extends AbstractRSBDualConnection<Message> {
         // RSBInformer<T> T extends Message & MessageOrBuilder  see AbstractRSBDualConnection
         try {
             // todo test outscope
-            Scope outScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPIntentScope.class).getValue());
+            Scope outScope = JPService.getProperty(JPSpeechScope.class).getValue();
             LOGGER.info("Initializing RSB Informer on scope: " + outScope);
             if (JPService.getProperty(JPLocalOutput.class).getValue()) {
                 LOGGER.warn("RSB output set to socket and localhost."); // what ??
@@ -109,11 +111,7 @@ public class RSBConnection extends AbstractRSBDualConnection<Message> {
      */
     @Override
     protected void registerConverters() {
-        LOGGER.debug("Registering ActionParameter converter for Listener.");
-        registerConverterForType(ActionParameter.getDefaultInstance());
-        LOGGER.debug("Registering UnitProbabilityCollection converter for Informer.");
-        registerConverterForType(UnitProbabilityCollection.getDefaultInstance());
+        LOGGER.debug("Registering SpeechHypothesis converter for Informer.");
         registerConverterForType(SpeechHypothesis.getDefaultInstance());
-
     }
 }

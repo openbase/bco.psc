@@ -29,6 +29,8 @@ import org.openbase.bco.psc.sm.SkeletonMergingLauncher;
 import org.openbase.bco.authentication.lib.BCO;
 import org.openbase.jul.pattern.launch.AbstractLauncher;
 import org.openbase.bco.psc.speech.SpeechLauncher;
+import org.openbase.bco.psc.test.TestLauncher;
+
 
 /**
  *
@@ -46,7 +48,8 @@ public class PSCLauncher {
                 RayExtractorLauncher.class,
                 IdentificationLauncher.class,
                 ControlLauncher.class,
-                SpeechLauncher.class
+                SpeechLauncher.class,
+                TestLauncher.class
         );
     }
 
