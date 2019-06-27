@@ -67,7 +67,6 @@ public class RSBConnection extends AbstractRSBDualConnection<Message> {
     protected RSBListener getInitializedListener() throws InitializationException {
         try {
             // todo test inscope
-            //Scope inScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPPSCBaseScope.class).getValue());
             Scope inScope = JPService.getProperty(JPSpeechScope.class).getValue();
             LOGGER.info("Initializing RSB Listener on scope: " + inScope);
             if (JPService.getProperty(JPLocalInput.class).getValue()) {
@@ -91,7 +90,7 @@ public class RSBConnection extends AbstractRSBDualConnection<Message> {
         // RSBInformer<T> T extends Message & MessageOrBuilder  see AbstractRSBDualConnection
         try {
             // todo test outscope
-            Scope outScope = JPService.getProperty(JPSpeechScope.class).getValue();
+            Scope outScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPIntentScope.class).getValue());
             LOGGER.info("Initializing RSB Informer on scope: " + outScope);
             if (JPService.getProperty(JPLocalOutput.class).getValue()) {
                 LOGGER.warn("RSB output set to socket and localhost."); // what ??
@@ -113,5 +112,7 @@ public class RSBConnection extends AbstractRSBDualConnection<Message> {
     protected void registerConverters() {
         LOGGER.debug("Registering SpeechHypothesis converter for Informer.");
         registerConverterForType(SpeechHypothesis.getDefaultInstance());
+        LOGGER.debug("Registering UnitProbabilityCollection converter for Informer.");
+        registerConverterForType(UnitProbabilityCollection.getDefaultInstance());
     }
 }

@@ -29,6 +29,7 @@ import rst.dialog.SpeechHypothesisType.SpeechHypothesis;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 
 public class KeywordConverter {
@@ -50,7 +51,7 @@ public class KeywordConverter {
         }
     }
 
-    public ArrayList<ActionParameter> getActions(ArrayList<String> keywords) {
+    public ArrayList<ActionParameter> getActions(List<String> keywords) {
         LOGGER.info("Converting keywords -> actions");
 
         ArrayList<ActionParameter> actionParameters = new ArrayList<>();

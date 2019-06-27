@@ -35,6 +35,7 @@ import org.openbase.jul.exception.printer.ExceptionPrinter;
 import org.openbase.jul.exception.printer.LogLevel;
 import org.openbase.jul.iface.Launchable;
 import org.openbase.jul.iface.VoidInitializable;
+import org.openbase.type.domotic.unit.UnitProbabilityCollectionType;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Event;
@@ -57,16 +58,29 @@ public class TestController extends AbstractEventHandler implements SpeechHypoth
 
         if (event.getData() instanceof String) {
             String eventData = (String) event.getData();
-            ArrayList<String> keywords = new ArrayList(Arrays.asList(eventData.split(" ")));
+           // ArrayList<String> keywords = new ArrayList(Arrays.asList(eventData.split(" ")));
+
 
             try {
-                if (keywords.contains("SpeechHypothesis")) {
+                if (eventData.contains("SpeechHypothesis")) {
                     // publish SpeechHypothesis for testing
-                    SpeechHypothesis speechHypothesis = SpeechHypothesis.newBuilder().setGrammarTree(keywords.get(1)).build();
+                    SpeechHypothesis speechHypothesis = SpeechHypothesis.newBuilder().setGrammarTree(eventData).build();
 
 
                     rsbConnection.publishData(speechHypothesis);
                     LOGGER.info("PUBLISHED SpeechHypothesis");
+
+                }
+
+                if (eventData.contains("unit")) {
+
+                    // publish unit for testing
+                    UnitProbabilityCollectionType.UnitProbabilityCollection.Builder collectionBuilder = UnitProbabilityCollectionType.UnitProbabilityCollection.newBuilder();
+                    collectionBuilder.addElementBuilder().setId("47e63f5a-ff30-4b0d-905a-815f94aa8b50").setProbability(1.0f);
+                    UnitProbabilityCollectionType.UnitProbabilityCollection unit = collectionBuilder.build();
+                    rsbConnection.publishData(unit);
+                    LOGGER.info("PUBLISHED unit");
+
                 }
             } catch (CouldNotPerformException ex) {
                 ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);

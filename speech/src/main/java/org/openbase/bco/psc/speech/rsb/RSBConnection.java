@@ -64,9 +64,9 @@ public class RSBConnection extends AbstractRSBDualConnection<Message> {
     @Override
     protected RSBListener getInitializedListener() throws InitializationException {
         try {
-            // todo test inscope
-            //Scope inScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPPSCBaseScope.class).getValue());
-            Scope inScope = JPService.getProperty(JPSpeechScope.class).getValue();
+            //Scope inScope = JPService.getProperty(JPSpeechScope.class).getValue();
+            // todo change back to speech scope later
+            Scope inScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPIntentScope.class).getValue());
             LOGGER.info("Initializing RSB Listener on scope: " + inScope);
             if (JPService.getProperty(JPLocalInput.class).getValue()) {
                 return RSBFactoryImpl.getInstance().createSynchronizedListener(inScope, getLocalConfig());
@@ -86,9 +86,7 @@ public class RSBConnection extends AbstractRSBDualConnection<Message> {
      */
     @Override
     protected RSBInformer<Message> getInitializedInformer() throws InitializationException {
-        // RSBInformer<T> T extends Message & MessageOrBuilder  see AbstractRSBDualConnection
         try {
-            // todo test outscope
             Scope outScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPIntentScope.class).getValue());
             LOGGER.info("Initializing RSB Informer on scope: " + outScope);
             if (JPService.getProperty(JPLocalOutput.class).getValue()) {
@@ -111,8 +109,8 @@ public class RSBConnection extends AbstractRSBDualConnection<Message> {
     protected void registerConverters() {
         LOGGER.debug("Registering ActionParameter converter for Listener.");
         registerConverterForType(ActionParameter.getDefaultInstance());
-        LOGGER.debug("Registering UnitProbabilityCollection converter for Informer.");
-        registerConverterForType(UnitProbabilityCollection.getDefaultInstance());
+        //LOGGER.debug("Registering UnitProbabilityCollection converter for Informer.");
+        //registerConverterForType(UnitProbabilityCollection.getDefaultInstance());
         registerConverterForType(SpeechHypothesis.getDefaultInstance());
 
     }

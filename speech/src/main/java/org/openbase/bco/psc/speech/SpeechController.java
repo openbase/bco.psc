@@ -80,23 +80,15 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             LOGGER.info("SpeechHypothesis detected: " + speechHypothesis);
             String intent = speechHypothesis.getGrammarTree();
             LOGGER.info("Grammar tree: " + intent);
-            ArrayList<String>  intents = new ArrayList<>();
-            intents.add(intent);
+            List<String> intents;
+            intents = Arrays.asList(intent.split(" "));
 
 
-//
             try {
                 ArrayList<ActionParameter> actionParameters = keywordConverter.getActions(intents);
                 if (actionParameters.size() < 1) {
                     LOGGER.warn("No matching action found.");
                 }
-
-                    // publish unit for testing
-                    UnitProbabilityCollection.Builder collectionBuilder = UnitProbabilityCollection.newBuilder();
-                    collectionBuilder.addElementBuilder().setId("47e63f5a-ff30-4b0d-905a-815f94aa8b50").setProbability(1.0f);
-                    UnitProbabilityCollection unit = collectionBuilder.build();
-                    rsbConnection.publishData(unit);
-                    LOGGER.info("PUBLISHED unit");
 
                 for (ActionParameter ap : actionParameters) {
                     rsbConnection.publishData(ap);
@@ -210,7 +202,6 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             ActionParameter powerOn = builder.build();
             keywordServiceMap.put("anmachen", powerOn);
             keywordServiceMap.put("lights_on", powerOn);
-
 
 
             // Create ActionParameter for PowerState=OFF
