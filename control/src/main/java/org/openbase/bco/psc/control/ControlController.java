@@ -11,21 +11,19 @@ package org.openbase.bco.psc.control;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
 
-import org.openbase.bco.dal.lib.action.ActionDescriptionProcessor;
 import org.openbase.bco.dal.remote.action.RemoteAction;
-import org.openbase.bco.dal.remote.layer.unit.Units;
 import org.openbase.bco.psc.control.jp.JPControlThreshold;
 import org.openbase.bco.psc.control.jp.JPIntentTimeout;
 import org.openbase.bco.psc.control.rsb.RSBConnection;
@@ -43,8 +41,6 @@ import org.openbase.jul.iface.Launchable;
 import org.openbase.jul.iface.VoidInitializable;
 import org.openbase.jul.storage.registry.RegistrySynchronizer;
 import org.openbase.jul.storage.registry.SynchronizableRegistryImpl;
-import org.openbase.type.domotic.action.ActionDescriptionType;
-import org.openbase.type.domotic.action.ActionDescriptionType.ActionDescription;
 import org.openbase.type.domotic.action.ActionParameterType;
 import org.openbase.type.domotic.action.ActionParameterType.ActionParameter;
 import org.openbase.type.domotic.service.ServiceConfigType;
@@ -53,14 +49,12 @@ import org.openbase.type.domotic.service.ServiceTemplateType.ServiceTemplate.Ser
 import org.openbase.type.domotic.unit.UnitConfigType;
 import org.openbase.type.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
 import org.openbase.type.domotic.unit.UnitProbabilityType.UnitProbability;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Event;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
@@ -115,11 +109,9 @@ public class ControlController extends AbstractEventHandler implements Control, 
      */
     private boolean initialized = false;
 
-    //private Stack<Event> selectedUnitIntents;
-    private TreeMap<Long, Event> selectedUnitIntents2;
+    private TreeMap<Long, UnitProbabilityCollection> selectedUnitIntents;
 
-    //private Stack<Event> receivedStatesIntents;
-    private TreeMap<Long, Event> receivedStatesIntents2;
+    private TreeMap<Long, ActionParameter> receivedStatesIntents;
 
 
     /**
@@ -132,13 +124,10 @@ public class ControlController extends AbstractEventHandler implements Control, 
         LOGGER.trace(event.toString());
         LOGGER.info("enter handleEvent");
 
-        if ((event.getData() instanceof UnitProbabilityCollection)) {  // this could also be done with event.scope
-            //selectedUnitIntents.push(event);
-            selectedUnitIntents2.put(event.getMetaData().getReceiveTime(),event);
-        } else { // assume we got a State, we should only receive (Power,..)States and UnitProbabilityCollections
-            //receivedStatesIntents.push(event);
-            receivedStatesIntents2.put(event.getMetaData().getReceiveTime(),event);
-
+        if (event.getData() instanceof UnitProbabilityCollection) {  // this could also be done with event.scope
+            selectedUnitIntents.put(event.getMetaData().getReceiveTime(), (UnitProbabilityCollection) event.getData());
+        } else if (event.getData() instanceof ActionParameter) {
+            receivedStatesIntents.put(event.getMetaData().getReceiveTime(), (ActionParameter) event.getData());
         }
 
         try {
@@ -149,9 +138,9 @@ public class ControlController extends AbstractEventHandler implements Control, 
     }
 
     private synchronized void handleIntents() throws CouldNotPerformException, InterruptedException {
-        LOGGER.info("Updated stack: #units: " + selectedUnitIntents2.size() + " #states: " + receivedStatesIntents2.size());
+        LOGGER.info("Updated stack: #units: " + selectedUnitIntents.size() + " #states: " + receivedStatesIntents.size());
         removeOldIntents();
-        LOGGER.info("After remove: #units: " + selectedUnitIntents2.size() + " #states: " + receivedStatesIntents2.size());
+        LOGGER.info("After remove: #units: " + selectedUnitIntents.size() + " #states: " + receivedStatesIntents.size());
 
         executeMatchingIntents();
     }
@@ -159,28 +148,26 @@ public class ControlController extends AbstractEventHandler implements Control, 
     private void removeOldIntents() {
         long currentTime = System.currentTimeMillis() * 1000;
 
-
         LOGGER.info("Remove: time " + currentTime + " timeout: " + intentTimeout);
-        selectedUnitIntents2.keySet().forEach(key -> LOGGER.info("unit receive time " + key + " diff " + (key - currentTime)));
-        receivedStatesIntents2.keySet().forEach(key -> LOGGER.info("state receive time " + key + " diff " + (key - currentTime)));
+        selectedUnitIntents.keySet().forEach(receiveTime ->
+                LOGGER.info("unit receive time " + receiveTime + " diff " + (receiveTime - currentTime)));
+        receivedStatesIntents.keySet().forEach(receiveTime ->
+                LOGGER.info("state receive time " + receiveTime + " diff " + (receiveTime - currentTime)));
 
-
-        selectedUnitIntents2.keySet().removeIf(key -> currentTime > intentTimeout + key);
-
-        receivedStatesIntents2.keySet().removeIf(key -> currentTime > intentTimeout + key);
+        selectedUnitIntents.keySet().removeIf(receiveTime -> currentTime > intentTimeout + receiveTime);
+        receivedStatesIntents.keySet().removeIf(receiveTime -> currentTime > intentTimeout + receiveTime);
     }
 
     private void executeMatchingIntents() throws CouldNotPerformException, InterruptedException {
         try {
-            Map<Long, Event> unmatchedReceivedStatesIntents = new TreeMap<>();
-            Map<Long, Event> unmatchedSelectedUnitIntents = new TreeMap<>();
+            Map<Long, UnitProbabilityCollection> unmatchedSelectedUnitIntents = new TreeMap<>();
+            Map<Long, ActionParameter> unmatchedReceivedStatesIntents = new TreeMap<>();
 
             LOGGER.info("executeMatchingIntents");
-            while (selectedUnitIntents2.size() > 0) {
-                //Event selectedUnit = selectedUnitIntents.pop();
-                Event selectedUnit = selectedUnitIntents2.remove(selectedUnitIntents2.firstKey());
-                UnitProbabilityCollection collection = (UnitProbabilityCollection) selectedUnit.getData();
-                List<String> selectedUnitIds = collection.getElementList().stream()
+            while (selectedUnitIntents.size() > 0) {
+                Long selectedUnitKey = selectedUnitIntents.firstKey();
+                UnitProbabilityCollection unitProbabilityCollection = selectedUnitIntents.remove(selectedUnitKey);
+                List<String> selectedUnitIds = unitProbabilityCollection.getElementList().stream()
                         .filter(x -> x.getProbability() >= threshold)
                         .map(UnitProbability::getId)
                         .collect(Collectors.toList());
@@ -188,9 +175,9 @@ public class ControlController extends AbstractEventHandler implements Control, 
                     LOGGER.info("unitId " + unitId + " used for matching");
                     UnitConfigType.UnitConfig unitConfig = getUnitRegistry().getUnitConfigById(unitId);
 
-                    while (receivedStatesIntents2.size() > 0) {
-                        Event receivedState = receivedStatesIntents2.remove(receivedStatesIntents2.firstKey());
-                        ActionParameter actionParameter = (ActionParameter) receivedState.getData();
+                    while (receivedStatesIntents.size() > 0) {
+                        Long receivedUnitKey = receivedStatesIntents.firstKey();
+                        ActionParameter actionParameter = receivedStatesIntents.remove(receivedUnitKey);
                         ServiceType serviceType = actionParameter.getServiceStateDescription().getServiceType();
 
                         LOGGER.info(" >   matching with " + serviceType);
@@ -200,15 +187,16 @@ public class ControlController extends AbstractEventHandler implements Control, 
                             completeActionDescription(actionParameter, unitId);
                             break;
                         } else {
-                            unmatchedSelectedUnitIntents.put(selectedUnit.getMetaData().getReceiveTime(), selectedUnit);
-                            unmatchedReceivedStatesIntents.put(receivedState.getMetaData().getReceiveTime(), receivedState);
+                            // store unmatched intents for later
+                            unmatchedSelectedUnitIntents.put(selectedUnitKey, unitProbabilityCollection);
+                            unmatchedReceivedStatesIntents.put(receivedUnitKey, actionParameter);
                         }
 
                     }
                 }
             }
-            selectedUnitIntents2.putAll(unmatchedSelectedUnitIntents);
-            receivedStatesIntents2.putAll(unmatchedReceivedStatesIntents);
+            selectedUnitIntents.putAll(unmatchedSelectedUnitIntents);
+            receivedStatesIntents.putAll(unmatchedReceivedStatesIntents);
         } catch (CouldNotPerformException ex) {
             throw new CouldNotPerformException("cannot match intents.", ex);
         }
@@ -262,8 +250,8 @@ public class ControlController extends AbstractEventHandler implements Control, 
             } catch (JPNotAvailableException | CouldNotPerformException ex) {
                 throw new InitializationException(ControlController.class, ex);
             }
-            selectedUnitIntents2 = new TreeMap<>();
-            receivedStatesIntents2 = new TreeMap<>();
+            selectedUnitIntents = new TreeMap<>();
+            receivedStatesIntents = new TreeMap<>();
         }
     }
 
