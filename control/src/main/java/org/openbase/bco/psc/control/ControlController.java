@@ -164,34 +164,36 @@ public class ControlController extends AbstractEventHandler implements Control, 
             Map<Long, ActionParameter> unmatchedReceivedStatesIntents = new TreeMap<>();
 
             LOGGER.info("executeMatchingIntents");
-            while (selectedUnitIntents.size() > 0) {
-                Long selectedUnitKey = selectedUnitIntents.firstKey();
-                UnitProbabilityCollection unitProbabilityCollection = selectedUnitIntents.remove(selectedUnitKey);
-                List<String> selectedUnitIds = unitProbabilityCollection.getElementList().stream()
-                        .filter(x -> x.getProbability() >= threshold)
-                        .map(UnitProbability::getId)
-                        .collect(Collectors.toList());
-                for (String unitId : selectedUnitIds) {
-                    LOGGER.info("unitId " + unitId + " used for matching");
-                    UnitConfigType.UnitConfig unitConfig = getUnitRegistry().getUnitConfigById(unitId);
+            if (selectedUnitIntents.size() > 0 && receivedStatesIntents.size() > 0) {
+                while (selectedUnitIntents.size() > 0) {
+                    Long selectedUnitKey = selectedUnitIntents.firstKey();
+                    UnitProbabilityCollection unitProbabilityCollection = selectedUnitIntents.remove(selectedUnitKey);
+                    List<String> selectedUnitIds = unitProbabilityCollection.getElementList().stream()
+                            .filter(x -> x.getProbability() >= threshold)
+                            .map(UnitProbability::getId)
+                            .collect(Collectors.toList());
+                    for (String unitId : selectedUnitIds) {
+                        LOGGER.info("unitId " + unitId + " used for matching");
+                        UnitConfigType.UnitConfig unitConfig = getUnitRegistry().getUnitConfigById(unitId);
 
-                    while (receivedStatesIntents.size() > 0) {
-                        Long receivedUnitKey = receivedStatesIntents.firstKey();
-                        ActionParameter actionParameter = receivedStatesIntents.remove(receivedUnitKey);
-                        ServiceType serviceType = actionParameter.getServiceStateDescription().getServiceType();
+                        while (receivedStatesIntents.size() > 0) {
+                            Long receivedUnitKey = receivedStatesIntents.firstKey();
+                            ActionParameter actionParameter = receivedStatesIntents.remove(receivedUnitKey);
+                            ServiceType serviceType = actionParameter.getServiceStateDescription().getServiceType();
 
-                        LOGGER.info(" >   matching with " + serviceType);
+                            LOGGER.info(" >   matching with " + serviceType);
 
-                        if (unitConfig.getServiceConfigList().stream().anyMatch(isMatchingAndOperationServiceType(serviceType))) {
-                            LOGGER.info(" >>>>>>>>>>> MATCH <<<<<<<<<<<<<<<");
-                            completeActionDescription(actionParameter, unitId);
-                            break;
-                        } else {
-                            // store unmatched intents for later
-                            unmatchedSelectedUnitIntents.put(selectedUnitKey, unitProbabilityCollection);
-                            unmatchedReceivedStatesIntents.put(receivedUnitKey, actionParameter);
+                            if (unitConfig.getServiceConfigList().stream().anyMatch(isMatchingAndOperationServiceType(serviceType))) {
+                                LOGGER.info(" >>>>>>>>>>> MATCH <<<<<<<<<<<<<<<");
+                                completeActionDescription(actionParameter, unitId);
+                                break;
+                            } else {
+                                // store unmatched intents for later
+                                unmatchedSelectedUnitIntents.put(selectedUnitKey, unitProbabilityCollection);
+                                unmatchedReceivedStatesIntents.put(receivedUnitKey, actionParameter);
+                            }
+
                         }
-
                     }
                 }
             }
