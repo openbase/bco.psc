@@ -57,12 +57,12 @@ public class TestController extends AbstractEventHandler implements SpeechHypoth
         LOGGER.trace(event.toString());
 
         if (event.getData() instanceof String) {
-            String eventData = (String) event.getData();
+            String eventData = (String) event.getData(); //should be something like change_color[blue]
            // ArrayList<String> keywords = new ArrayList(Arrays.asList(eventData.split(" ")));
 
 
             try {
-                if (eventData.contains("SpeechHypothesis")) {
+              //  if (eventData.contains("SpeechHypothesis")) {
                     // publish SpeechHypothesis for testing
                     SpeechHypothesis speechHypothesis = SpeechHypothesis.newBuilder().setGrammarTree(eventData).build();
 
@@ -70,9 +70,9 @@ public class TestController extends AbstractEventHandler implements SpeechHypoth
                     rsbConnection.publishData(speechHypothesis);
                     LOGGER.info("PUBLISHED SpeechHypothesis");
 
-                }
+//                }
 
-                if (eventData.contains("unit")) {
+             //   if (eventData.contains("unit")) {
 
                     // publish unit for testing
                     UnitProbabilityCollectionType.UnitProbabilityCollection.Builder collectionBuilder = UnitProbabilityCollectionType.UnitProbabilityCollection.newBuilder();
@@ -81,7 +81,7 @@ public class TestController extends AbstractEventHandler implements SpeechHypoth
                     rsbConnection.publishData(unit);
                     LOGGER.info("PUBLISHED unit");
 
-                }
+              //  }
             } catch (CouldNotPerformException ex) {
                 ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
             } catch (InterruptedException ex) {

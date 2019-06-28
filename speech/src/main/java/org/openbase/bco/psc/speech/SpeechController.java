@@ -78,23 +78,18 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
         if (event.getData() instanceof SpeechHypothesis) {
             SpeechHypothesis speechHypothesis = (SpeechHypothesis) event.getData();
             LOGGER.info("SpeechHypothesis detected: " + speechHypothesis);
-            String intent = speechHypothesis.getGrammarTree();
-            LOGGER.info("Grammar tree: " + intent);
-            List<String> intents;
-            intents = Arrays.asList(intent.split(" "));
-
 
             try {
-                ArrayList<ActionParameter> actionParameters = keywordConverter.getActions(intents);
-                if (actionParameters.size() < 1) {
+                //ArrayList<ActionParameter> actionParameters = keywordConverter.getActions(intents);
+                ActionParameter actionParameter = keywordConverter.getAction(speechHypothesis);
+                if (actionParameter == null) {
                     LOGGER.warn("No matching action found.");
                 }
 
-                for (ActionParameter ap : actionParameters) {
-                    rsbConnection.publishData(ap);
-                    LOGGER.info("PUBLISHED action: " + ap);
+                rsbConnection.publishData(actionParameter);
+                LOGGER.info("PUBLISHED action: " + actionParameter);
 
-                }
+
             } catch (CouldNotPerformException ex) {
                 ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
             } catch (InterruptedException ex) {
