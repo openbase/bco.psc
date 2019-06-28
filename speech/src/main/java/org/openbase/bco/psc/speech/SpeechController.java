@@ -41,6 +41,10 @@ import org.openbase.type.domotic.action.ActionInitiatorType;
 import org.openbase.type.domotic.action.ActionParameterType.ActionParameter;
 import org.openbase.type.domotic.service.ServiceTemplateType;
 import org.openbase.type.domotic.state.BrightnessStateType;
+import org.openbase.type.domotic.state.ColorStateType;
+import org.openbase.type.vision.ColorType.Color;
+import org.openbase.type.vision.RGBColorType.RGBColor;
+import org.openbase.type.vision.HSBColorType.HSBColor;
 import org.openbase.type.domotic.state.PowerStateType;
 import org.openbase.type.domotic.unit.UnitTemplateType;
 import org.openbase.type.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
@@ -180,13 +184,10 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
 
         LOGGER.info("Initializing keyword converter...");
 
-        HashMap<String, ActionParameter> keywordServiceMap = new HashMap<>();
+        HashMap<String, ActionParameter> intentActionMap = new HashMap<>();
         try {
 
-            //PowerStateType.PowerState offState = PowerStateType.PowerState.newBuilder().setValue(PowerStateType.PowerState.State.OFF).build();
-            //BrightnessStateType.BrightnessState brightState = BrightnessStateType.BrightnessState.newBuilder().setBrightness(0.5).build();
-            //ColorState colorState = ColorState.newBuilder().setColor()
-            //UnitTemplateType.UnitTemplate light = UnitTemplateType.UnitTemplate.newBuilder().setUnitType(UnitTemplateType.UnitTemplate.UnitType.LIGHT).build();
+            //BrightnessStateType.BrightnessState brightState = BrightnessStateType.BrightnessState.newBuilder().setBrightness(-0.5).build();
 
             // Create ActionParameter for PowerState=ON
             PowerStateType.PowerState onState = PowerStateType.PowerState.newBuilder().setValue(PowerStateType.PowerState.State.ON).build();
@@ -195,8 +196,8 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             builder.getActionInitiatorBuilder().setInitiatorType(ActionInitiatorType.ActionInitiator.InitiatorType.HUMAN);
 
             ActionParameter powerOn = builder.build();
-            keywordServiceMap.put("anmachen", powerOn);
-            keywordServiceMap.put("lights_on", powerOn);
+            intentActionMap.put("anmachen", powerOn);
+            intentActionMap.put("on", powerOn);
 
 
             // Create ActionParameter for PowerState=OFF
@@ -205,11 +206,22 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             builder.getActionInitiatorBuilder().setInitiatorType(ActionInitiatorType.ActionInitiator.InitiatorType.HUMAN);
 
             ActionParameter powerOff = builder.build();
-            keywordServiceMap.put("ausmachen", powerOff);
-            keywordServiceMap.put("lights_off", powerOff);
+            intentActionMap.put("ausmachen", powerOff);
+            intentActionMap.put("off", powerOff);
+
+            // Create ActionParameter for Color=BLUE
+            Color blue = Color.newBuilder().setHsbColor(HSBColor.newBuilder().setHue(229).setSaturation(52).setBrightness(43)).build();
+            ColorStateType.ColorState colorState = ColorStateType.ColorState.newBuilder().setColor(blue).build();
+
+            builder = ActionDescriptionProcessor.generateDefaultActionParameter(colorState, ServiceTemplateType.ServiceTemplate.ServiceType.COLOR_STATE_SERVICE);
+            builder.getActionInitiatorBuilder().setInitiatorType(ActionInitiatorType.ActionInitiator.InitiatorType.HUMAN);
+            ActionParameter lightBlue = builder.build();
+
+            intentActionMap.put("light_blue", lightBlue);
 
 
-            keywordConverter = new KeywordConverter(keywordServiceMap);
+
+            keywordConverter = new KeywordConverter(intentActionMap);
 
         } catch (IOException | ClassNotFoundException ex) {
             throw new IOException("Keyword Converter could not be initialized.", ex);
