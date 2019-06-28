@@ -51,6 +51,26 @@ public class KeywordConverter {
         }
     }
 
+    public ActionParameter getAction(SpeechHypothesis speechHypothesis) {
+
+        String[] intentEntity = speechHypothesis.getGrammarTree().split("\\[");
+        String intent = intentEntity[0];
+        String entity;
+        if (intentEntity.length > 1) entity = intentEntity[1];
+        ActionParameter event;
+
+        if (keywordServiceMap.containsKey(intent)) {
+            event = keywordServiceMap.get(intent);
+            LOGGER.info("Intent detected: " + intent + " corresponding event: " + event);
+            return event;
+        } else {
+            LOGGER.info("Intent (" + intent + ") not in Map.");
+            return null;
+        }
+
+
+    }
+
     public ArrayList<ActionParameter> getActions(List<String> keywords) {
         LOGGER.info("Converting keywords -> actions");
 
