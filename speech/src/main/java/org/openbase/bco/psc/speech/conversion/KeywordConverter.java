@@ -63,7 +63,7 @@ public class KeywordConverter {
         }
 
         if (keywordIntentMap.containsKey(grammarTree.trim())) {
-            LOGGER.info("Intent detected: " + grammarTree );
+            LOGGER.info("Intent detected: " + grammarTree);
             return keywordIntentMap.get(grammarTree.trim()); // todo change to intent + [entity]
         } else {
 

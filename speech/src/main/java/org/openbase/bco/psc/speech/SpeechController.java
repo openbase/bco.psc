@@ -24,12 +24,9 @@ package org.openbase.bco.psc.speech;
  */
 
 import org.openbase.bco.dal.lib.action.ActionDescriptionProcessor;
-import org.openbase.bco.psc.lib.jp.JPPscUnitFilterList;
 import org.openbase.bco.psc.speech.conversion.KeywordConverter;
 import org.openbase.bco.psc.speech.rsb.RSBConnection;
 import org.openbase.bco.registry.remote.Registries;
-import org.openbase.jps.core.JPService;
-import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InitializationException;
 import org.openbase.jul.exception.NotAvailableException;
@@ -40,40 +37,28 @@ import org.openbase.jul.iface.VoidInitializable;
 import org.openbase.type.domotic.action.ActionInitiatorType;
 import org.openbase.type.domotic.action.ActionParameterType.ActionParameter;
 import org.openbase.type.domotic.service.ServiceTemplateType;
-import org.openbase.type.domotic.state.BrightnessStateType;
 import org.openbase.type.domotic.state.ColorStateType;
-import org.openbase.type.vision.ColorType.Color;
-import org.openbase.type.vision.RGBColorType.RGBColor;
-import org.openbase.type.vision.HSBColorType.HSBColor;
 import org.openbase.type.domotic.state.PowerStateType;
-import org.openbase.type.domotic.unit.UnitTemplateType;
-import org.openbase.type.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
+import org.openbase.type.vision.ColorType.Color;
+import org.openbase.type.vision.HSBColorType.HSBColor;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Event;
 import rst.dialog.SpeechHypothesisType.SpeechHypothesis;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
 
 public class SpeechController extends AbstractEventHandler implements Speech, Launchable<Void>, VoidInitializable {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(SpeechController.class);
-    //private AbstractUnitSelector selector;
     private RSBConnection rsbConnection;
-
-    //private RegistrySynchronizer<String, SelectableObject, UnitConfig, UnitConfig.Builder> selectableObjectRegistrySynchronizer;
-
-    private List<String> registryFlags;
+    private boolean initialized = false;
+    private boolean active = false;
 
     private KeywordConverter keywordConverter;
 
-    private boolean initialized = false;
-    private boolean active = false;
 
     @Override
     public void handleEvent(final Event event) {
@@ -93,7 +78,6 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
                 rsbConnection.publishData(actionParameter);
                 LOGGER.info("PUBLISHED action: " + actionParameter);
 
-
             } catch (CouldNotPerformException ex) {
                 ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
             } catch (InterruptedException ex) {
@@ -107,21 +91,7 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
         try {
             LOGGER.info("Waiting for bco registry synchronization...");
             Registries.getUnitRegistry().waitForData();
-//
-//            selectableObjectRegistrySynchronizer = new RegistrySynchronizer<String, SelectableObject, UnitConfig, UnitConfig.Builder>(
-//                    selector.getSelectedObjectRegistry(), getUnitRegistry().getUnitConfigRemoteRegistry(), getUnitRegistry(), SelectableObjectFactory.getInstance());
-//            selectableObjectRegistrySynchronizer.addFilter(config -> {
-//                try {
-//                    return !PointingUnitChecker.isPointingControlUnit(config, registryFlags);
-//                } catch (InterruptedException ex) {
-//                    Thread.currentThread().interrupt();
-//                    ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
-//                    return true;
-//                } catch (CouldNotPerformException ex) {
-//                    ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.WARN);
-//                    return true;
-//                }
-//            });
+
         } catch (NotAvailableException ex) {
             throw new CouldNotPerformException("Could not connect to the registry.", ex);
         } catch (CouldNotPerformException ex) {
@@ -136,12 +106,11 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             try {
                 initKeywordConverter();
 
-                registryFlags = JPService.getProperty(JPPscUnitFilterList.class).getValue();
                 initializeRegistryConnection();
                 rsbConnection = new RSBConnection(this);
                 rsbConnection.init();
                 initialized = true;
-            } catch (JPNotAvailableException | CouldNotPerformException ex) {
+            } catch (CouldNotPerformException ex) {
                 throw new InitializationException(SpeechController.class, ex);
             } catch (IOException ex) {
                 ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
@@ -159,7 +128,6 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             active = true;
             Registries.waitForData();
             LOGGER.info("Activating Registry synchronization.");
-            //selectableObjectRegistrySynchronizer.activate();
             rsbConnection.activate();
         }
     }
@@ -171,7 +139,6 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             active = false;
             rsbConnection.deactivate();
             LOGGER.info("Deactivating Registry synchronization.");
-            // selectableObjectRegistrySynchronizer.deactivate();
         }
     }
 
@@ -180,13 +147,11 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
         return active;
     }
 
-    private void initKeywordConverter() throws IOException {
-
-        LOGGER.info("Initializing keyword converter...");
+    private void initKeywordConverter() throws IOException, CouldNotPerformException {
 
         HashMap<String, ActionParameter> intentActionMap = new HashMap<>();
-        try {
 
+        try {
             //BrightnessStateType.BrightnessState brightState = BrightnessStateType.BrightnessState.newBuilder().setBrightness(-0.5).build();
 
             // Create ActionParameter for PowerState=ON
@@ -210,7 +175,7 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             intentActionMap.put("ausmachen", powerOff);
             intentActionMap.put("powerstate[aus]", powerOff);
 
-
+            // Create color states
             Color blue = Color.newBuilder().setHsbColor(HSBColor.newBuilder().setHue(229).setSaturation(52).setBrightness(43)).build();
             Color red = Color.newBuilder().setHsbColor(HSBColor.newBuilder().setHue(1).setSaturation(100).setBrightness(51)).build();
             Color green = Color.newBuilder().setHsbColor(HSBColor.newBuilder().setHue(110).setSaturation(100).setBrightness(51)).build();
@@ -218,7 +183,6 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             ColorStateType.ColorState blueState = ColorStateType.ColorState.newBuilder().setColor(blue).build();
             ColorStateType.ColorState redState = ColorStateType.ColorState.newBuilder().setColor(red).build();
             ColorStateType.ColorState greenState = ColorStateType.ColorState.newBuilder().setColor(green).build();
-
 
             // Create ActionParameter for Color=BLUE
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(blueState, ServiceTemplateType.ServiceTemplate.ServiceType.COLOR_STATE_SERVICE);
@@ -238,13 +202,12 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
 
             intentActionMap.put("coloring[grün]", builder.build());
 
-
             keywordConverter = new KeywordConverter(intentActionMap);
 
         } catch (IOException | ClassNotFoundException ex) {
             throw new IOException("Keyword Converter could not be initialized.", ex);
-        } catch (CouldNotPerformException e) {
-            e.printStackTrace();
+        } catch (CouldNotPerformException ex) {
+            throw new CouldNotPerformException("Keyword Converter could not be initialized.", ex);
         }
     }
 
