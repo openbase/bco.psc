@@ -176,9 +176,9 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             intentActionMap.put("powerstate[aus]", powerOff);
 
             // Create color states
-            Color blue = Color.newBuilder().setHsbColor(HSBColor.newBuilder().setHue(229).setSaturation(52).setBrightness(43)).build();
-            Color red = Color.newBuilder().setHsbColor(HSBColor.newBuilder().setHue(1).setSaturation(100).setBrightness(51)).build();
-            Color green = Color.newBuilder().setHsbColor(HSBColor.newBuilder().setHue(110).setSaturation(100).setBrightness(51)).build();
+            Color blue = Color.newBuilder().setHsbColor(HSBColor.newBuilder().setHue(229).setSaturation(0.5).setBrightness(0.5)).build();
+            Color red = Color.newBuilder().setHsbColor(HSBColor.newBuilder().setHue(1).setSaturation(1).setBrightness(0.5)).build();
+            Color green = Color.newBuilder().setHsbColor(HSBColor.newBuilder().setHue(110).setSaturation(1).setBrightness(0.5)).build();
 
             ColorStateType.ColorState blueState = ColorStateType.ColorState.newBuilder().setColor(blue).build();
             ColorStateType.ColorState redState = ColorStateType.ColorState.newBuilder().setColor(red).build();
