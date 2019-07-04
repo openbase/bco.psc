@@ -23,6 +23,8 @@ package org.openbase.bco.psc.dummyintent;
  * #L%
  */
 
+import com.google.protobuf.Message;
+import org.openbase.bco.dal.lib.layer.unit.Unit;
 import org.openbase.bco.psc.dummyintent.rsb.RSBConnection;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -30,6 +32,8 @@ import org.openbase.jul.exception.InitializationException;
 import org.openbase.jul.exception.NotAvailableException;
 import org.openbase.jul.exception.printer.ExceptionPrinter;
 import org.openbase.jul.exception.printer.LogLevel;
+import org.openbase.jul.extension.rsb.com.RSBFactoryImpl;
+import org.openbase.jul.extension.rsb.iface.RSBInformer;
 import org.openbase.jul.iface.Launchable;
 import org.openbase.jul.iface.VoidInitializable;
 import org.openbase.type.domotic.unit.UnitProbabilityCollectionType;
@@ -45,6 +49,7 @@ public class DummyIntentController extends AbstractEventHandler implements Speec
     private RSBConnection rsbConnection;
     private boolean initialized = false;
     private boolean active = false;
+    private RSBInformer<UnitProbabilityCollectionType.UnitProbabilityCollection> unitInformer;
 
     @Override
     public void handleEvent(final Event event) {
@@ -52,7 +57,7 @@ public class DummyIntentController extends AbstractEventHandler implements Speec
 
         if (event.getData() instanceof String) {
 
-            String intent = (String) event.getData(); //should be something like change_color[blue]
+            String intent = (String) event.getData(); //should be something like colorstate[blau]
 
             try {
 
@@ -63,7 +68,7 @@ public class DummyIntentController extends AbstractEventHandler implements Speec
                     UnitProbabilityCollectionType.UnitProbabilityCollection.Builder collectionBuilder = UnitProbabilityCollectionType.UnitProbabilityCollection.newBuilder();
                     collectionBuilder.addElementBuilder().setId("47e63f5a-ff30-4b0d-905a-815f94aa8b50").setProbability(1.0f);
                     UnitProbabilityCollectionType.UnitProbabilityCollection unit = collectionBuilder.build();
-                    rsbConnection.publishData(unit);
+                    unitInformer.publish(unit);
                     LOGGER.info("PUBLISHED unit");
                 }
 
@@ -102,6 +107,8 @@ public class DummyIntentController extends AbstractEventHandler implements Speec
                 initializeRegistryConnection();
                 rsbConnection = new RSBConnection(this);
                 rsbConnection.init();
+                unitInformer = RSBFactoryImpl.getInstance().createSynchronizedInformer("/pointing/intents", UnitProbabilityCollectionType.UnitProbabilityCollection.class);
+
                 initialized = true;
             } catch (CouldNotPerformException ex) {
                 throw new InitializationException(DummyIntentController.class, ex);
@@ -119,6 +126,7 @@ public class DummyIntentController extends AbstractEventHandler implements Speec
             active = true;
             Registries.waitForData();
             LOGGER.info("Activating Registry synchronization.");
+            unitInformer.activate();
             rsbConnection.activate();
         }
     }
@@ -128,6 +136,7 @@ public class DummyIntentController extends AbstractEventHandler implements Speec
         LOGGER.debug("Deactivating " + getClass().getName() + ".");
         if (active) {
             active = false;
+            unitInformer.deactivate();
             rsbConnection.deactivate();
             LOGGER.info("Deactivating Registry synchronization.");
         }

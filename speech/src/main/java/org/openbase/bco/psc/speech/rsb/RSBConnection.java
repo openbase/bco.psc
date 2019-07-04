@@ -64,9 +64,7 @@ public class RSBConnection extends AbstractRSBDualConnection<Message> {
     @Override
     protected RSBListener getInitializedListener() throws InitializationException {
         try {
-            //Scope inScope = JPService.getProperty(JPSpeechScope.class).getValue();
-            // todo change back to speech scope later
-            Scope inScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPIntentScope.class).getValue());
+            Scope inScope = JPService.getProperty(JPSpeechScope.class).getValue();
             LOGGER.info("Initializing RSB Listener on scope: " + inScope);
             if (JPService.getProperty(JPLocalInput.class).getValue()) {
                 return RSBFactoryImpl.getInstance().createSynchronizedListener(inScope, getLocalConfig());
