@@ -126,21 +126,31 @@ public class ControlController extends AbstractEventHandler implements Control, 
 
         if (event.getData() instanceof UnitProbabilityCollection) {  // this could also be done with event.scope
             UnitProbabilityCollection units = (UnitProbabilityCollection) event.getData();
+
             List<UnitProbability> selectedUnits = units.getElementList().stream()
                     .filter(x -> x.getProbability() >= threshold)
                     .collect(Collectors.toList());
-            UnitProbabilityCollection unitProbabilityCollection = UnitProbabilityCollection.newBuilder().addAllElement(selectedUnits).build();
 
-            selectedUnitIntents.put(event.getMetaData().getReceiveTime(), unitProbabilityCollection);
+            if (selectedUnits.size() > 0) {
+                UnitProbabilityCollection unitProbabilityCollection = UnitProbabilityCollection.newBuilder().addAllElement(selectedUnits).build();
+                selectedUnitIntents.put(event.getMetaData().getReceiveTime(), unitProbabilityCollection);
+                try {
+                    handleIntents();
+                } catch (CouldNotPerformException ex) {
+                    ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
+                }
+            }
+
         } else if (event.getData() instanceof ActionParameter) {
             receivedStatesIntents.put(event.getMetaData().getReceiveTime(), (ActionParameter) event.getData());
+            try {
+                handleIntents();
+            } catch (CouldNotPerformException ex) {
+                ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
+            }
         }
 
-        try {
-            handleIntents();
-        } catch (CouldNotPerformException ex) {
-            ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
-        }
+
     }
 
     private synchronized void handleIntents() throws CouldNotPerformException, InterruptedException {
