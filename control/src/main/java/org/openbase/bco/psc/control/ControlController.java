@@ -11,12 +11,12 @@ package org.openbase.bco.psc.control;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public
  * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -125,7 +125,13 @@ public class ControlController extends AbstractEventHandler implements Control, 
         LOGGER.info("enter handleEvent");
 
         if (event.getData() instanceof UnitProbabilityCollection) {  // this could also be done with event.scope
-            selectedUnitIntents.put(event.getMetaData().getReceiveTime(), (UnitProbabilityCollection) event.getData());
+            UnitProbabilityCollection units = (UnitProbabilityCollection) event.getData();
+            List<UnitProbability> selectedUnits = units.getElementList().stream()
+                    .filter(x -> x.getProbability() >= threshold)
+                    .collect(Collectors.toList());
+            UnitProbabilityCollection unitProbabilityCollection = UnitProbabilityCollection.newBuilder().addAllElement(selectedUnits).build();
+
+            selectedUnitIntents.put(event.getMetaData().getReceiveTime(), unitProbabilityCollection);
         } else if (event.getData() instanceof ActionParameter) {
             receivedStatesIntents.put(event.getMetaData().getReceiveTime(), (ActionParameter) event.getData());
         }
@@ -169,7 +175,6 @@ public class ControlController extends AbstractEventHandler implements Control, 
                     Long selectedUnitKey = selectedUnitIntents.firstKey();
                     UnitProbabilityCollection unitProbabilityCollection = selectedUnitIntents.remove(selectedUnitKey);
                     List<String> selectedUnitIds = unitProbabilityCollection.getElementList().stream()
-                            .filter(x -> x.getProbability() >= threshold)
                             .map(UnitProbability::getId)
                             .collect(Collectors.toList());
                     for (String unitId : selectedUnitIds) {
