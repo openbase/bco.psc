@@ -1,10 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>bco.psc.test</artifactId>
+    <artifactId>bco.psc.dummyintent</artifactId>
     <packaging>jar</packaging>
 
-    <name>BCO PSC Test</name>
+    <name>BCO PSC Dummy Intent</name>
 
     <parent>
         <groupId>org.openbase</groupId>
@@ -48,8 +48,8 @@
                 <configuration>
                     <programs>
                         <program>
-                            <mainClass>org.openbase.bco.psc.identification.IdentificationLauncher</mainClass>
-                            <id>bco-psc-identification</id>
+                            <mainClass>org.openbase.bco.psc.dummyintent.DummyIntentLauncher</mainClass>
+                            <id>bco-psc-dummyintent</id>
                             <platforms>
                                 <platform>unix</platform>
                             </platforms>

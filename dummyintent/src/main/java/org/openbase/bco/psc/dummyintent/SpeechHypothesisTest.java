@@ -1,8 +1,8 @@
-package org.openbase.bco.psc.test;
+package org.openbase.bco.psc.dummyintent;
 
 /*-
  * #%L
- * BCO PSC Test
+ * BCO PSC Dummy Intent
  * %%
  * Copyright (C) 2016 - 2019 openbase.org
  * %%

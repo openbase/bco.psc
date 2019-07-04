@@ -1,9 +1,9 @@
-package org.openbase.bco.psc.test;
+package org.openbase.bco.psc.dummyintent;
 
 /*
  * -
  * #%L
- * BCO PSC Test
+ * BCO PSC Dummy Intent
  * %%
  * Copyright (C) 2016 - 2019 openbase.org
  * %%
@@ -28,17 +28,16 @@ import org.openbase.bco.psc.lib.jp.JPLocalInput;
 import org.openbase.bco.psc.lib.jp.JPLocalOutput;
 import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
 import org.openbase.bco.psc.lib.jp.JPPscUnitFilterList;
-import org.openbase.bco.psc.test.TestController;
 import org.openbase.jps.core.JPService;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InstantiationException;
 import org.openbase.jul.pattern.launch.AbstractLauncher;
 
 
-public class TestLauncher extends AbstractLauncher<TestController> {
+public class DummyIntentLauncher extends AbstractLauncher<DummyIntentController> {
 
-    public TestLauncher() throws InstantiationException {
-        super(SpeechHypothesisTest.class, TestController.class);
+    public DummyIntentLauncher() throws InstantiationException {
+        super(SpeechHypothesisTest.class, DummyIntentController.class);
     }
 
     @Override
@@ -70,7 +69,7 @@ public class TestLauncher extends AbstractLauncher<TestController> {
      */
     public static void main(final String[] args) throws InterruptedException, CouldNotPerformException {
         BCO.printLogo();
-        AbstractLauncher.main(args, SpeechHypothesisTest.class, TestLauncher.class);
+        AbstractLauncher.main(args, SpeechHypothesisTest.class, DummyIntentLauncher.class);
 
     }
 }

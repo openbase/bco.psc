@@ -28,6 +28,7 @@ import rst.dialog.SpeechHypothesisType.SpeechHypothesis;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -38,36 +39,37 @@ public class KeywordConverter {
      */
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(KeywordConverter.class);
 
-    private HashMap<String, ActionParameter> keywordServiceMap;
+    private HashMap<String, ActionParameter> keywordIntentMap;
 
 
     public KeywordConverter(HashMap<String, ActionParameter> map) throws IOException, ClassNotFoundException {
 
-        keywordServiceMap = map;
+        keywordIntentMap = map;
 
         LOGGER.info("Map <String, ActionParameter> :");
-        for (String key : keywordServiceMap.keySet()) {
-            LOGGER.info(key + ": " + keywordServiceMap.get(key));
+        for (String key : keywordIntentMap.keySet()) {
+            LOGGER.info(key + ": " + keywordIntentMap.get(key));
         }
     }
 
     public ActionParameter getAction(SpeechHypothesis speechHypothesis) {
 
-        String[] intentEntity = speechHypothesis.getGrammarTree().split("\\[");
-        String intent = intentEntity[0];
-        String entity;
-        if (intentEntity.length > 1) entity = intentEntity[1];
-        ActionParameter event;
+        String grammarTree = speechHypothesis.getGrammarTree();
+        List<String> intentEntity = Arrays.asList(grammarTree.split("\\[,\\]"));
 
-        if (keywordServiceMap.containsKey(intent)) {
-            event = keywordServiceMap.get(intent);
-            LOGGER.info("Intent detected: " + intent + " corresponding event: " + event);
-            return event;
-        } else {
-            LOGGER.info("Intent (" + intent + ") not in Map.");
-            return null;
+        if (intentEntity.size() > 1) {
+            String intent = intentEntity.get(0);
+            String entity = intentEntity.get(1);
         }
 
+        if (keywordIntentMap.containsKey(grammarTree.trim())) {
+            LOGGER.info("Intent detected: " + grammarTree );
+            return keywordIntentMap.get(grammarTree.trim()); // todo change to intent + [entity]
+        } else {
+
+            LOGGER.info("Intent (" + grammarTree + ") not in Map.");
+            return null;
+        }
 
     }
 
@@ -76,8 +78,8 @@ public class KeywordConverter {
 
         ArrayList<ActionParameter> actionParameters = new ArrayList<>();
         for (String kw : keywords) {
-            if (keywordServiceMap.containsKey(kw)) {
-                ActionParameter event = keywordServiceMap.get(kw);
+            if (keywordIntentMap.containsKey(kw)) {
+                ActionParameter event = keywordIntentMap.get(kw);
                 actionParameters.add(event);
                 LOGGER.info("Keyword detected: " + kw + " corresponding event: " + event);
             } else {
@@ -86,7 +88,6 @@ public class KeywordConverter {
         }
         return actionParameters;
     }
-
 
 
 }

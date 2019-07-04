@@ -1,9 +1,9 @@
-package org.openbase.bco.psc.test;
+package org.openbase.bco.psc.dummyintent;
 
 /*
  * -
  * #%L
- * BCO PSC Test
+ * BCO PSC Dummy Intent
  * %%
  * Copyright (C) 2016 - 2019 openbase.org
  * %%
@@ -23,11 +23,8 @@ package org.openbase.bco.psc.test;
  * #L%
  */
 
-import org.openbase.bco.psc.lib.jp.JPPscUnitFilterList;
-import org.openbase.bco.psc.test.rsb.RSBConnection;
+import org.openbase.bco.psc.dummyintent.rsb.RSBConnection;
 import org.openbase.bco.registry.remote.Registries;
-import org.openbase.jps.core.JPService;
-import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InitializationException;
 import org.openbase.jul.exception.NotAvailableException;
@@ -41,13 +38,10 @@ import rsb.AbstractEventHandler;
 import rsb.Event;
 import rst.dialog.SpeechHypothesisType.SpeechHypothesis;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 
+public class DummyIntentController extends AbstractEventHandler implements SpeechHypothesisTest, Launchable<Void>, VoidInitializable {
 
-public class TestController extends AbstractEventHandler implements SpeechHypothesisTest, Launchable<Void>, VoidInitializable {
-
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(TestController.class);
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(DummyIntentController.class);
     private RSBConnection rsbConnection;
     private boolean initialized = false;
     private boolean active = false;
@@ -57,22 +51,13 @@ public class TestController extends AbstractEventHandler implements SpeechHypoth
         LOGGER.trace(event.toString());
 
         if (event.getData() instanceof String) {
-            String eventData = (String) event.getData(); //should be something like change_color[blue]
-           // ArrayList<String> keywords = new ArrayList(Arrays.asList(eventData.split(" ")));
 
+            String intent = (String) event.getData(); //should be something like change_color[blue]
 
             try {
-              //  if (eventData.contains("SpeechHypothesis")) {
-                    // publish SpeechHypothesis for testing
-                    SpeechHypothesis speechHypothesis = SpeechHypothesis.newBuilder().setGrammarTree(eventData).build();
 
-
-                    rsbConnection.publishData(speechHypothesis);
-                    LOGGER.info("PUBLISHED SpeechHypothesis");
-
-//                }
-
-             //   if (eventData.contains("unit")) {
+                if (intent.contains("unit")) {
+                    intent = intent.replaceFirst("unit", "");
 
                     // publish unit for testing
                     UnitProbabilityCollectionType.UnitProbabilityCollection.Builder collectionBuilder = UnitProbabilityCollectionType.UnitProbabilityCollection.newBuilder();
@@ -80,8 +65,14 @@ public class TestController extends AbstractEventHandler implements SpeechHypoth
                     UnitProbabilityCollectionType.UnitProbabilityCollection unit = collectionBuilder.build();
                     rsbConnection.publishData(unit);
                     LOGGER.info("PUBLISHED unit");
+                }
 
-              //  }
+                // publish SpeechHypothesis for testing
+                SpeechHypothesis speechHypothesis = SpeechHypothesis.newBuilder().setGrammarTree(intent).build();
+                rsbConnection.publishData(speechHypothesis);
+                LOGGER.info("PUBLISHED SpeechHypothesis for testing");
+
+
             } catch (CouldNotPerformException ex) {
                 ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
             } catch (InterruptedException ex) {
@@ -105,7 +96,7 @@ public class TestController extends AbstractEventHandler implements SpeechHypoth
 
     @Override
     public void init() throws InitializationException, InterruptedException {
-        LOGGER.info("Initializing test controller...");
+        LOGGER.info("Initializing dummyintent controller...");
         if (!initialized) {
             try {
                 initializeRegistryConnection();
@@ -113,7 +104,7 @@ public class TestController extends AbstractEventHandler implements SpeechHypoth
                 rsbConnection.init();
                 initialized = true;
             } catch (CouldNotPerformException ex) {
-                throw new InitializationException(TestController.class, ex);
+                throw new InitializationException(DummyIntentController.class, ex);
             }
         }
     }

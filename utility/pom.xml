@@ -125,7 +125,7 @@
         </dependency>
         <dependency>
             <groupId>org.openbase</groupId>
-            <artifactId>bco.psc.test</artifactId>
+            <artifactId>bco.psc.dummyintent</artifactId>
             <version>${project.version}</version>
         </dependency>
 

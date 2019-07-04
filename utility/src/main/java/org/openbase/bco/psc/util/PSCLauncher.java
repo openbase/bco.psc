@@ -29,7 +29,7 @@ import org.openbase.bco.psc.sm.SkeletonMergingLauncher;
 import org.openbase.bco.authentication.lib.BCO;
 import org.openbase.jul.pattern.launch.AbstractLauncher;
 import org.openbase.bco.psc.speech.SpeechLauncher;
-import org.openbase.bco.psc.test.TestLauncher;
+import org.openbase.bco.psc.dummyintent.DummyIntentLauncher;
 
 
 /**
@@ -49,7 +49,7 @@ public class PSCLauncher {
                 IdentificationLauncher.class,
                 ControlLauncher.class,
                 SpeechLauncher.class,
-                TestLauncher.class
+                DummyIntentLauncher.class
         );
     }
 

@@ -1,8 +1,8 @@
-package org.openbase.bco.psc.test.rsb;
+package org.openbase.bco.psc.dummyintent.rsb;
 
 /*-
  * #%L
- * BCO PSC Test
+ * BCO PSC Dummy Intent
  * %%
  * Copyright (C) 2016 - 2019 openbase.org
  * %%
@@ -32,12 +32,10 @@ import org.openbase.jul.exception.InitializationException;
 import org.openbase.jul.extension.rsb.com.RSBFactoryImpl;
 import org.openbase.jul.extension.rsb.iface.RSBInformer;
 import org.openbase.jul.extension.rsb.iface.RSBListener;
-import org.openbase.type.domotic.action.ActionParameterType.ActionParameter;
 import org.openbase.type.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Scope;
-import rst.dialog.SpeechHypothesisType;
 
 import static rst.dialog.SpeechHypothesisType.*;
 
@@ -66,7 +64,7 @@ public class RSBConnection extends AbstractRSBDualConnection<Message> {
     @Override
     protected RSBListener getInitializedListener() throws InitializationException {
         try {
-            // todo test inscope
+            // todo dummyintent inscope
             Scope inScope = JPService.getProperty(JPSpeechScope.class).getValue();
             LOGGER.info("Initializing RSB Listener on scope: " + inScope);
             if (JPService.getProperty(JPLocalInput.class).getValue()) {
@@ -89,7 +87,7 @@ public class RSBConnection extends AbstractRSBDualConnection<Message> {
     protected RSBInformer<Message> getInitializedInformer() throws InitializationException {
         // RSBInformer<T> T extends Message & MessageOrBuilder  see AbstractRSBDualConnection
         try {
-            // todo test outscope
+            // todo dummyintent outscope
             Scope outScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPIntentScope.class).getValue());
             LOGGER.info("Initializing RSB Informer on scope: " + outScope);
             if (JPService.getProperty(JPLocalOutput.class).getValue()) {

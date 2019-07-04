@@ -48,8 +48,8 @@
                 <configuration>
                     <programs>
                         <program>
-                            <mainClass>org.openbase.bco.psc.identification.IdentificationLauncher</mainClass>
-                            <id>bco-psc-identification</id>
+                            <mainClass>org.openbase.bco.psc.speech.SpeechLauncher</mainClass>
+                            <id>bco-psc-speech</id>
                             <platforms>
                                 <platform>unix</platform>
                             </platforms>
