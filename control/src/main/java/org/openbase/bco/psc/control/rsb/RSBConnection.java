@@ -22,7 +22,7 @@ package org.openbase.bco.psc.control.rsb;
  * #L%
  */
 import org.openbase.bco.psc.lib.jp.JPLocalInput;
-import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
+import org.openbase.bco.psc.lib.jp.JPMergeScope;
 import org.openbase.bco.psc.lib.jp.JPIntentScope;
 import org.openbase.bco.psc.lib.rsb.AbstractRSBListenerConnection;
 import org.openbase.jps.core.JPService;
@@ -31,7 +31,6 @@ import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InitializationException;
 import org.openbase.jul.extension.rsb.com.RSBFactoryImpl;
 import org.openbase.jul.extension.rsb.iface.RSBListener;
-import org.openbase.type.domotic.action.ActionParameterType;
 import org.openbase.type.domotic.action.ActionParameterType.ActionParameter;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
@@ -68,9 +67,8 @@ public class RSBConnection extends AbstractRSBListenerConnection {
     @Override
     protected RSBListener getInitializedListener() throws InitializationException {
         try {
-            Scope inScope = JPService.getProperty(JPPSCBaseScope.class).getValue()
-                    .concat(JPService.getProperty(JPIntentScope.class).getValue());
-                    //.concat(JPService.getProperty(JPActionScope.class).getValue());
+            Scope inScope = JPService.getProperty(JPIntentScope.class).getValue()
+                    .concat(JPService.getProperty(JPMergeScope.class).getValue());
             LOGGER.info("Initializing RSB Control Listener on scope: " + inScope);
             if (JPService.getProperty(JPLocalInput.class).getValue()) {
                 LOGGER.warn("RSB input set to socket and localhost.");

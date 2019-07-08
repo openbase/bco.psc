@@ -107,7 +107,7 @@ public class DummyIntentController extends AbstractEventHandler implements Speec
                 initializeRegistryConnection();
                 rsbConnection = new RSBConnection(this);
                 rsbConnection.init();
-                unitInformer = RSBFactoryImpl.getInstance().createSynchronizedInformer("/pointing/intents", UnitProbabilityCollectionType.UnitProbabilityCollection.class);
+                unitInformer = RSBFactoryImpl.getInstance().createSynchronizedInformer("/intents/merge", UnitProbabilityCollectionType.UnitProbabilityCollection.class);
 
                 initialized = true;
             } catch (CouldNotPerformException ex) {

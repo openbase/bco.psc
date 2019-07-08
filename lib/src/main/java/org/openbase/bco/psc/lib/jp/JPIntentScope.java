@@ -25,16 +25,14 @@ import org.openbase.jps.exception.JPNotAvailableException;
 import rsb.Scope;
 
 /**
- * JPScope used to parse the subscope used for used for sending and receiving
- * the events produced by the identification.
+ * Base scope for intents.
  *
- * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class JPIntentScope extends AbstractJPScope {
     /**
      * The identifiers that can be used in front of the command line argument.
      */
-    public final static String[] COMMAND_IDENTIFIERS = {"--scope-for-units"};
+    public final static String[] COMMAND_IDENTIFIERS = {"--scope-for-intents"};
 
     /**
      * Constructor.
@@ -50,7 +48,7 @@ public class JPIntentScope extends AbstractJPScope {
      */
     @Override
     public String getDescription() {
-        return "Defines the subscope under the psc base scope used to send or receive unit probability data created by identification.";
+        return "Defines the base scope for intents.";
     }
 
     /**

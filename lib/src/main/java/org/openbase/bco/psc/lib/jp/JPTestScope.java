@@ -1,6 +1,6 @@
 package org.openbase.bco.psc.lib.jp;
 
-/*
+/*-
  * #%L
  * BCO PSC Library
  * %%
@@ -10,12 +10,12 @@ package org.openbase.bco.psc.lib.jp;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -24,18 +24,20 @@ package org.openbase.bco.psc.lib.jp;
 import org.openbase.jps.exception.JPNotAvailableException;
 import rsb.Scope;
 
-
-public class JPSpeechScope extends AbstractJPScope {
-
+/**
+ * JPScope used for sending unit and speech events for testing.
+ *
+ */
+public class JPTestScope extends AbstractJPScope {
     /**
      * The identifiers that can be used in front of the command line argument.
      */
-    public final static String[] COMMAND_IDENTIFIERS = {"--scope-speech-psc"};
+    public final static String[] COMMAND_IDENTIFIERS = {"--scope-for-tests"};
 
     /**
      * Constructor.
      */
-    public JPSpeechScope() {
+    public JPTestScope() {
         super(COMMAND_IDENTIFIERS);
     }
 
@@ -46,7 +48,7 @@ public class JPSpeechScope extends AbstractJPScope {
      */
     @Override
     public String getDescription() {
-        return "Defines the speech scope.";
+        return "Defines the scope used to send units and speech events for testing.";
     }
 
     /**
@@ -57,6 +59,7 @@ public class JPSpeechScope extends AbstractJPScope {
      */
     @Override
     protected Scope getPropertyDefaultValue() throws JPNotAvailableException {
-        return new Scope("/speech");
+        return new Scope("/test");
     }
+
 }

@@ -10,12 +10,12 @@ package org.openbase.bco.psc.speech.rsb;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -33,7 +33,6 @@ import org.openbase.jul.extension.rsb.com.RSBFactoryImpl;
 import org.openbase.jul.extension.rsb.iface.RSBInformer;
 import org.openbase.jul.extension.rsb.iface.RSBListener;
 import org.openbase.type.domotic.action.ActionParameterType.ActionParameter;
-import org.openbase.type.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Scope;
@@ -64,7 +63,8 @@ public class RSBConnection extends AbstractRSBDualConnection<Message> {
     @Override
     protected RSBListener getInitializedListener() throws InitializationException {
         try {
-            Scope inScope = JPService.getProperty(JPSpeechScope.class).getValue();
+            Scope inScope = JPService.getProperty(JPIntentScope.class).getValue()
+                    .concat(JPService.getProperty(JPSpeechScope.class).getValue());
             LOGGER.info("Initializing RSB Listener on scope: " + inScope);
             if (JPService.getProperty(JPLocalInput.class).getValue()) {
                 return RSBFactoryImpl.getInstance().createSynchronizedListener(inScope, getLocalConfig());
@@ -85,10 +85,11 @@ public class RSBConnection extends AbstractRSBDualConnection<Message> {
     @Override
     protected RSBInformer<Message> getInitializedInformer() throws InitializationException {
         try {
-            Scope outScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPIntentScope.class).getValue());
+            Scope outScope = JPService.getProperty(JPIntentScope.class).getValue()
+                    .concat(JPService.getProperty(JPMergeScope.class).getValue());
             LOGGER.info("Initializing RSB Informer on scope: " + outScope);
             if (JPService.getProperty(JPLocalOutput.class).getValue()) {
-                LOGGER.warn("RSB output set to socket and localhost."); // what ??
+                LOGGER.warn("RSB output set to socket and localhost.");
                 return RSBFactoryImpl.getInstance().createSynchronizedInformer(outScope, Message.class, getLocalConfig());
 
             } else {
@@ -107,8 +108,7 @@ public class RSBConnection extends AbstractRSBDualConnection<Message> {
     protected void registerConverters() {
         LOGGER.debug("Registering ActionParameter converter for Listener.");
         registerConverterForType(ActionParameter.getDefaultInstance());
-        //LOGGER.debug("Registering UnitProbabilityCollection converter for Informer.");
-        //registerConverterForType(UnitProbabilityCollection.getDefaultInstance());
+        LOGGER.debug("Registering SpeechHypothesis converter for Informer.");
         registerConverterForType(SpeechHypothesis.getDefaultInstance());
 
     }

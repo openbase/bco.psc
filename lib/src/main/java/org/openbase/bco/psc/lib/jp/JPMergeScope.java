@@ -1,6 +1,6 @@
 package org.openbase.bco.psc.lib.jp;
 
-/*
+/*-
  * #%L
  * BCO PSC Library
  * %%
@@ -24,18 +24,21 @@ package org.openbase.bco.psc.lib.jp;
 import org.openbase.jps.exception.JPNotAvailableException;
 import rsb.Scope;
 
-
-public class JPSpeechScope extends AbstractJPScope {
-
+/**
+ * JPScope used to parse the subscope used for used receiving
+ * the events produced by the identification, speech and dummyintent.
+ *
+ */
+public class JPMergeScope extends AbstractJPScope {
     /**
      * The identifiers that can be used in front of the command line argument.
      */
-    public final static String[] COMMAND_IDENTIFIERS = {"--scope-speech-psc"};
+    public final static String[] COMMAND_IDENTIFIERS = {"--scope-for-intents-merging"};
 
     /**
      * Constructor.
      */
-    public JPSpeechScope() {
+    public JPMergeScope() {
         super(COMMAND_IDENTIFIERS);
     }
 
@@ -46,7 +49,7 @@ public class JPSpeechScope extends AbstractJPScope {
      */
     @Override
     public String getDescription() {
-        return "Defines the speech scope.";
+        return "Defines the subscope under the psc base scope used to receive unit probability data and speech data.";
     }
 
     /**
@@ -57,6 +60,7 @@ public class JPSpeechScope extends AbstractJPScope {
      */
     @Override
     protected Scope getPropertyDefaultValue() throws JPNotAvailableException {
-        return new Scope("/speech");
+        return new Scope("/merge");
     }
+
 }

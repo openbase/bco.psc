@@ -67,7 +67,8 @@ public class RSBConnection extends AbstractRSBDualConnection<UnitProbabilityColl
     @Override
     protected RSBListener getInitializedListener() throws InitializationException {
         try {
-            Scope inScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPRayScope.class).getValue());
+            Scope inScope = JPService.getProperty(JPPSCBaseScope.class).getValue()
+                    .concat(JPService.getProperty(JPRayScope.class).getValue());
             LOGGER.info("Initializing RSB Listener on scope: " + inScope);
             if (JPService.getProperty(JPLocalInput.class).getValue()) {
                 return RSBFactoryImpl.getInstance().createSynchronizedListener(inScope, getLocalConfig());
@@ -88,7 +89,8 @@ public class RSBConnection extends AbstractRSBDualConnection<UnitProbabilityColl
     @Override
     protected RSBInformer<UnitProbabilityCollection> getInitializedInformer() throws InitializationException {
         try {
-            Scope outScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPIntentScope.class).getValue());
+            Scope outScope = JPService.getProperty(JPIntentScope.class).getValue()
+                    .concat(JPService.getProperty(JPMergeScope.class).getValue());
             LOGGER.info("Initializing RSB Informer on scope: " + outScope);
             if (JPService.getProperty(JPLocalOutput.class).getValue()) {
                 LOGGER.warn("RSB output set to socket and localhost.");

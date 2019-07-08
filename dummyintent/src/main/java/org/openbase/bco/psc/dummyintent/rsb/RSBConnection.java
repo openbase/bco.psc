@@ -64,7 +64,8 @@ public class RSBConnection extends AbstractRSBDualConnection<Message> {
     @Override
     protected RSBListener getInitializedListener() throws InitializationException {
         try {
-            Scope inScope = JPService.getProperty(JPSpeechScope.class).getValue();
+            Scope inScope = JPService.getProperty(JPIntentScope.class).getValue()
+                    .concat(JPService.getProperty(JPTestScope.class).getValue());
             LOGGER.info("Initializing RSB Listener on scope: " + inScope);
             if (JPService.getProperty(JPLocalInput.class).getValue()) {
                 return RSBFactoryImpl.getInstance().createSynchronizedListener(inScope, getLocalConfig());
@@ -84,13 +85,12 @@ public class RSBConnection extends AbstractRSBDualConnection<Message> {
      */
     @Override
     protected RSBInformer<Message> getInitializedInformer() throws InitializationException {
-        // RSBInformer<T> T extends Message & MessageOrBuilder  see AbstractRSBDualConnection
         try {
-            Scope outScope = JPService.getProperty(JPSpeechScope.class).getValue();
-           // Scope outScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPIntentScope.class).getValue());
+            Scope outScope = JPService.getProperty(JPIntentScope.class).getValue()
+                    .concat(JPService.getProperty(JPSpeechScope.class).getValue());
             LOGGER.info("Initializing RSB Informer on scope: " + outScope);
             if (JPService.getProperty(JPLocalOutput.class).getValue()) {
-                LOGGER.warn("RSB output set to socket and localhost."); // what ??
+                LOGGER.warn("RSB output set to socket and localhost.");
                 return RSBFactoryImpl.getInstance().createSynchronizedInformer(outScope, Message.class, getLocalConfig());
 
             } else {
