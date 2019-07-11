@@ -21,15 +21,15 @@ package org.openbase.bco.psc.control.rsb;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import org.openbase.bco.psc.lib.jp.JPLocalInput;
-import org.openbase.bco.psc.lib.jp.JPMergeScope;
-import org.openbase.bco.psc.lib.jp.JPIntentScope;
+import org.openbase.bco.psc.lib.jp.*;
+import org.openbase.bco.psc.lib.rsb.AbstractRSBDualConnection;
 import org.openbase.bco.psc.lib.rsb.AbstractRSBListenerConnection;
 import org.openbase.jps.core.JPService;
 import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InitializationException;
 import org.openbase.jul.extension.rsb.com.RSBFactoryImpl;
+import org.openbase.jul.extension.rsb.iface.RSBInformer;
 import org.openbase.jul.extension.rsb.iface.RSBListener;
 import org.openbase.type.domotic.action.ActionParameterType.ActionParameter;
 import org.slf4j.LoggerFactory;
@@ -42,7 +42,7 @@ import org.openbase.type.domotic.unit.UnitProbabilityCollectionType.UnitProbabil
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public class RSBConnection extends AbstractRSBListenerConnection {
+public class RSBConnection extends AbstractRSBDualConnection<UnitProbabilityCollection> {
 
     /**
      * Logger instance.
@@ -90,5 +90,28 @@ public class RSBConnection extends AbstractRSBListenerConnection {
         registerConverterForType(ActionParameter.getDefaultInstance());
         LOGGER.debug("Registering UnitProbabilityCollection converter for Listener.");
         registerConverterForType(UnitProbabilityCollection.getDefaultInstance());
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     * @throws InitializationException {@inheritDoc}
+     */
+    @Override
+    protected RSBInformer<UnitProbabilityCollection> getInitializedInformer() throws InitializationException {
+        try {
+            Scope outScope = JPService.getProperty(JPPSCBaseScope.class).getValue()
+                    .concat(JPService.getProperty(JPSelectedUnitScope.class).getValue());
+            LOGGER.info("Initializing RSB Informer on scope: " + outScope);
+            if (JPService.getProperty(JPLocalOutput.class).getValue()) {
+                LOGGER.warn("RSB output set to socket and localhost.");
+                return RSBFactoryImpl.getInstance().createSynchronizedInformer(outScope, UnitProbabilityCollection.class, getLocalConfig());
+            } else {
+                return RSBFactoryImpl.getInstance().createSynchronizedInformer(outScope, UnitProbabilityCollection.class);
+            }
+        } catch (JPNotAvailableException | CouldNotPerformException ex) {
+            throw new InitializationException(RSBConnection.class, ex);
+        }
     }
 }

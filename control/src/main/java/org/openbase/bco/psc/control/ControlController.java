@@ -11,12 +11,12 @@ package org.openbase.bco.psc.control;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -121,36 +121,33 @@ public class ControlController extends AbstractEventHandler implements Control, 
      */
     @Override
     public void handleEvent(final Event event) throws InterruptedException {
-        LOGGER.trace(event.toString());
-        LOGGER.info("enter handleEvent");
+        try {
 
-        if (event.getData() instanceof UnitProbabilityCollection) {  // this could also be done with event.scope
-            UnitProbabilityCollection units = (UnitProbabilityCollection) event.getData();
+            LOGGER.trace(event.toString());
+            LOGGER.info("enter handleEvent");
 
-            List<UnitProbability> selectedUnits = units.getElementList().stream()
-                    .filter(x -> x.getProbability() >= threshold)
-                    .collect(Collectors.toList());
+            if (event.getData() instanceof UnitProbabilityCollection) {  // this could also be done with event.scope
+                UnitProbabilityCollection unitProbabilityCollection = (UnitProbabilityCollection) event.getData();
 
-            if (selectedUnits.size() > 0) {
-                UnitProbabilityCollection unitProbabilityCollection = UnitProbabilityCollection.newBuilder().addAllElement(selectedUnits).build();
-                selectedUnitIntents.put(event.getMetaData().getReceiveTime(), unitProbabilityCollection);
-                try {
+                rsbConnection.publishData(unitProbabilityCollection);
+
+                List<UnitProbability> selectedUnits = unitProbabilityCollection.getElementList().stream()
+                        .filter(x -> x.getProbability() >= threshold)
+                        .collect(Collectors.toList());
+
+                if (selectedUnits.size() > 0) {
+                    unitProbabilityCollection = UnitProbabilityCollection.newBuilder().addAllElement(selectedUnits).build();
+                    selectedUnitIntents.put(event.getMetaData().getReceiveTime(), unitProbabilityCollection);
                     handleIntents();
-                } catch (CouldNotPerformException ex) {
-                    ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
                 }
-            }
-
-        } else if (event.getData() instanceof ActionParameter) {
-            receivedStatesIntents.put(event.getMetaData().getReceiveTime(), (ActionParameter) event.getData());
-            try {
+            } else if (event.getData() instanceof ActionParameter) {
+                receivedStatesIntents.put(event.getMetaData().getReceiveTime(), (ActionParameter) event.getData());
                 handleIntents();
-            } catch (CouldNotPerformException ex) {
-                ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
             }
+        } catch (
+                CouldNotPerformException ex) {
+            ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
         }
-
-
     }
 
     private synchronized void handleIntents() throws CouldNotPerformException, InterruptedException {
