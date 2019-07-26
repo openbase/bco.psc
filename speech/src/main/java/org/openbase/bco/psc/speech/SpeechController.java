@@ -11,12 +11,12 @@ package org.openbase.bco.psc.speech;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -44,6 +44,8 @@ import org.openbase.type.vision.HSBColorType.HSBColor;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Event;
+import rst.dialog.SpeechHypothesesType;
+import rst.dialog.SpeechHypothesesType.SpeechHypotheses;
 import rst.dialog.SpeechHypothesisType.SpeechHypothesis;
 
 import java.io.IOException;
@@ -64,27 +66,34 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
     public void handleEvent(final Event event) {
         LOGGER.trace(event.toString());
 
+        SpeechHypothesis speechHypothesis = null;
         if (event.getData() instanceof SpeechHypothesis) {
-            SpeechHypothesis speechHypothesis = (SpeechHypothesis) event.getData();
-            LOGGER.info("SpeechHypothesis detected: " + speechHypothesis);
-
-            try {
-                //ArrayList<ActionParameter> actionParameters = keywordConverter.getActions(intents);
-                ActionParameter actionParameter = keywordConverter.getAction(speechHypothesis);
-                if (actionParameter == null) {
-                    LOGGER.warn("No matching action found.");
-                }
-
-                rsbConnection.publishData(actionParameter);
-                LOGGER.info("PUBLISHED action: " + actionParameter);
-
-            } catch (CouldNotPerformException ex) {
-                ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
-            } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
-                ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
-            }
+            speechHypothesis = (SpeechHypothesis) event.getData();
+        } else if (event.getData() instanceof SpeechHypotheses) {
+            SpeechHypotheses speechHypotheses = (SpeechHypotheses) event.getData();
+            speechHypothesis = speechHypotheses.getBestResult();
         }
+
+        LOGGER.info("SpeechHypothesis detected: " + speechHypothesis);
+        if (speechHypothesis == null) return;
+        
+        try {
+            //ArrayList<ActionParameter> actionParameters = keywordConverter.getActions(intents);
+            ActionParameter actionParameter = keywordConverter.getAction(speechHypothesis);
+            if (actionParameter == null) {
+                LOGGER.warn("No matching action found.");
+            }
+
+            rsbConnection.publishData(actionParameter);
+            LOGGER.info("PUBLISHED action: " + actionParameter);
+
+        } catch (CouldNotPerformException ex) {
+            ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
+        }
+
     }
 
     private void initializeRegistryConnection() throws InterruptedException, CouldNotPerformException {
