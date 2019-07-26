@@ -197,19 +197,19 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(blueState, ServiceTemplateType.ServiceTemplate.ServiceType.COLOR_STATE_SERVICE);
             builder.getActionInitiatorBuilder().setInitiatorType(ActionInitiatorType.ActionInitiator.InitiatorType.HUMAN);
 
-            intentActionMap.put("coloring[light:blau]", builder.build());
+            intentActionMap.put("coloring[color:blau]", builder.build());
 
             // Create ActionParameter for Color=RED
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(redState, ServiceTemplateType.ServiceTemplate.ServiceType.COLOR_STATE_SERVICE);
             builder.getActionInitiatorBuilder().setInitiatorType(ActionInitiatorType.ActionInitiator.InitiatorType.HUMAN);
 
-            intentActionMap.put("coloring[light:rot]", builder.build());
+            intentActionMap.put("coloring[color:rot]", builder.build());
 
             // Create ActionParameter for Color=GREEN
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(greenState, ServiceTemplateType.ServiceTemplate.ServiceType.COLOR_STATE_SERVICE);
             builder.getActionInitiatorBuilder().setInitiatorType(ActionInitiatorType.ActionInitiator.InitiatorType.HUMAN);
 
-            intentActionMap.put("coloring[light:grün]", builder.build());
+            intentActionMap.put("coloring[color:grün]", builder.build());
 
             keywordConverter = new KeywordConverter(intentActionMap);
 
