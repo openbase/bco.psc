@@ -76,7 +76,7 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
 
         LOGGER.info("SpeechHypothesis detected: " + speechHypothesis);
         if (speechHypothesis == null) return;
-        
+
         try {
             //ArrayList<ActionParameter> actionParameters = keywordConverter.getActions(intents);
             ActionParameter actionParameter = keywordConverter.getAction(speechHypothesis);
@@ -172,7 +172,7 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             ActionParameter powerOn = builder.build();
             intentActionMap.put("anmachen", powerOn);
             intentActionMap.put("on", powerOn);
-            intentActionMap.put("powerstate[an]", powerOn);
+            intentActionMap.put("powerstate[light:an]", powerOn);
 
 
             // Create ActionParameter for PowerState=OFF
@@ -182,7 +182,7 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
 
             ActionParameter powerOff = builder.build();
             intentActionMap.put("ausmachen", powerOff);
-            intentActionMap.put("powerstate[aus]", powerOff);
+            intentActionMap.put("powerstate[light:aus]", powerOff);
 
             // Create color states
             Color blue = Color.newBuilder().setHsbColor(HSBColor.newBuilder().setHue(229).setSaturation(0.5).setBrightness(0.5)).build();
@@ -197,19 +197,19 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(blueState, ServiceTemplateType.ServiceTemplate.ServiceType.COLOR_STATE_SERVICE);
             builder.getActionInitiatorBuilder().setInitiatorType(ActionInitiatorType.ActionInitiator.InitiatorType.HUMAN);
 
-            intentActionMap.put("coloring[blau]", builder.build());
+            intentActionMap.put("coloring[light:blau]", builder.build());
 
             // Create ActionParameter for Color=RED
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(redState, ServiceTemplateType.ServiceTemplate.ServiceType.COLOR_STATE_SERVICE);
             builder.getActionInitiatorBuilder().setInitiatorType(ActionInitiatorType.ActionInitiator.InitiatorType.HUMAN);
 
-            intentActionMap.put("coloring[rot]", builder.build());
+            intentActionMap.put("coloring[light:rot]", builder.build());
 
             // Create ActionParameter for Color=GREEN
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(greenState, ServiceTemplateType.ServiceTemplate.ServiceType.COLOR_STATE_SERVICE);
             builder.getActionInitiatorBuilder().setInitiatorType(ActionInitiatorType.ActionInitiator.InitiatorType.HUMAN);
 
-            intentActionMap.put("coloring[grün]", builder.build());
+            intentActionMap.put("coloring[light:grün]", builder.build());
 
             keywordConverter = new KeywordConverter(intentActionMap);
 
