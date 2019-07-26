@@ -57,7 +57,7 @@ public class DummyIntentController extends AbstractEventHandler implements Speec
 
         if (event.getData() instanceof String) {
 
-            String intent = (String) event.getData(); //should be something like colorstate[blau]
+            String intent = (String) event.getData(); // should be something like colorstate[color:blau]
 
             try {
 
