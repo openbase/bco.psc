@@ -11,19 +11,25 @@ package org.openbase.bco.psc.control;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
 
+import org.openbase.bco.dal.lib.layer.service.ServiceRemote;
 import org.openbase.bco.dal.remote.action.RemoteAction;
+import org.openbase.bco.dal.remote.layer.service.BlindStateServiceRemote;
+import org.openbase.bco.dal.remote.layer.service.ServiceRemoteFactoryImpl;
+import org.openbase.bco.dal.remote.layer.unit.Units;
+import org.openbase.bco.dal.remote.layer.unit.connection.ConnectionRemote;
+import org.openbase.bco.dal.remote.layer.unit.location.LocationRemote;
 import org.openbase.bco.psc.control.jp.JPControlThreshold;
 import org.openbase.bco.psc.control.jp.JPIntentTimeout;
 import org.openbase.bco.psc.control.rsb.RSBConnection;
@@ -44,11 +50,18 @@ import org.openbase.jul.storage.registry.SynchronizableRegistryImpl;
 import org.openbase.type.domotic.action.ActionParameterType;
 import org.openbase.type.domotic.action.ActionParameterType.ActionParameter;
 import org.openbase.type.domotic.service.ServiceConfigType;
+import org.openbase.type.domotic.service.ServiceTemplateType;
 import org.openbase.type.domotic.service.ServiceTemplateType.ServiceTemplate;
 import org.openbase.type.domotic.service.ServiceTemplateType.ServiceTemplate.ServiceType;
+import org.openbase.type.domotic.state.BlindStateType;
+import org.openbase.type.domotic.state.WindowStateType;
+import org.openbase.type.domotic.state.WindowStateType.WindowState;
 import org.openbase.type.domotic.unit.UnitConfigType;
 import org.openbase.type.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
 import org.openbase.type.domotic.unit.UnitProbabilityType.UnitProbability;
+import org.openbase.type.domotic.unit.UnitTemplateType;
+import org.openbase.type.domotic.unit.connection.ConnectionConfigType;
+import org.openbase.type.domotic.unit.connection.ConnectionConfigType.ConnectionConfig.ConnectionType;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Event;
@@ -61,6 +74,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
+import static org.openbase.type.domotic.service.ServiceTemplateType.ServiceTemplate.ServiceType.BLIND_STATE_SERVICE;
 
 /**
  * The controller class of this application.
@@ -113,6 +127,8 @@ public class ControlController extends AbstractEventHandler implements Control, 
 
     private TreeMap<Long, ActionParameter> receivedStatesIntents;
 
+    private ServiceRemote<WindowState, SERVICE>
+
 
     /**
      * {@inheritDoc}
@@ -120,6 +136,7 @@ public class ControlController extends AbstractEventHandler implements Control, 
      * @param event {@inheritDoc}
      */
     @Override
+
     public void handleEvent(final Event event) throws InterruptedException {
         try {
             LOGGER.trace(event.toString());
@@ -197,7 +214,7 @@ public class ControlController extends AbstractEventHandler implements Control, 
                                 completeActionDescription(actionParameter, unitId);
                                 break;
                             } else {
-                                // store unmatched intents for later
+                                // restore unmatched intents for reuse
                                 unmatchedSelectedUnitIntents.put(selectedUnitKey, unitProbabilityCollection);
                                 unmatchedReceivedStatesIntents.put(receivedUnitKey, actionParameter);
                             }
@@ -223,9 +240,25 @@ public class ControlController extends AbstractEventHandler implements Control, 
             ActionParameter.Builder builder = actionParameter.toBuilder();
             builder.getServiceStateDescriptionBuilder().setUnitId(unitId);
             ActionParameter actionParameterNew = builder.build();
+
+            // WORKAROUND: security check if windows are closed when using blind service
+            if (actionParameterNew.getServiceStateDescription().getServiceType() == BLIND_STATE_SERVICE) {
+                LocationRemote living = Units.getUnitByAlias("LIVING", false, Units.LOCATION);
+                List<? extends ConnectionRemote> connectionRemotes = living.getUnits(UnitTemplateType.UnitTemplate.UnitType.CONNECTION, false, Units.CONNECTION);
+                for (ConnectionRemote connectionRemote : connectionRemotes) {
+                    if (connectionRemote.getConfig().getConnectionConfig().getConnectionType() == ConnectionType.WINDOW) {
+                        if (connectionRemote.getWindowState().getValue() != WindowState.State.CLOSED) {
+                            LOGGER.warn("RemoteAction was canceled because of open window!");
+                            return;
+                        }
+                    }
+                }
+            }
+
             RemoteAction remoteAction = new RemoteAction(actionParameterNew);
             remoteAction.execute().get(5, TimeUnit.SECONDS);
             LOGGER.info("RemoteAction was delivered " + remoteAction);
+
             //remoteAction.waitUntilDone();
 
         } catch (CouldNotPerformException | ExecutionException | TimeoutException ex) {
