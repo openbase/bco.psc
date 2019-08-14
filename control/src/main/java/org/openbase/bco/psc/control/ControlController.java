@@ -127,16 +127,12 @@ public class ControlController extends AbstractEventHandler implements Control, 
 
     private TreeMap<Long, ActionParameter> receivedStatesIntents;
 
-    private ServiceRemote<WindowState, SERVICE>
-
-
     /**
      * {@inheritDoc}
      *
      * @param event {@inheritDoc}
      */
     @Override
-
     public void handleEvent(final Event event) throws InterruptedException {
         try {
             LOGGER.trace(event.toString());
