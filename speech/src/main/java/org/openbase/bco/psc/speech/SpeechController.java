@@ -37,6 +37,7 @@ import org.openbase.jul.iface.VoidInitializable;
 import org.openbase.type.domotic.action.ActionInitiatorType;
 import org.openbase.type.domotic.action.ActionParameterType.ActionParameter;
 import org.openbase.type.domotic.service.ServiceTemplateType;
+import org.openbase.type.domotic.state.BlindStateType;
 import org.openbase.type.domotic.state.ColorStateType;
 import org.openbase.type.domotic.state.PowerStateType;
 import org.openbase.type.vision.ColorType.Color;
@@ -166,6 +167,9 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             // Create ActionParameter for PowerState=ON
             PowerStateType.PowerState onState = PowerStateType.PowerState.newBuilder().setValue(PowerStateType.PowerState.State.ON).build();
             ServiceTemplateType.ServiceTemplate.ServiceType powerServiceType = ServiceTemplateType.ServiceTemplate.ServiceType.POWER_STATE_SERVICE;
+            ServiceTemplateType.ServiceTemplate.ServiceType blindServiceType = ServiceTemplateType.ServiceTemplate.ServiceType.BLIND_STATE_SERVICE;
+            ServiceTemplateType.ServiceTemplate.ServiceType colorServiceType = ServiceTemplateType.ServiceTemplate.ServiceType.COLOR_STATE_SERVICE;
+            ActionInitiatorType.ActionInitiator.InitiatorType initiator = ActionInitiatorType.ActionInitiator.InitiatorType.HUMAN;
             ActionParameter.Builder builder = ActionDescriptionProcessor.generateDefaultActionParameter(onState, powerServiceType);
             builder.getActionInitiatorBuilder().setInitiatorType(ActionInitiatorType.ActionInitiator.InitiatorType.HUMAN);
 
@@ -178,11 +182,21 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             // Create ActionParameter for PowerState=OFF
             PowerStateType.PowerState offState = PowerStateType.PowerState.newBuilder().setValue(PowerStateType.PowerState.State.OFF).build();
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(offState, powerServiceType);
-            builder.getActionInitiatorBuilder().setInitiatorType(ActionInitiatorType.ActionInitiator.InitiatorType.HUMAN);
+            builder.getActionInitiatorBuilder().setInitiatorType(initiator);
 
             ActionParameter powerOff = builder.build();
             intentActionMap.put("ausmachen", powerOff);
             intentActionMap.put("light[power:aus]", powerOff);
+
+            //Create ActionParameter for Blindstate=UP
+            BlindStateType.BlindState upState = BlindStateType.BlindState.newBuilder().setValue(BlindStateType.BlindState.State.UP).build();
+            builder = ActionDescriptionProcessor.generateDefaultActionParameter(upState, blindServiceType);
+            builder.getActionInitiatorBuilder().setInitiatorType(initiator);
+
+            //Create ActionParameter for Blindstate=DOWN
+            BlindStateType.BlindState downState = BlindStateType.BlindState.newBuilder().setValue(BlindStateType.BlindState.State.DOWN).build();
+            builder = ActionDescriptionProcessor.generateDefaultActionParameter(downState, blindServiceType);
+            builder.getActionInitiatorBuilder().setInitiatorType(initiator);
 
             // Create color states
             Color blue = Color.newBuilder().setHsbColor(HSBColor.newBuilder().setHue(229).setSaturation(0.5).setBrightness(0.5)).build();
@@ -198,32 +212,32 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             ColorStateType.ColorState lilaState = ColorStateType.ColorState.newBuilder().setColor(lila).build();
 
             // Create ActionParameter for Color=BLUE
-            builder = ActionDescriptionProcessor.generateDefaultActionParameter(blueState, ServiceTemplateType.ServiceTemplate.ServiceType.COLOR_STATE_SERVICE);
-            builder.getActionInitiatorBuilder().setInitiatorType(ActionInitiatorType.ActionInitiator.InitiatorType.HUMAN);
+            builder = ActionDescriptionProcessor.generateDefaultActionParameter(blueState, colorServiceType);
+            builder.getActionInitiatorBuilder().setInitiatorType(initiator);
 
             intentActionMap.put("light[color:blau]", builder.build());
 
             // Create ActionParameter for Color=RED
-            builder = ActionDescriptionProcessor.generateDefaultActionParameter(redState, ServiceTemplateType.ServiceTemplate.ServiceType.COLOR_STATE_SERVICE);
-            builder.getActionInitiatorBuilder().setInitiatorType(ActionInitiatorType.ActionInitiator.InitiatorType.HUMAN);
+            builder = ActionDescriptionProcessor.generateDefaultActionParameter(redState, colorServiceType);
+            builder.getActionInitiatorBuilder().setInitiatorType(initiator);
 
             intentActionMap.put("light[color:rot]", builder.build());
 
             // Create ActionParameter for Color=GREEN
-            builder = ActionDescriptionProcessor.generateDefaultActionParameter(greenState, ServiceTemplateType.ServiceTemplate.ServiceType.COLOR_STATE_SERVICE);
-            builder.getActionInitiatorBuilder().setInitiatorType(ActionInitiatorType.ActionInitiator.InitiatorType.HUMAN);
+            builder = ActionDescriptionProcessor.generateDefaultActionParameter(greenState, colorServiceType);
+            builder.getActionInitiatorBuilder().setInitiatorType(initiator);
 
             intentActionMap.put("light[color:grün]", builder.build());
 
             // Create ActionParameter for Color=PINK
-            builder = ActionDescriptionProcessor.generateDefaultActionParameter(pinkState, ServiceTemplateType.ServiceTemplate.ServiceType.COLOR_STATE_SERVICE);
-            builder.getActionInitiatorBuilder().setInitiatorType(ActionInitiatorType.ActionInitiator.InitiatorType.HUMAN);
+            builder = ActionDescriptionProcessor.generateDefaultActionParameter(pinkState, colorServiceType);
+            builder.getActionInitiatorBuilder().setInitiatorType(initiator);
 
             intentActionMap.put("light[color:pink]", builder.build());
 
             // Create ActionParameter for Color=LILA
-            builder = ActionDescriptionProcessor.generateDefaultActionParameter(lilaState, ServiceTemplateType.ServiceTemplate.ServiceType.COLOR_STATE_SERVICE);
-            builder.getActionInitiatorBuilder().setInitiatorType(ActionInitiatorType.ActionInitiator.InitiatorType.HUMAN);
+            builder = ActionDescriptionProcessor.generateDefaultActionParameter(lilaState, colorServiceType);
+            builder.getActionInitiatorBuilder().setInitiatorType(initiator);
 
             intentActionMap.put("light[color:lila]", builder.build());
 
