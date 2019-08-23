@@ -7,14 +7,14 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="bco.psc.speech" />
+        <module name="bco.psc.dummyintent" />
         <module name="bco.psc.skeleton-merging" />
         <module name="bco.psc.test" />
         <module name="bco.psc.ray-extractor" />
-        <module name="bco.psc.control" />
         <module name="bco.psc.lib" />
         <module name="bco.psc.util" />
         <module name="bco.psc.identification" />
-        <module name="bco.psc.dummyintent" />
+        <module name="bco.psc.control" />
       </profile>
     </annotationProcessing>
   </component>
