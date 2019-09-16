@@ -23,15 +23,13 @@ package org.openbase.bco.psc.control;
  * #L%
  */
 
-import org.openbase.bco.dal.lib.layer.service.ServiceRemote;
 import org.openbase.bco.dal.remote.action.RemoteAction;
-import org.openbase.bco.dal.remote.layer.service.BlindStateServiceRemote;
-import org.openbase.bco.dal.remote.layer.service.ServiceRemoteFactoryImpl;
 import org.openbase.bco.dal.remote.layer.unit.Units;
 import org.openbase.bco.dal.remote.layer.unit.connection.ConnectionRemote;
 import org.openbase.bco.dal.remote.layer.unit.location.LocationRemote;
 import org.openbase.bco.psc.control.jp.JPControlThreshold;
 import org.openbase.bco.psc.control.jp.JPIntentTimeout;
+import org.openbase.bco.psc.control.jp.JPLegacyMode;
 import org.openbase.bco.psc.control.rsb.RSBConnection;
 import org.openbase.bco.psc.lib.jp.JPPscUnitFilterList;
 import org.openbase.bco.psc.lib.registry.PointingUnitChecker;
@@ -50,23 +48,21 @@ import org.openbase.jul.storage.registry.SynchronizableRegistryImpl;
 import org.openbase.type.domotic.action.ActionParameterType;
 import org.openbase.type.domotic.action.ActionParameterType.ActionParameter;
 import org.openbase.type.domotic.service.ServiceConfigType;
-import org.openbase.type.domotic.service.ServiceTemplateType;
 import org.openbase.type.domotic.service.ServiceTemplateType.ServiceTemplate;
 import org.openbase.type.domotic.service.ServiceTemplateType.ServiceTemplate.ServiceType;
-import org.openbase.type.domotic.state.BlindStateType;
-import org.openbase.type.domotic.state.WindowStateType;
 import org.openbase.type.domotic.state.WindowStateType.WindowState;
 import org.openbase.type.domotic.unit.UnitConfigType;
 import org.openbase.type.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
 import org.openbase.type.domotic.unit.UnitProbabilityType.UnitProbability;
 import org.openbase.type.domotic.unit.UnitTemplateType;
-import org.openbase.type.domotic.unit.connection.ConnectionConfigType;
 import org.openbase.type.domotic.unit.connection.ConnectionConfigType.ConnectionConfig.ConnectionType;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Event;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -97,6 +93,7 @@ public class ControlController extends AbstractEventHandler implements Control, 
      * The synchronizer which synchronizes the unit registry with the internal controllableObjectRegistry.
      */
     private RegistrySynchronizer<String, ControllableObject, UnitConfigType.UnitConfig, UnitConfigType.UnitConfig.Builder> controllableObjectRegistrySynchronizer;
+
     /**
      * Internal synchronized registry containing all controllable objects.
      */
@@ -106,25 +103,40 @@ public class ControlController extends AbstractEventHandler implements Control, 
      * The flags used to identify controllable objects in the unit registry.
      */
     private List<String> registryFlags;
+
     /**
      * Probability threshold, that has to be exceeded for a control action to take place.
      */
     private double threshold;
+
     /**
      * Timeout for keeping and matching intent events.
      */
     private Long intentTimeout;
+
+    /**
+     * Flag for legacy mode.
+     */
+    private Boolean inLegacyMode;
+
     /**
      * Activation state of this class.
      */
     private boolean active = false;
+
     /**
      * Initialization state of this class.
      */
     private boolean initialized = false;
 
+    /**
+     * Collection of the selected UnitProbabilityCollections with the selection time.
+     */
     private TreeMap<Long, UnitProbabilityCollection> selectedUnitIntents;
 
+    /**
+     * Collection of the received ActionParameters with the time of arrival.
+     */
     private TreeMap<Long, ActionParameter> receivedStatesIntents;
 
     /**
@@ -136,26 +148,46 @@ public class ControlController extends AbstractEventHandler implements Control, 
     public void handleEvent(final Event event) throws InterruptedException {
         try {
             LOGGER.trace(event.toString());
-            if (event.getData() instanceof UnitProbabilityCollection) {  // this could also be done with event.scope
-                UnitProbabilityCollection unitProbabilityCollection = (UnitProbabilityCollection) event.getData();
+            if (inLegacyMode) {
+                if (event.getData() instanceof UnitProbabilityCollection) {
+                    UnitProbabilityCollection collection = (UnitProbabilityCollection) event.getData();
+                    collection.getElementList().stream().filter(x -> x.getProbability() >= threshold).forEach(x -> {
+                        if (controllableObjectRegistry.contains(x.getId())) {
+                            try {
+                                if (controllableObjectRegistry.get(x.getId()).switchPowerState()) {
+                                    LOGGER.info("Switched power state of unit " + controllableObjectRegistry.get(x.getId()).getConfig().getLabel() + " with id " + x.getId());
+                                } else {
+                                    LOGGER.trace("Did not switch power state of unit " + controllableObjectRegistry.get(x.getId()).getConfig().getLabel() + " with id " + x.getId());
+                                }
+                            } catch (InterruptedException ex) {
+                                // skip run because of interruption
+                            } catch (CouldNotPerformException ex) {
+                                ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
+                            }
+                        }
+                    });
+                }
+            } else {
+                if (event.getData() instanceof UnitProbabilityCollection) {  // this could also be done with event.scope
+                    UnitProbabilityCollection unitProbabilityCollection = (UnitProbabilityCollection) event.getData();
 
-                rsbConnection.publishData(unitProbabilityCollection);
+                    rsbConnection.publishData(unitProbabilityCollection);
 
-                List<UnitProbability> selectedUnits = unitProbabilityCollection.getElementList().stream()
-                        .filter(x -> x.getProbability() >= threshold)
-                        .collect(Collectors.toList());
+                    List<UnitProbability> selectedUnits = unitProbabilityCollection.getElementList().stream()
+                            .filter(x -> x.getProbability() >= threshold)
+                            .collect(Collectors.toList());
 
-                if (selectedUnits.size() > 0) {
-                    unitProbabilityCollection = UnitProbabilityCollection.newBuilder().addAllElement(selectedUnits).build();
-                    selectedUnitIntents.put(event.getMetaData().getReceiveTime(), unitProbabilityCollection);
+                    if (selectedUnits.size() > 0) {
+                        unitProbabilityCollection = UnitProbabilityCollection.newBuilder().addAllElement(selectedUnits).build();
+                        selectedUnitIntents.put(event.getMetaData().getReceiveTime(), unitProbabilityCollection);
+                        handleIntents();
+                    }
+                } else if (event.getData() instanceof ActionParameter) {
+                    receivedStatesIntents.put(event.getMetaData().getReceiveTime(), (ActionParameter) event.getData());
                     handleIntents();
                 }
-            } else if (event.getData() instanceof ActionParameter) {
-                receivedStatesIntents.put(event.getMetaData().getReceiveTime(), (ActionParameter) event.getData());
-                handleIntents();
             }
-        } catch (
-                CouldNotPerformException ex) {
+        } catch (CouldNotPerformException ex) {
             ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
         }
     }
@@ -280,6 +312,8 @@ public class ControlController extends AbstractEventHandler implements Control, 
                 threshold = JPService.getProperty(JPControlThreshold.class).getValue();
                 LOGGER.info("Selected Control threshold: " + threshold);
                 intentTimeout = JPService.getProperty(JPIntentTimeout.class).getValue();
+                LOGGER.info("Selected intent timeout: " + intentTimeout);
+                inLegacyMode = JPService.getProperty(JPLegacyMode.class).getValue();
                 LOGGER.info("Selected intent timeout: " + intentTimeout);
 
                 initializeRegistryConnection();
