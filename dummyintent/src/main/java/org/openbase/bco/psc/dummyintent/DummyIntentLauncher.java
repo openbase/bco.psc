@@ -33,11 +33,18 @@ import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InstantiationException;
 import org.openbase.jul.pattern.launch.AbstractLauncher;
 
-
+/**
+ * This class launches the dummy intent
+ *
+ * @author <a href="mailto:dreinsch@techfak.uni-bielefeld.de">Dennis Reinsch</a>
+ * @author <a href="mailto:jbitschene@techfak.uni-bielefeld.de">Jennifer Bitschene</a>
+ * @author <a href="mailto:jniermann@techfak.uni-bielefeld.de">Julia Niermann</a>
+ *
+ */
 public class DummyIntentLauncher extends AbstractLauncher<DummyIntentController> {
 
     public DummyIntentLauncher() throws InstantiationException {
-        super(SpeechHypothesisTest.class, DummyIntentController.class);
+        super(DummyIntent.class, DummyIntentController.class);
     }
 
     @Override
@@ -69,7 +76,7 @@ public class DummyIntentLauncher extends AbstractLauncher<DummyIntentController>
      */
     public static void main(final String[] args) throws InterruptedException, CouldNotPerformException {
         BCO.printLogo();
-        AbstractLauncher.main(args, SpeechHypothesisTest.class, DummyIntentLauncher.class);
+        AbstractLauncher.main(args, DummyIntent.class, DummyIntentLauncher.class);
 
     }
 }

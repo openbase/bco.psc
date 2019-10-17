@@ -22,5 +22,5 @@ package org.openbase.bco.psc.dummyintent;
  * #L%
  */
 
-public interface SpeechHypothesisTest {
+public interface DummyIntent {
 }

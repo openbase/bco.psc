@@ -11,20 +11,18 @@ package org.openbase.bco.psc.dummyintent;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
 
-import com.google.protobuf.Message;
-import org.openbase.bco.dal.lib.layer.unit.Unit;
 import org.openbase.bco.psc.dummyintent.rsb.RSBConnection;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -42,8 +40,15 @@ import rsb.AbstractEventHandler;
 import rsb.Event;
 import rst.dialog.SpeechHypothesisType.SpeechHypothesis;
 
-
-public class DummyIntentController extends AbstractEventHandler implements SpeechHypothesisTest, Launchable<Void>, VoidInitializable {
+/**
+ * This class controls the dummy intent
+ *
+ * @author <a href="mailto:dreinsch@techfak.uni-bielefeld.de">Dennis Reinsch</a>
+ * @author <a href="mailto:jbitschene@techfak.uni-bielefeld.de">Jennifer Bitschene</a>
+ * @author <a href="mailto:jniermann@techfak.uni-bielefeld.de">Julia Niermann</a>
+ *
+ */
+public class DummyIntentController extends AbstractEventHandler implements DummyIntent, Launchable<Void>, VoidInitializable {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(DummyIntentController.class);
     private RSBConnection rsbConnection;
