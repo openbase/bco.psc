@@ -30,6 +30,8 @@ import org.openbase.jps.exception.JPNotAvailableException;
  * JavaProperty used to specify the timeout defining how long an intent will be kept and used for matching.
  *
  * @author <a href="mailto:dreinsch@techfak.uni-bielefeld.de">Dennis Reinsch</a>
+ * @author <a href="mailto:jbitschene@techfak.uni-bielefeld.de">Jennifer Bitschene</a>
+ * @author <a href="mailto:jniermann@techfak.uni-bielefeld.de">Julia Niermann</a>
  */
 public class JPIntentTimeout extends AbstractJPTimeout {
 
