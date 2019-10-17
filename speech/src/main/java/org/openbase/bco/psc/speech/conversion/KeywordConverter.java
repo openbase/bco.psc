@@ -27,12 +27,16 @@ import org.slf4j.LoggerFactory;
 import rst.dialog.SpeechHypothesisType.SpeechHypothesis;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
 
+/**
+ * A class that extracts intents from speech and converts them to action parameters.
+ *
+ * @author <a href="mailto:dreinsch@techfak.uni-bielefeld.de">Dennis Reinsch</a>
+ * @author <a href="mailto:jbitschene@techfak.uni-bielefeld.de">Jennifer Bitschene</a>
+ * @author <a href="mailto:jniermann@techfak.uni-bielefeld.de">Julia Niermann</a>
+ */
 public class KeywordConverter {
     /**
      * Logger instance.
@@ -41,7 +45,13 @@ public class KeywordConverter {
 
     private HashMap<String, ActionParameter> keywordIntentMap;
 
-
+    /**
+     * Class that extracts intents from speech and converts them to action parameters.
+     *
+     * @param map the mapping from speech (strings) to corresponding action parameters
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     public KeywordConverter(HashMap<String, ActionParameter> map) throws IOException, ClassNotFoundException {
 
         keywordIntentMap = map;
@@ -52,42 +62,24 @@ public class KeywordConverter {
         }
     }
 
+    /**
+     * Get action parameter from speech hypothesis
+     *
+     * @param speechHypothesis the speech hypothesis
+     * @return corresponding action parameter
+     */
     public ActionParameter getAction(SpeechHypothesis speechHypothesis) {
 
         String grammarTree = speechHypothesis.getGrammarTree();
-        List<String> intentEntity = Arrays.asList(grammarTree.split("\\[,\\]"));
-
-        if (intentEntity.size() > 1) {
-            String intent = intentEntity.get(0);
-            String entity = intentEntity.get(1);
-        }
 
         if (keywordIntentMap.containsKey(grammarTree.trim())) {
             LOGGER.info("Intent detected: " + grammarTree);
-            return keywordIntentMap.get(grammarTree.trim()); // todo change to intent + [entity]
+            return keywordIntentMap.get(grammarTree.trim()); // intent[entity]
         } else {
-
             LOGGER.info("Intent (" + grammarTree + ") not in Map.");
             return null;
         }
 
     }
-
-    public ArrayList<ActionParameter> getActions(List<String> keywords) {
-        LOGGER.info("Converting keywords -> actions");
-
-        ArrayList<ActionParameter> actionParameters = new ArrayList<>();
-        for (String kw : keywords) {
-            if (keywordIntentMap.containsKey(kw)) {
-                ActionParameter event = keywordIntentMap.get(kw);
-                actionParameters.add(event);
-                LOGGER.info("Keyword detected: " + kw + " corresponding event: " + event);
-            } else {
-                LOGGER.info("Keyword (" + kw + ") not in Map.");
-            }
-        }
-        return actionParameters;
-    }
-
 
 }

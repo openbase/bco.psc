@@ -36,7 +36,6 @@ import org.openbase.type.domotic.action.ActionParameterType.ActionParameter;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Scope;
-import rst.dialog.SpeechHypothesesType;
 import rst.dialog.SpeechHypothesesType.SpeechHypotheses;
 import rst.dialog.SpeechHypothesisType.SpeechHypothesis;
 

@@ -45,14 +45,19 @@ import org.openbase.type.vision.HSBColorType.HSBColor;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Event;
-import rst.dialog.SpeechHypothesesType;
 import rst.dialog.SpeechHypothesesType.SpeechHypotheses;
 import rst.dialog.SpeechHypothesisType.SpeechHypothesis;
 
 import java.io.IOException;
 import java.util.HashMap;
 
-
+/**
+ * The speech component of this application.
+ *
+ * @author <a href="mailto:dreinsch@techfak.uni-bielefeld.de">Dennis Reinsch</a>
+ * @author <a href="mailto:jbitschene@techfak.uni-bielefeld.de">Jennifer Bitschene</a>
+ * @author <a href="mailto:jniermann@techfak.uni-bielefeld.de">Julia Niermann</a>
+ */
 public class SpeechController extends AbstractEventHandler implements Speech, Launchable<Void>, VoidInitializable {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(SpeechController.class);
@@ -63,6 +68,9 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
     private KeywordConverter keywordConverter;
 
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void handleEvent(final Event event) {
         LOGGER.trace(event.toString());
@@ -79,12 +87,13 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
         if (speechHypothesis == null) return;
 
         try {
-            //ArrayList<ActionParameter> actionParameters = keywordConverter.getActions(intents);
+            // try mapping speech hypothesis to action parameter
             ActionParameter actionParameter = keywordConverter.getAction(speechHypothesis);
             if (actionParameter == null) {
                 LOGGER.warn("No matching action found.");
             }
 
+            // send action parameter to Control component
             rsbConnection.publishData(actionParameter);
             LOGGER.info("PUBLISHED action: " + actionParameter);
 
@@ -109,6 +118,10 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
         }
     }
 
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void init() throws InitializationException, InterruptedException {
         LOGGER.info("Initializing speech controller...");
@@ -128,6 +141,10 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
         }
     }
 
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void activate() throws CouldNotPerformException, InterruptedException {
         LOGGER.debug("Activating " + getClass().getName() + ".");
@@ -142,6 +159,10 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
         }
     }
 
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void deactivate() throws CouldNotPerformException, InterruptedException {
         LOGGER.debug("Deactivating " + getClass().getName() + ".");
@@ -152,6 +173,10 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
         }
     }
 
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isActive() {
         return active;
@@ -162,8 +187,6 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
         HashMap<String, ActionParameter> intentActionMap = new HashMap<>();
 
         try {
-            //BrightnessStateType.BrightnessState brightState = BrightnessStateType.BrightnessState.newBuilder().setBrightness(-0.5).build();
-
             // Create ActionParameter for PowerState=ON
             PowerStateType.PowerState onState = PowerStateType.PowerState.newBuilder().setValue(PowerStateType.PowerState.State.ON).build();
             ServiceTemplateType.ServiceTemplate.ServiceType powerServiceType = ServiceTemplateType.ServiceTemplate.ServiceType.POWER_STATE_SERVICE;
