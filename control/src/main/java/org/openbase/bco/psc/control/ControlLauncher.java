@@ -24,6 +24,7 @@ package org.openbase.bco.psc.control;
  */
 import org.openbase.bco.psc.control.jp.JPControlThreshold;
 import org.openbase.bco.psc.control.jp.JPCooldownTime;
+import org.openbase.bco.psc.control.jp.JPMultimodalMode;
 import org.openbase.bco.psc.lib.jp.JPIntentScope;
 import org.openbase.bco.psc.lib.jp.JPLocalInput;
 import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
@@ -70,6 +71,9 @@ public class ControlLauncher extends AbstractLauncher<ControlController> {
 
         // Transport specification
         JPService.registerProperty(JPLocalInput.class);
+
+        // Multimodal mode
+        JPService.registerProperty(JPMultimodalMode.class);
     }
 
     /**
