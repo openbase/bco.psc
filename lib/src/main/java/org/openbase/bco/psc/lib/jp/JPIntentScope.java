@@ -27,6 +27,9 @@ import rsb.Scope;
 /**
  * Base scope for intents.
  *
+ * @author <a href="mailto:dreinsch@techfak.uni-bielefeld.de">Dennis Reinsch</a>
+ * @author <a href="mailto:jbitschene@techfak.uni-bielefeld.de">Jennifer Bitschene</a>
+ * @author <a href="mailto:jniermann@techfak.uni-bielefeld.de">Julia Niermann</a>
  */
 public class JPIntentScope extends AbstractJPScope {
     /**
