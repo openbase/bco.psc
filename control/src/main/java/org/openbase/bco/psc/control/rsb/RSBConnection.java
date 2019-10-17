@@ -41,6 +41,9 @@ import org.openbase.type.domotic.unit.UnitProbabilityCollectionType.UnitProbabil
  * This class handles the RSB connections of the project.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
+ * @author <a href="mailto:dreinsch@techfak.uni-bielefeld.de">Dennis Reinsch</a>
+ * @author <a href="mailto:jbitschene@techfak.uni-bielefeld.de">Jennifer Bitschene</a>
+ * @author <a href="mailto:jniermann@techfak.uni-bielefeld.de">Julia Niermann</a>
  */
 public class RSBConnection extends AbstractRSBDualConnection<UnitProbabilityCollection> {
 
