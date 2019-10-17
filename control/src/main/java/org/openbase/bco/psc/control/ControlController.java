@@ -29,7 +29,7 @@ import org.openbase.bco.dal.remote.layer.unit.connection.ConnectionRemote;
 import org.openbase.bco.dal.remote.layer.unit.location.LocationRemote;
 import org.openbase.bco.psc.control.jp.JPControlThreshold;
 import org.openbase.bco.psc.control.jp.JPIntentTimeout;
-import org.openbase.bco.psc.control.jp.JPLegacyMode;
+import org.openbase.bco.psc.control.jp.JPMultimodalMode;
 import org.openbase.bco.psc.control.rsb.RSBConnection;
 import org.openbase.bco.psc.lib.jp.JPPscUnitFilterList;
 import org.openbase.bco.psc.lib.registry.PointingUnitChecker;
@@ -115,9 +115,9 @@ public class ControlController extends AbstractEventHandler implements Control, 
     private Long intentTimeout;
 
     /**
-     * Flag for legacy mode.
+     * Flag for multimodal mode.
      */
-    private Boolean inLegacyMode;
+    private Boolean inMultimodalMode;
 
     /**
      * Activation state of this class.
@@ -148,7 +148,26 @@ public class ControlController extends AbstractEventHandler implements Control, 
     public void handleEvent(final Event event) throws InterruptedException {
         try {
             LOGGER.trace(event.toString());
-            if (inLegacyMode) {
+            if (inMultimodalMode) {
+                if (event.getData() instanceof UnitProbabilityCollection) {  // collect intents and handle them
+                    UnitProbabilityCollection unitProbabilityCollection = (UnitProbabilityCollection) event.getData();
+
+                    rsbConnection.publishData(unitProbabilityCollection);
+
+                    List<UnitProbability> selectedUnits = unitProbabilityCollection.getElementList().stream()
+                            .filter(x -> x.getProbability() >= threshold)
+                            .collect(Collectors.toList());
+
+                    if (selectedUnits.size() > 0) {
+                        unitProbabilityCollection = UnitProbabilityCollection.newBuilder().addAllElement(selectedUnits).build();
+                        selectedUnitIntents.put(event.getMetaData().getReceiveTime(), unitProbabilityCollection);
+                        handleIntents();
+                    }
+                } else if (event.getData() instanceof ActionParameter) {
+                    receivedStatesIntents.put(event.getMetaData().getReceiveTime(), (ActionParameter) event.getData());
+                    handleIntents();
+                }
+            } else {
                 if (event.getData() instanceof UnitProbabilityCollection) {
                     UnitProbabilityCollection collection = (UnitProbabilityCollection) event.getData();
                     collection.getElementList().stream().filter(x -> x.getProbability() >= threshold).forEach(x -> {
@@ -167,25 +186,6 @@ public class ControlController extends AbstractEventHandler implements Control, 
                         }
                     });
                 }
-            } else {
-                if (event.getData() instanceof UnitProbabilityCollection) {  // this could also be done with event.scope
-                    UnitProbabilityCollection unitProbabilityCollection = (UnitProbabilityCollection) event.getData();
-
-                    rsbConnection.publishData(unitProbabilityCollection);
-
-                    List<UnitProbability> selectedUnits = unitProbabilityCollection.getElementList().stream()
-                            .filter(x -> x.getProbability() >= threshold)
-                            .collect(Collectors.toList());
-
-                    if (selectedUnits.size() > 0) {
-                        unitProbabilityCollection = UnitProbabilityCollection.newBuilder().addAllElement(selectedUnits).build();
-                        selectedUnitIntents.put(event.getMetaData().getReceiveTime(), unitProbabilityCollection);
-                        handleIntents();
-                    }
-                } else if (event.getData() instanceof ActionParameter) {
-                    receivedStatesIntents.put(event.getMetaData().getReceiveTime(), (ActionParameter) event.getData());
-                    handleIntents();
-                }
             }
         } catch (CouldNotPerformException ex) {
             ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
@@ -196,13 +196,13 @@ public class ControlController extends AbstractEventHandler implements Control, 
         LOGGER.info("Updated stack: #units: " + selectedUnitIntents.size() + " #states: " + receivedStatesIntents.size());
         removeOldIntents();
         LOGGER.info("After remove: #units: " + selectedUnitIntents.size() + " #states: " + receivedStatesIntents.size());
-
         executeMatchingIntents();
     }
 
     private void removeOldIntents() {
         long currentTime = System.currentTimeMillis() * 1000;
 
+        // logging
         LOGGER.info("Remove: time " + currentTime + " timeout: " + intentTimeout);
         selectedUnitIntents.keySet().forEach(receiveTime ->
                 LOGGER.info("unit receive time " + receiveTime + " diff " + (receiveTime - currentTime)));
@@ -221,18 +221,19 @@ public class ControlController extends AbstractEventHandler implements Control, 
             LOGGER.info("executeMatchingIntents");
             if (selectedUnitIntents.size() > 0 && receivedStatesIntents.size() > 0) {
                 while (selectedUnitIntents.size() > 0) {
-                    Long selectedUnitKey = selectedUnitIntents.firstKey();
-                    UnitProbabilityCollection unitProbabilityCollection = selectedUnitIntents.remove(selectedUnitKey);
+                    Long selectedUnitTime = selectedUnitIntents.firstKey();
+                    UnitProbabilityCollection unitProbabilityCollection = selectedUnitIntents.remove(selectedUnitTime);
                     List<String> selectedUnitIds = unitProbabilityCollection.getElementList().stream()
                             .map(UnitProbability::getId)
                             .collect(Collectors.toList());
+
                     for (String unitId : selectedUnitIds) {
                         LOGGER.info("unitId " + unitId + " used for matching");
                         UnitConfigType.UnitConfig unitConfig = getUnitRegistry().getUnitConfigById(unitId);
 
                         while (receivedStatesIntents.size() > 0) {
-                            Long receivedUnitKey = receivedStatesIntents.firstKey();
-                            ActionParameter actionParameter = receivedStatesIntents.remove(receivedUnitKey);
+                            Long receivedStateTime = receivedStatesIntents.firstKey();
+                            ActionParameter actionParameter = receivedStatesIntents.remove(receivedStateTime);
                             ServiceType serviceType = actionParameter.getServiceStateDescription().getServiceType();
 
                             LOGGER.info(" >   matching with " + serviceType);
@@ -243,8 +244,8 @@ public class ControlController extends AbstractEventHandler implements Control, 
                                 break;
                             } else {
                                 // restore unmatched intents for reuse
-                                unmatchedSelectedUnitIntents.put(selectedUnitKey, unitProbabilityCollection);
-                                unmatchedReceivedStatesIntents.put(receivedUnitKey, actionParameter);
+                                unmatchedSelectedUnitIntents.put(selectedUnitTime, unitProbabilityCollection);
+                                unmatchedReceivedStatesIntents.put(receivedStateTime, actionParameter);
                             }
 
                         }
@@ -263,7 +264,8 @@ public class ControlController extends AbstractEventHandler implements Control, 
                 && x.getServiceDescription().getPattern() == ServiceTemplate.ServicePattern.OPERATION;
     }
 
-    private void completeActionDescription(ActionParameterType.ActionParameter actionParameter, String unitId) throws CouldNotPerformException, InterruptedException {
+    private void completeActionDescription(ActionParameterType.ActionParameter actionParameter, String unitId)
+            throws CouldNotPerformException, InterruptedException {
         try {
             ActionParameter.Builder builder = actionParameter.toBuilder();
             builder.getServiceStateDescriptionBuilder().setUnitId(unitId);
@@ -286,8 +288,6 @@ public class ControlController extends AbstractEventHandler implements Control, 
             RemoteAction remoteAction = new RemoteAction(actionParameterNew);
             remoteAction.execute().get(5, TimeUnit.SECONDS);
             LOGGER.info("RemoteAction was delivered " + remoteAction);
-
-            //remoteAction.waitUntilDone();
 
         } catch (CouldNotPerformException | ExecutionException | TimeoutException ex) {
             throw new CouldNotPerformException("could not complete action.", ex);
@@ -313,7 +313,7 @@ public class ControlController extends AbstractEventHandler implements Control, 
                 LOGGER.info("Selected Control threshold: " + threshold);
                 intentTimeout = JPService.getProperty(JPIntentTimeout.class).getValue();
                 LOGGER.info("Selected intent timeout: " + intentTimeout);
-                inLegacyMode = JPService.getProperty(JPLegacyMode.class).getValue();
+                inMultimodalMode = JPService.getProperty(JPMultimodalMode.class).getValue();
                 LOGGER.info("Selected intent timeout: " + intentTimeout);
 
                 initializeRegistryConnection();

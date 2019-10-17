@@ -3,16 +3,16 @@ package org.openbase.bco.psc.control.jp;
 import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jps.preset.AbstractJPBoolean;
 
-public class JPLegacyMode extends AbstractJPBoolean {
+public class JPMultimodalMode extends AbstractJPBoolean {
     /**
      * The identifiers that can be used in front of the command line argument.
      */
-    public final static String[] COMMAND_IDENTIFIERS = {"--enable-legacy-mode"};
+    public final static String[] COMMAND_IDENTIFIERS = {"--enable-multimodal-mode"};
 
     /**
      * Constructor.
      */
-    public JPLegacyMode() {
+    public JPMultimodalMode() {
         super(COMMAND_IDENTIFIERS);
     }
 
@@ -34,7 +34,7 @@ public class JPLegacyMode extends AbstractJPBoolean {
      */
     @Override
     public String getDescription() {
-        return "Enables the non multi-modal legacy mode.";
+        return "Enables the multi-modal mode.";
     }
 
 }
