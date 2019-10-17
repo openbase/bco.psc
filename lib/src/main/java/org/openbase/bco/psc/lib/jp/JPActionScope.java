@@ -25,10 +25,11 @@ import org.openbase.jps.exception.JPNotAvailableException;
 import rsb.Scope;
 
 /**
- * JPScope used to parse the subscope used for sending and receiving the events
- * produced by skeleton-merging.
+ * JPScope used for receiving actions (ActionParameters)
  *
- * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
+ * @author <a href="mailto:dreinsch@techfak.uni-bielefeld.de">Dennis Reinsch</a>
+ * @author <a href="mailto:jbitschene@techfak.uni-bielefeld.de">Jennifer Bitschene</a>
+ * @author <a href="mailto:jniermann@techfak.uni-bielefeld.de">Julia Niermann</a>
  */
 public class JPActionScope extends AbstractJPScope {
 
