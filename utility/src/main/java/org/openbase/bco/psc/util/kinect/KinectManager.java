@@ -164,7 +164,7 @@ public class KinectManager {
                     Translation rootTranslation = config.getPlacementConfig().getPose().getTranslation();
                     Vec3DDouble rootVector = Vec3DDouble.newBuilder().setX(rootTranslation.getX()).setY(rootTranslation.getY()).setZ(rootTranslation.getZ()).build();
                     try {
-                        List<UnitConfig> locationConfigsByCoordinate = getUnitRegistry(true).getLocationUnitConfigsByCoordinate(rootVector, LocationConfigType.LocationConfig.LocationType.TILE);
+                        List<UnitConfig> locationConfigsByCoordinate = getUnitRegistry(true).getLocationUnitConfigsByCoordinateAndLocationType(rootVector, LocationConfigType.LocationConfig.LocationType.TILE);
                         if (locationConfigsByCoordinate.isEmpty()) {
                             throw new ExecutionException(new CouldNotPerformException("No fitting location could be found."));
                         }
