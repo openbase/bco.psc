@@ -22,10 +22,17 @@ package org.openbase.bco.psc.identification.selection;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 import java.util.Objects;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.media.j3d.Transform3D;
+
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.openbase.bco.registry.remote.Registries;
+import org.openbase.bco.registry.unit.lib.UnitRegistry;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
 import org.openbase.jul.iface.Configurable;
@@ -34,7 +41,6 @@ import org.openbase.type.domotic.unit.UnitConfigType.UnitConfig;
 import org.openbase.type.geometry.AxisAlignedBoundingBox3DFloatType.AxisAlignedBoundingBox3DFloat;
 
 /**
- *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class SelectableObject implements Configurable<String, UnitConfig>, AbstractSelectable {
@@ -48,23 +54,30 @@ public class SelectableObject implements Configurable<String, UnitConfig>, Abstr
      * {@inheritDoc}
      *
      * @param config {@inheritDoc}
+     *
      * @return {@inheritDoc}
+     *
      * @throws CouldNotPerformException {@inheritDoc}
-     * @throws InterruptedException {@inheritDoc}
+     * @throws InterruptedException     {@inheritDoc}
      */
     @Override
     public synchronized UnitConfig applyConfigUpdate(UnitConfig config) throws CouldNotPerformException, InterruptedException {
-        this.config = config;
-        Transform3D unitToRootTransform = Registries.getUnitRegistry(true).getUnitToRootTransform3D(config);
-        AxisAlignedBoundingBox3DFloat aabb = Registries.getUnitRegistry().getUnitShape(config).getBoundingBox();
-        boundingBox = new BoundingBox(unitToRootTransform, aabb);
-        return this.config;
+        try {
+            this.config = config;
+            Transform3D unitToRootTransform = Registries.getUnitRegistry(true).getUnitToRootTransform3D(config).get(UnitRegistry.RCT_TIMEOUT, TimeUnit.MILLISECONDS);
+            AxisAlignedBoundingBox3DFloat aabb = Registries.getUnitRegistry().getUnitShapeByUnitConfig(config).getBoundingBox();
+            boundingBox = new BoundingBox(unitToRootTransform, aabb);
+            return this.config;
+        } catch (TimeoutException | ExecutionException | CancellationException ex) {
+            throw new CouldNotPerformException("Could not apply config update!", ex);
+        }
     }
 
     /**
      * {@inheritDoc}
      *
      * @return {@inheritDoc}
+     *
      * @throws NotAvailableException {@inheritDoc}
      */
     @Override
@@ -79,6 +92,7 @@ public class SelectableObject implements Configurable<String, UnitConfig>, Abstr
      * {@inheritDoc}
      *
      * @return {@inheritDoc}
+     *
      * @throws NotAvailableException {@inheritDoc}
      */
     @Override
@@ -93,6 +107,7 @@ public class SelectableObject implements Configurable<String, UnitConfig>, Abstr
      * {@inheritDoc}
      *
      * @return {@inheritDoc}
+     *
      * @throws NotAvailableException {@inheritDoc}
      */
     @Override
@@ -116,6 +131,7 @@ public class SelectableObject implements Configurable<String, UnitConfig>, Abstr
      * {@inheritDoc}
      *
      * @param obj {@inheritDoc}
+     *
      * @return {@inheritDoc}
      */
     @Override

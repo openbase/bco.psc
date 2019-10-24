@@ -22,9 +22,14 @@ package org.openbase.bco.psc.sm.transformation;
  * #L%
  */
 import java.util.Objects;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.media.j3d.Transform3D;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.openbase.bco.registry.remote.Registries;
+import org.openbase.bco.registry.unit.lib.UnitRegistry;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
 import org.openbase.jul.iface.Configurable;
@@ -73,8 +78,8 @@ public class RegistryTransformer extends Transformer implements Configurable<Str
                 .orElseThrow(() -> new CouldNotPerformException("No scope was found for UnitConfig " + config.getLabel())).getValue());
         Transform3D transform;
         try {
-            transform = Registries.getUnitRegistry(true).getUnitToRootTransform3D(config);
-        } catch (CouldNotPerformException ex) {
+            transform = Registries.getUnitRegistry(true).getUnitToRootTransform3D(config).get(UnitRegistry.RCT_TIMEOUT, TimeUnit.MILLISECONDS);
+        } catch (CouldNotPerformException | TimeoutException | ExecutionException | CancellationException ex) {
             throw new CouldNotPerformException("Could not get the transformation.", ex);
         }
         setTransform(transform);

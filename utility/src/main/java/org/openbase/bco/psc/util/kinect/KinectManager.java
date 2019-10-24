@@ -22,6 +22,7 @@ package org.openbase.bco.psc.util.kinect;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -29,19 +30,22 @@ import java.io.IOException;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
+
 import org.openbase.bco.psc.util.jp.JPKinectLocation;
 import org.openbase.bco.psc.util.jp.JPKinectName;
 import org.openbase.bco.psc.util.jp.JPKinectPlacementFile;
 import org.openbase.bco.psc.util.jp.JPKinectSerialNumber;
 import org.openbase.bco.psc.util.jp.JPKinectUnitId;
 import org.openbase.bco.registry.remote.Registries;
+
 import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
+
+import org.openbase.bco.registry.unit.lib.UnitRegistry;
 import org.openbase.jps.core.JPService;
 import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -62,7 +66,6 @@ import org.openbase.type.math.Vec3DDoubleType.Vec3DDouble;
 import org.openbase.type.spatial.PlacementConfigType.PlacementConfig;
 
 /**
- *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class KinectManager {
@@ -85,7 +88,7 @@ public class KinectManager {
      * Updates the Kinect device config as specified in the JavaProperties.
      *
      * @throws CouldNotPerformException is thrown, if the update could not be executed.
-     * @throws InterruptedException is thrown in case of an external interruption.
+     * @throws InterruptedException     is thrown in case of an external interruption.
      */
     public static void updateKinect() throws CouldNotPerformException, InterruptedException {
         try {
@@ -109,7 +112,7 @@ public class KinectManager {
      * Creates the Kinect device config as specified in the JavaProperties.
      *
      * @throws CouldNotPerformException is thrown, if the creation could not be executed.
-     * @throws InterruptedException is thrown in case of an external interruption.
+     * @throws InterruptedException     is thrown in case of an external interruption.
      */
     public static void createKinect() throws InterruptedException, CouldNotPerformException {
         try {
@@ -148,9 +151,11 @@ public class KinectManager {
      * Updates the registry entry of the given UnitConfig so that the location matches the tile that the Kinect is placed in.
      *
      * @param config Kinect device config to be updated.
+     *
      * @return The resulting UnitConfig saved in the registry.
+     *
      * @throws CouldNotPerformException is thrown, if the update could not be executed.
-     * @throws InterruptedException is thrown in case of an external interruption.
+     * @throws InterruptedException     is thrown in case of an external interruption.
      */
     private static UnitConfig updateLocationId(UnitConfig config) throws CouldNotPerformException, InterruptedException {
         try {
@@ -164,18 +169,18 @@ public class KinectManager {
                     Translation rootTranslation = config.getPlacementConfig().getPose().getTranslation();
                     Vec3DDouble rootVector = Vec3DDouble.newBuilder().setX(rootTranslation.getX()).setY(rootTranslation.getY()).setZ(rootTranslation.getZ()).build();
                     try {
-                        List<UnitConfig> locationConfigsByCoordinate = getUnitRegistry(true).getLocationUnitConfigsByCoordinate(rootVector, LocationConfigType.LocationConfig.LocationType.TILE);
+                        List<UnitConfig> locationConfigsByCoordinate = getUnitRegistry(true).getLocationUnitConfigsByCoordinateAndLocationType(rootVector, LocationConfigType.LocationConfig.LocationType.TILE).get(UnitRegistry.RCT_TIMEOUT, TimeUnit.MILLISECONDS);
                         if (locationConfigsByCoordinate.isEmpty()) {
                             throw new ExecutionException(new CouldNotPerformException("No fitting location could be found."));
                         }
                         targetLocation = locationConfigsByCoordinate.get(0);
                         LOGGER.info("Selected location is " + targetLocation.getLabel() + ", calculating the correct transformation.");
-                    } catch (ExecutionException ex) {
+                    } catch (ExecutionException | TimeoutException | CancellationException ex) {
                         LOGGER.info("No optimal location could be found, keeping Home as location. If you want a specific location, you can specify it using the -l parameter.");
                         return config;
                     }
                 }
-                Future<Transform> unitTransformationFuture = getUnitRegistry().getUnitTransformationFuture(config, targetLocation);
+                Future<Transform> unitTransformationFuture = getUnitRegistry().getUnitTransformation(config, targetLocation);
                 Transform3D transform = unitTransformationFuture.get().getTransform();
                 Quat4d quat = new Quat4d();
                 Vector3d vec = new Vector3d();
@@ -202,9 +207,10 @@ public class KinectManager {
      * Adds information from the JavaProperties to the builder.
      *
      * @param deviceConfigBuilder builder that should be extended.
-     * @throws JPNotAvailableException is thrown if a JavaProperty is not available.
+     *
+     * @throws JPNotAvailableException  is thrown if a JavaProperty is not available.
      * @throws CouldNotPerformException is thrown if something went wrong.
-     * @throws InterruptedException is thrown in case of an external interruption.
+     * @throws InterruptedException     is thrown in case of an external interruption.
      */
     private static void addInformation(final UnitConfig.Builder deviceConfigBuilder) throws JPNotAvailableException, CouldNotPerformException, InterruptedException {
         if (JPService.getProperty(JPKinectName.class).isParsed()) {
@@ -257,10 +263,12 @@ public class KinectManager {
      * <code>Transform3D</code>-object from it.
      *
      * @param transformFile File used to create the
-     * <code>Transform3D</code>-object.
+     *                      <code>Transform3D</code>-object.
+     *
      * @return The <code>Transform3D</code>-object parsed from the file.
+     *
      * @throws CouldNotPerformException is thrown, if the file can not be
-     * parsed.
+     *                                  parsed.
      */
     private static Transform3D parseFile(File transformFile) throws CouldNotPerformException {
         //TODO: Adapt this to take the correct file format!

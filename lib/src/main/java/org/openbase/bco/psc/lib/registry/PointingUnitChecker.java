@@ -78,7 +78,7 @@ public class PointingUnitChecker {
 
     public static boolean hasLocationData(UnitConfig config) throws InterruptedException, CouldNotPerformException {
         try {
-            Registries.getUnitRegistry(true).getUnitToRootTransformationFuture(config).get(10000, TimeUnit.SECONDS);
+            Registries.getUnitRegistry(true).getUnitToRootTransformation(config).get(10000, TimeUnit.SECONDS);
         } catch (CouldNotPerformException | TimeoutException ex) {
             throw new CouldNotPerformException("GlobalTransformReceiver not available.", ex);
         } catch (ExecutionException ex) {
