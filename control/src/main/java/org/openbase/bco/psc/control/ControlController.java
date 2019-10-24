@@ -11,12 +11,12 @@ package org.openbase.bco.psc.control;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public
  * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -183,6 +183,7 @@ public class ControlController extends AbstractEventHandler implements Control, 
                                 }
                             } catch (InterruptedException ex) {
                                 // skip run because of interruption
+                                Thread.currentThread().interrupt();
                             } catch (CouldNotPerformException ex) {
                                 ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
                             }
@@ -196,9 +197,9 @@ public class ControlController extends AbstractEventHandler implements Control, 
     }
 
     private synchronized void handleIntents() throws CouldNotPerformException, InterruptedException {
-        LOGGER.info("Updated stack: #units: " + selectedUnitIntents.size() + " #states: " + receivedStatesIntents.size());
+        LOGGER.debug("Updated stack: #units: " + selectedUnitIntents.size() + " #states: " + receivedStatesIntents.size());
         removeOldIntents();
-        LOGGER.info("After remove: #units: " + selectedUnitIntents.size() + " #states: " + receivedStatesIntents.size());
+        LOGGER.debug("After remove: #units: " + selectedUnitIntents.size() + " #states: " + receivedStatesIntents.size());
         executeMatchingIntents();
     }
 
@@ -350,7 +351,6 @@ public class ControlController extends AbstractEventHandler implements Control, 
                     return !PointingUnitChecker.isPointingControlUnit(config, registryFlags);
                 } catch (InterruptedException ex) {
                     Thread.currentThread().interrupt();
-                    ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
                     return true;
                 } catch (CouldNotPerformException ex) {
                     ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.WARN);
@@ -377,8 +377,8 @@ public class ControlController extends AbstractEventHandler implements Control, 
         }
         if (!active) {
             active = true;
+            LOGGER.info("Activating Registry synchronization.");
             Registries.waitForData();
-            LOGGER.debug("Activating Registry synchronization.");
             controllableObjectRegistrySynchronizer.activate();
             rsbConnection.activate();
         }
@@ -395,8 +395,8 @@ public class ControlController extends AbstractEventHandler implements Control, 
         LOGGER.info("Deactivating " + getClass().getName() + ".");
         if (active) {
             active = false;
-            rsbConnection.deactivate();
             LOGGER.info("Deactivating Registry synchronization.");
+            rsbConnection.deactivate();
             controllableObjectRegistrySynchronizer.deactivate();
         }
     }

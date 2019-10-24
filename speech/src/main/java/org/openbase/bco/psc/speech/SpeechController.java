@@ -11,12 +11,12 @@ package org.openbase.bco.psc.speech;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public
  * License along with this program. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -83,14 +83,15 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             speechHypothesis = speechHypotheses.getBestResult();
         }
 
-        LOGGER.info("SpeechHypothesis detected: " + speechHypothesis);
         if (speechHypothesis == null) return;
+        LOGGER.info("SpeechHypothesis detected: " + speechHypothesis);
 
         try {
             // try mapping speech hypothesis to action parameter
             ActionParameter actionParameter = keywordConverter.getAction(speechHypothesis);
             if (actionParameter == null) {
                 LOGGER.warn("No matching action found.");
+                return;
             }
 
             // send action parameter to Control component
@@ -101,7 +102,6 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
-            ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
         }
 
     }
@@ -133,10 +133,8 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
                 rsbConnection = new RSBConnection(this);
                 rsbConnection.init();
                 initialized = true;
-            } catch (CouldNotPerformException ex) {
+            } catch (CouldNotPerformException | IOException ex) {
                 throw new InitializationException(SpeechController.class, ex);
-            } catch (IOException ex) {
-                ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
             }
         }
     }
@@ -153,8 +151,8 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
         }
         if (!active) {
             active = true;
-            Registries.waitForData();
             LOGGER.info("Activating Registry synchronization.");
+            Registries.waitForData();
             rsbConnection.activate();
         }
     }
@@ -168,8 +166,8 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
         LOGGER.debug("Deactivating " + getClass().getName() + ".");
         if (active) {
             active = false;
-            rsbConnection.deactivate();
             LOGGER.info("Deactivating Registry synchronization.");
+            rsbConnection.deactivate();
         }
     }
 
