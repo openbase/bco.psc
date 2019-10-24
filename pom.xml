@@ -42,6 +42,27 @@
             </roles>
             <timezone>+1</timezone>
         </developer>
+        <developer>
+            <id>jenniferleebitschene</id>
+            <name>Jennifer Bitschene</name>
+            <email>jbitschene@techfak.uni-bielefeld.de</email>
+            <url>https://github.com/jenniferleebitschene</url>
+            <timezone>+1</timezone>
+        </developer>
+        <developer>
+            <id>dreinsch</id>
+            <name>Dennis Reinsch</name>
+            <email>dreinsch@techfak.uni-bielefeld.de</email>
+            <url>https://github.com/dreinsch</url>
+            <timezone>+1</timezone>
+        </developer>
+        <developer>
+            <id>julnie</id>
+            <name>Julia Niermann</name>
+            <email>jniermann@techfak.uni-bielefeld.de</email>
+            <url>https://github.com/julnie</url>
+            <timezone>+1</timezone>
+        </developer>
     </developers>
  
     <licenses>
