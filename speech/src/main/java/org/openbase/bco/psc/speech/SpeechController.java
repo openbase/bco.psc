@@ -94,7 +94,7 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
                 return;
             }
 
-            // send action parameter to PSCActionGenerator component
+            // send action parameter to PSCControl component
             rsbConnection.publishData(actionParameter);
             LOGGER.info("published ActionParameter: " + actionParameter);
 

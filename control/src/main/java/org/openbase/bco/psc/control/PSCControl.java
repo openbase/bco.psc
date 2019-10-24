@@ -80,12 +80,12 @@ import static org.openbase.type.domotic.service.ServiceTemplateType.ServiceTempl
  * @author <a href="mailto:jbitschene@techfak.uni-bielefeld.de">Jennifer Bitschene</a>
  * @author <a href="mailto:jniermann@techfak.uni-bielefeld.de">Julia Niermann</a>
  */
-public class PSCActionGenerator extends AbstractEventHandler implements Control, Launchable<Void>, VoidInitializable {
+public class PSCControl extends AbstractEventHandler implements Control, Launchable<Void>, VoidInitializable {
 
     /**
      * Logger instance.
      */
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(PSCActionGenerator.class);
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(PSCControl.class);
 
     /**
      * The object handling the rsb connection.
@@ -308,7 +308,7 @@ public class PSCActionGenerator extends AbstractEventHandler implements Control,
     public void init() throws InitializationException, InterruptedException {
         if (!initialized) {
             try {
-                LOGGER.info("Initializing PSCActionGenerator.");
+                LOGGER.info("Initializing PSCControl.");
 
                 controllableObjectRegistry = new SynchronizableRegistryImpl<>();
                 registryFlags = JPService.getProperty(JPPscUnitFilterList.class).getValue();
@@ -326,7 +326,7 @@ public class PSCActionGenerator extends AbstractEventHandler implements Control,
                 rsbConnection.init();
                 initialized = true;
             } catch (JPNotAvailableException | CouldNotPerformException ex) {
-                throw new InitializationException(PSCActionGenerator.class, ex);
+                throw new InitializationException(PSCControl.class, ex);
             }
             selectedUnitIntents = new TreeMap<>();
             receivedStatesIntents = new TreeMap<>();
