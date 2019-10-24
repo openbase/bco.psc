@@ -43,7 +43,7 @@ import org.openbase.jul.pattern.launch.AbstractLauncher;
  * @author <a href="mailto:jbitschene@techfak.uni-bielefeld.de">Jennifer Bitschene</a>
  * @author <a href="mailto:jniermann@techfak.uni-bielefeld.de">Julia Niermann</a>
  */
-public class ControlLauncher extends AbstractLauncher<ControlController> {
+public class ControlLauncher extends AbstractLauncher<PSCActionGenerator> {
 
     /**
      * Constructor.
@@ -51,7 +51,7 @@ public class ControlLauncher extends AbstractLauncher<ControlController> {
      * @throws InstantiationException is thrown, if the program could not be instantiated.
      */
     public ControlLauncher() throws InstantiationException {
-        super(Control.class, ControlController.class);
+        super(Control.class, PSCActionGenerator.class);
     }
 
     /**

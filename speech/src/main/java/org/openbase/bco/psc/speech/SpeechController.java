@@ -94,9 +94,9 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
                 return;
             }
 
-            // send action parameter to Control component
+            // send action parameter to PSCActionGenerator component
             rsbConnection.publishData(actionParameter);
-            LOGGER.info("PUBLISHED action: " + actionParameter);
+            LOGGER.info("published ActionParameter: " + actionParameter);
 
         } catch (CouldNotPerformException ex) {
             ExceptionPrinter.printHistory(ex, LOGGER, LogLevel.ERROR);
@@ -151,8 +151,9 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
         }
         if (!active) {
             active = true;
-            LOGGER.info("Activating Registry synchronization.");
+            LOGGER.info("Waiting for bco registry synchronization...");
             Registries.waitForData();
+            LOGGER.info("Activating Registry synchronization.");
             rsbConnection.activate();
         }
     }

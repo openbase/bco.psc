@@ -35,6 +35,7 @@ import org.openbase.jul.extension.rsb.iface.RSBInformer;
 import org.openbase.jul.extension.type.processing.LabelProcessor;
 import org.openbase.jul.iface.Launchable;
 import org.openbase.jul.iface.VoidInitializable;
+import org.openbase.type.domotic.unit.UnitConfigType;
 import org.openbase.type.domotic.unit.UnitProbabilityCollectionType;
 import org.openbase.type.domotic.unit.UnitTemplateType;
 import org.slf4j.LoggerFactory;
@@ -73,11 +74,11 @@ public class DummyIntentController extends AbstractEventHandler implements Dummy
 
                     // publish unit for testing
                     UnitProbabilityCollectionType.UnitProbabilityCollection.Builder collectionBuilder = UnitProbabilityCollectionType.UnitProbabilityCollection.newBuilder();
-                    String unitId = Registries.getUnitRegistry().getUnitConfigsByUnitType(UnitTemplateType.UnitTemplate.UnitType.COLORABLE_LIGHT).get(0).getId();
-                    collectionBuilder.addElementBuilder().setId(unitId).setProbability(1.0f);
+                    UnitConfigType.UnitConfig unitConfig = Registries.getUnitRegistry().getUnitConfigsByUnitType(UnitTemplateType.UnitTemplate.UnitType.COLORABLE_LIGHT).get(0);
+                    collectionBuilder.addElementBuilder().setId(unitConfig.getId()).setProbability(1.0f);
                     UnitProbabilityCollectionType.UnitProbabilityCollection unit = collectionBuilder.build();
                     unitInformer.publish(unit);
-                    String bestMatch = LabelProcessor.getBestMatch(Registries.getUnitRegistry().getUnitConfigById(unitId).getLabel());
+                    String bestMatch = LabelProcessor.getBestMatch(unitConfig.getLabel());
                     LOGGER.info("PUBLISHED unit " + bestMatch);
                 }
 

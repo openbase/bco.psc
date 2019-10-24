@@ -80,12 +80,12 @@ import static org.openbase.type.domotic.service.ServiceTemplateType.ServiceTempl
  * @author <a href="mailto:jbitschene@techfak.uni-bielefeld.de">Jennifer Bitschene</a>
  * @author <a href="mailto:jniermann@techfak.uni-bielefeld.de">Julia Niermann</a>
  */
-public class ControlController extends AbstractEventHandler implements Control, Launchable<Void>, VoidInitializable {
+public class PSCActionGenerator extends AbstractEventHandler implements Control, Launchable<Void>, VoidInitializable {
 
     /**
      * Logger instance.
      */
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ControlController.class);
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(PSCActionGenerator.class);
 
     /**
      * The object handling the rsb connection.
@@ -197,9 +197,9 @@ public class ControlController extends AbstractEventHandler implements Control, 
     }
 
     private synchronized void handleIntents() throws CouldNotPerformException, InterruptedException {
-        LOGGER.debug("Updated stack: #units: " + selectedUnitIntents.size() + " #states: " + receivedStatesIntents.size());
+        LOGGER.trace("Updated stack: #units: " + selectedUnitIntents.size() + " #states: " + receivedStatesIntents.size());
         removeOldIntents();
-        LOGGER.debug("After remove: #units: " + selectedUnitIntents.size() + " #states: " + receivedStatesIntents.size());
+        LOGGER.trace("After remove: #units: " + selectedUnitIntents.size() + " #states: " + receivedStatesIntents.size());
         executeMatchingIntents();
     }
 
@@ -207,11 +207,11 @@ public class ControlController extends AbstractEventHandler implements Control, 
         long currentTime = System.currentTimeMillis() * 1000;
 
         // logging
-        LOGGER.info("Remove: time " + currentTime + " timeout: " + intentTimeout);
+        LOGGER.trace("Remove: time " + currentTime + " timeout: " + intentTimeout);
         selectedUnitIntents.keySet().forEach(receiveTime ->
-                LOGGER.info("unit receive time " + receiveTime + " diff " + (receiveTime - currentTime)));
+                LOGGER.trace("unit receive time " + receiveTime + " diff " + (receiveTime - currentTime)));
         receivedStatesIntents.keySet().forEach(receiveTime ->
-                LOGGER.info("state receive time " + receiveTime + " diff " + (receiveTime - currentTime)));
+                LOGGER.trace("state receive time " + receiveTime + " diff " + (receiveTime - currentTime)));
 
         selectedUnitIntents.keySet().removeIf(receiveTime -> currentTime > intentTimeout + receiveTime);
         receivedStatesIntents.keySet().removeIf(receiveTime -> currentTime > intentTimeout + receiveTime);
@@ -222,7 +222,7 @@ public class ControlController extends AbstractEventHandler implements Control, 
             Map<Long, UnitProbabilityCollection> unmatchedSelectedUnitIntents = new TreeMap<>();
             Map<Long, ActionParameter> unmatchedReceivedStatesIntents = new TreeMap<>();
 
-            LOGGER.info("executeMatchingIntents");
+            LOGGER.trace("executeMatchingIntents");
             if (selectedUnitIntents.size() > 0 && receivedStatesIntents.size() > 0) {
                 while (selectedUnitIntents.size() > 0) {
                     Long selectedUnitTime = selectedUnitIntents.firstKey();
@@ -232,7 +232,7 @@ public class ControlController extends AbstractEventHandler implements Control, 
                             .collect(Collectors.toList());
 
                     for (String unitId : selectedUnitIds) {
-                        LOGGER.info("unitId " + unitId + " used for matching");
+                        LOGGER.debug("unitId " + unitId + " used for matching");
                         UnitConfigType.UnitConfig unitConfig = getUnitRegistry().getUnitConfigById(unitId);
 
                         while (receivedStatesIntents.size() > 0) {
@@ -240,10 +240,10 @@ public class ControlController extends AbstractEventHandler implements Control, 
                             ActionParameter actionParameter = receivedStatesIntents.remove(receivedStateTime);
                             ServiceType serviceType = actionParameter.getServiceStateDescription().getServiceType();
 
-                            LOGGER.info(" >   matching with " + serviceType);
+                            LOGGER.debug(" >   matching with " + serviceType);
 
                             if (unitConfig.getServiceConfigList().stream().anyMatch(isMatchingAndOperationServiceType(serviceType))) {
-                                LOGGER.info(" >>>>>>>>>>> MATCH <<<<<<<<<<<<<<<");
+                                LOGGER.debug(" >>>>>>>>>>> MATCH <<<<<<<<<<<<<<<");
                                 completeActionDescription(actionParameter, unitId);
                                 break;
                             } else {
@@ -308,7 +308,7 @@ public class ControlController extends AbstractEventHandler implements Control, 
     public void init() throws InitializationException, InterruptedException {
         if (!initialized) {
             try {
-                LOGGER.info("Initializing ControlController.");
+                LOGGER.info("Initializing PSCActionGenerator.");
 
                 controllableObjectRegistry = new SynchronizableRegistryImpl<>();
                 registryFlags = JPService.getProperty(JPPscUnitFilterList.class).getValue();
@@ -326,7 +326,7 @@ public class ControlController extends AbstractEventHandler implements Control, 
                 rsbConnection.init();
                 initialized = true;
             } catch (JPNotAvailableException | CouldNotPerformException ex) {
-                throw new InitializationException(ControlController.class, ex);
+                throw new InitializationException(PSCActionGenerator.class, ex);
             }
             selectedUnitIntents = new TreeMap<>();
             receivedStatesIntents = new TreeMap<>();
@@ -377,8 +377,9 @@ public class ControlController extends AbstractEventHandler implements Control, 
         }
         if (!active) {
             active = true;
-            LOGGER.info("Activating Registry synchronization.");
+            LOGGER.info("Waiting for bco registry synchronization...");
             Registries.waitForData();
+            LOGGER.info("Activating Registry synchronization.");
             controllableObjectRegistrySynchronizer.activate();
             rsbConnection.activate();
         }
@@ -395,8 +396,8 @@ public class ControlController extends AbstractEventHandler implements Control, 
         LOGGER.info("Deactivating " + getClass().getName() + ".");
         if (active) {
             active = false;
-            LOGGER.info("Deactivating Registry synchronization.");
             rsbConnection.deactivate();
+            LOGGER.info("Deactivating Registry synchronization.");
             controllableObjectRegistrySynchronizer.deactivate();
         }
     }
