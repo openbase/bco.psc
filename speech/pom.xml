@@ -1,11 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>bco.psc.util</artifactId>
+    <artifactId>bco.psc.speech</artifactId>
     <packaging>jar</packaging>
 
-    <name>BCO PSC Utility</name>
-    
+    <name>BCO PSC Speech</name>
+
     <parent>
         <groupId>org.openbase</groupId>
         <artifactId>bco.psc</artifactId>
@@ -13,14 +13,14 @@
     </parent>
 
     <url>https://github.com/openbase/bco.psc/wiki</url>
-    
+
     <licenses>
         <license>
             <name>GPLv3</name>
             <url>http://www.gnu.org/licenses/gpl.html</url>
         </license>
     </licenses>
-    
+
 
     <build>
         <plugins>
@@ -48,22 +48,8 @@
                 <configuration>
                     <programs>
                         <program>
-                            <mainClass>org.openbase.bco.psc.util.PSCLauncher</mainClass>
-                            <id>bco-psc</id>
-                            <platforms>
-                                <platform>unix</platform>
-                            </platforms>
-                        </program>
-                        <program>
-                            <mainClass>org.openbase.bco.psc.util.CreateKinectLauncher</mainClass>
-                            <id>bco-psc-create-kinect</id>
-                            <platforms>
-                                <platform>unix</platform>
-                            </platforms>
-                        </program>
-                        <program>
-                            <mainClass>org.openbase.bco.psc.util.UpdateKinectLauncher</mainClass>
-                            <id>bco-psc-update-kinect</id>
+                            <mainClass>org.openbase.bco.psc.speech.SpeechLauncher</mainClass>
+                            <id>bco-psc-speech</id>
                             <platforms>
                                 <platform>unix</platform>
                             </platforms>
@@ -91,43 +77,25 @@
             </plugin>
         </plugins>
     </build>
-	
-    <properties>
-        <skipTests>false</skipTests>
-    </properties>
-
 
     <dependencies>
         <dependency>
             <groupId>org.openbase</groupId>
-            <artifactId>bco.psc.skeleton-merging</artifactId>
+            <artifactId>bco.psc.lib</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.openbase</groupId>
-            <artifactId>bco.psc.ray-extractor</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openbase</groupId>
-            <artifactId>bco.psc.identification</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openbase</groupId>
-            <artifactId>bco.psc.control</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openbase</groupId>
-            <artifactId>bco.psc.speech</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openbase</groupId>
-            <artifactId>bco.psc.dummyintent</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+
+
+            <dependency>
+                <groupId>org.openbase</groupId>
+                <artifactId>bco.psc.lib</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>rsb</groupId>
+                <artifactId>rst</artifactId>
+                <version>${dependency.rst.version}</version>
+            </dependency>
 
     </dependencies>
 </project>

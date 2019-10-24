@@ -25,12 +25,8 @@ package org.openbase.bco.psc.identification;
 import org.openbase.bco.psc.identification.jp.JPDistanceType;
 import org.openbase.bco.psc.identification.jp.JPIdentificationThreshold;
 import org.openbase.bco.psc.identification.jp.JPUnitSelectorType;
-import org.openbase.bco.psc.lib.jp.JPLocalInput;
-import org.openbase.bco.psc.lib.jp.JPLocalOutput;
-import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
-import org.openbase.bco.psc.lib.jp.JPPscUnitFilterList;
-import org.openbase.bco.psc.lib.jp.JPRayScope;
-import org.openbase.bco.psc.lib.jp.JPSelectedUnitScope;
+import org.openbase.bco.psc.lib.jp.*;
+import org.openbase.bco.psc.lib.jp.JPIntentScope;
 import org.openbase.bco.authentication.lib.BCO;
 import org.openbase.jps.core.JPService;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -40,6 +36,10 @@ import org.openbase.jul.pattern.launch.AbstractLauncher;
 /**
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
+ * @author <a href="mailto:dreinsch@techfak.uni-bielefeld.de">Dennis Reinsch</a>
+ * @author <a href="mailto:jbitschene@techfak.uni-bielefeld.de">Jennifer Bitschene</a>
+ * @author <a href="mailto:jniermann@techfak.uni-bielefeld.de">Julia Niermann</a>
+ *
  */
 public class IdentificationLauncher extends AbstractLauncher<IdentificationController> {
 
@@ -52,7 +52,7 @@ public class IdentificationLauncher extends AbstractLauncher<IdentificationContr
         // Scopes
         JPService.registerProperty(JPPSCBaseScope.class);
         JPService.registerProperty(JPRayScope.class);
-        JPService.registerProperty(JPSelectedUnitScope.class);
+        JPService.registerProperty(JPIntentScope.class);
 
         // Threshold
         JPService.registerProperty(JPIdentificationThreshold.class);
@@ -81,7 +81,7 @@ public class IdentificationLauncher extends AbstractLauncher<IdentificationContr
         //TODO: Remove this!
 //        try {
 //            DefaultConverterRepository.getDefaultConverterRepository().addConverter(new ProtocolBufferConverter<>(UnitProbabilityCollection.getDefaultInstance()));
-//            Scope outScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPSelectedUnitScope.class).getValue());
+//            Scope outScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPIntentScope.class).getValue());
 //            RSBInformer<UnitProbabilityCollection> informer = RSBFactoryImpl.getInstance().createSynchronizedInformer(outScope, UnitProbabilityCollection.class);
 //            informer.activate();
 //            System.out.println("sending unit");

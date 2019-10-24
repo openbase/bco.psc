@@ -1,8 +1,8 @@
-package org.openbase.bco.psc.identification.rsb;
+package org.openbase.bco.psc.speech.rsb;
 
 /*-
  * #%L
- * BCO PSC Identification
+ * BCO PSC Speech
  * %%
  * Copyright (C) 2016 - 2019 openbase.org
  * %%
@@ -21,8 +21,9 @@ package org.openbase.bco.psc.identification.rsb;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
+import com.google.protobuf.Message;
 import org.openbase.bco.psc.lib.jp.*;
-import org.openbase.bco.psc.lib.jp.JPIntentScope;
 import org.openbase.bco.psc.lib.rsb.AbstractRSBDualConnection;
 import org.openbase.jps.core.JPService;
 import org.openbase.jps.exception.JPNotAvailableException;
@@ -31,18 +32,14 @@ import org.openbase.jul.exception.InitializationException;
 import org.openbase.jul.extension.rsb.com.RSBFactoryImpl;
 import org.openbase.jul.extension.rsb.iface.RSBInformer;
 import org.openbase.jul.extension.rsb.iface.RSBListener;
+import org.openbase.type.domotic.action.ActionParameterType.ActionParameter;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Scope;
-import org.openbase.type.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
-import org.openbase.type.tracking.PointingRay3DFloatDistributionCollectionType.PointingRay3DFloatDistributionCollection;
+import rst.dialog.SpeechHypothesesType.SpeechHypotheses;
+import rst.dialog.SpeechHypothesisType.SpeechHypothesis;
 
-/**
- * This class handles the RSB connections of the project.
- *
- * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
- */
-public class RSBConnection extends AbstractRSBDualConnection<UnitProbabilityCollection> {
+public class RSBConnection extends AbstractRSBDualConnection<Message> {
 
     /**
      * Logger instance.
@@ -67,8 +64,8 @@ public class RSBConnection extends AbstractRSBDualConnection<UnitProbabilityColl
     @Override
     protected RSBListener getInitializedListener() throws InitializationException {
         try {
-            Scope inScope = JPService.getProperty(JPPSCBaseScope.class).getValue()
-                    .concat(JPService.getProperty(JPRayScope.class).getValue());
+            Scope inScope = JPService.getProperty(JPIntentScope.class).getValue()
+                    .concat(JPService.getProperty(JPSpeechScope.class).getValue());
             LOGGER.info("Initializing RSB Listener on scope: " + inScope);
             if (JPService.getProperty(JPLocalInput.class).getValue()) {
                 return RSBFactoryImpl.getInstance().createSynchronizedListener(inScope, getLocalConfig());
@@ -87,16 +84,18 @@ public class RSBConnection extends AbstractRSBDualConnection<UnitProbabilityColl
      * @throws InitializationException {@inheritDoc}
      */
     @Override
-    protected RSBInformer<UnitProbabilityCollection> getInitializedInformer() throws InitializationException {
+    protected RSBInformer<Message> getInitializedInformer() throws InitializationException {
         try {
             Scope outScope = JPService.getProperty(JPIntentScope.class).getValue()
                     .concat(JPService.getProperty(JPMergeScope.class).getValue());
             LOGGER.info("Initializing RSB Informer on scope: " + outScope);
             if (JPService.getProperty(JPLocalOutput.class).getValue()) {
                 LOGGER.warn("RSB output set to socket and localhost.");
-                return RSBFactoryImpl.getInstance().createSynchronizedInformer(outScope, UnitProbabilityCollection.class, getLocalConfig());
+                return RSBFactoryImpl.getInstance().createSynchronizedInformer(outScope, Message.class, getLocalConfig());
+
             } else {
-                return RSBFactoryImpl.getInstance().createSynchronizedInformer(outScope, UnitProbabilityCollection.class);
+                return RSBFactoryImpl.getInstance().createSynchronizedInformer(outScope, Message.class, getLocalConfig());
+
             }
         } catch (JPNotAvailableException | CouldNotPerformException ex) {
             throw new InitializationException(RSBConnection.class, ex);
@@ -108,9 +107,11 @@ public class RSBConnection extends AbstractRSBDualConnection<UnitProbabilityColl
      */
     @Override
     protected void registerConverters() {
-        LOGGER.debug("Registering PointingRay3DFloatCollection converter for Listener.");
-        registerConverterForType(PointingRay3DFloatDistributionCollection.getDefaultInstance());
-        LOGGER.debug("Registering UnitProbabilityCollection converter for Informer.");
-        registerConverterForType(UnitProbabilityCollection.getDefaultInstance());
+        LOGGER.debug("Registering ActionParameter converter for Listener.");
+        registerConverterForType(ActionParameter.getDefaultInstance());
+        LOGGER.debug("Registering SpeechHypothesis converter for Informer.");
+        registerConverterForType(SpeechHypothesis.getDefaultInstance());
+        LOGGER.debug("Registering SpeechHypotheses converter for Informer.");
+        registerConverterForType(SpeechHypotheses.getDefaultInstance());
     }
 }

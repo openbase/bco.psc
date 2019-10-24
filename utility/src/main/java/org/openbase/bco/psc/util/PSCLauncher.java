@@ -28,10 +28,16 @@ import org.openbase.bco.psc.re.RayExtractorLauncher;
 import org.openbase.bco.psc.sm.SkeletonMergingLauncher;
 import org.openbase.bco.authentication.lib.BCO;
 import org.openbase.jul.pattern.launch.AbstractLauncher;
+import org.openbase.bco.psc.speech.SpeechLauncher;
+import org.openbase.bco.psc.dummyintent.DummyIntentLauncher;
+
 
 /**
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
+ * @author <a href="mailto:dreinsch@techfak.uni-bielefeld.de">Dennis Reinsch</a>
+ * @author <a href="mailto:jbitschene@techfak.uni-bielefeld.de">Jennifer Bitschene</a>
+ * @author <a href="mailto:jniermann@techfak.uni-bielefeld.de">Julia Niermann</a>
  */
 public class PSCLauncher {
 
@@ -44,7 +50,9 @@ public class PSCLauncher {
                 SkeletonMergingLauncher.class,
                 RayExtractorLauncher.class,
                 IdentificationLauncher.class,
-                ControlLauncher.class
+                ControlLauncher.class,
+                SpeechLauncher.class,
+                DummyIntentLauncher.class
         );
     }
 

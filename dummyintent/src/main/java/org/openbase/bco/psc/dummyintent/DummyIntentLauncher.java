@@ -1,9 +1,9 @@
-package org.openbase.bco.psc.control;
+package org.openbase.bco.psc.dummyintent;
 
 /*
  * -
  * #%L
- * BCO PSC Control
+ * BCO PSC Dummy Intent
  * %%
  * Copyright (C) 2016 - 2019 openbase.org
  * %%
@@ -22,61 +22,51 @@ package org.openbase.bco.psc.control;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import org.openbase.bco.psc.control.jp.JPControlThreshold;
-import org.openbase.bco.psc.control.jp.JPCooldownTime;
-import org.openbase.bco.psc.control.jp.JPMultimodalMode;
-import org.openbase.bco.psc.lib.jp.JPIntentScope;
+
+import org.openbase.bco.authentication.lib.BCO;
 import org.openbase.bco.psc.lib.jp.JPLocalInput;
+import org.openbase.bco.psc.lib.jp.JPLocalOutput;
 import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
 import org.openbase.bco.psc.lib.jp.JPPscUnitFilterList;
-import org.openbase.bco.authentication.lib.BCO;
 import org.openbase.jps.core.JPService;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InstantiationException;
 import org.openbase.jul.pattern.launch.AbstractLauncher;
 
 /**
- * The launcher of this application.
+ * This class launches the dummy intent
  *
- * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  * @author <a href="mailto:dreinsch@techfak.uni-bielefeld.de">Dennis Reinsch</a>
  * @author <a href="mailto:jbitschene@techfak.uni-bielefeld.de">Jennifer Bitschene</a>
  * @author <a href="mailto:jniermann@techfak.uni-bielefeld.de">Julia Niermann</a>
+ *
  */
-public class ControlLauncher extends AbstractLauncher<PSCControl> {
+public class DummyIntentLauncher extends AbstractLauncher<DummyIntentController> {
 
-    /**
-     * Constructor.
-     *
-     * @throws InstantiationException is thrown, if the program could not be instantiated.
-     */
-    public ControlLauncher() throws InstantiationException {
-        super(Control.class, PSCControl.class);
+    public DummyIntentLauncher() throws InstantiationException {
+        super(DummyIntent.class, DummyIntentController.class);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void loadProperties() {
         // Scopes
         JPService.registerProperty(JPPSCBaseScope.class);
-        JPService.registerProperty(JPIntentScope.class);
+        //JPService.registerProperty(JPRayScope.class);
+        //JPService.registerProperty(JPIntentScope.class);
 
         // Threshold
-        JPService.registerProperty(JPControlThreshold.class);
+        //JPService.registerProperty(JPIdentificationThreshold.class);
 
         // Unit filter
         JPService.registerProperty(JPPscUnitFilterList.class);
 
         // Component specific
-        JPService.registerProperty(JPCooldownTime.class);
+        //JPService.registerProperty(JPUnitSelectorType.class);
+        //JPService.registerProperty(JPDistanceType.class);
 
         // Transport specification
         JPService.registerProperty(JPLocalInput.class);
-
-        // Multimodal mode
-        JPService.registerProperty(JPMultimodalMode.class);
+        JPService.registerProperty(JPLocalOutput.class);
     }
 
     /**
@@ -86,6 +76,7 @@ public class ControlLauncher extends AbstractLauncher<PSCControl> {
      */
     public static void main(final String[] args) throws InterruptedException, CouldNotPerformException {
         BCO.printLogo();
-        AbstractLauncher.main(args, Control.class, ControlLauncher.class);
+        AbstractLauncher.main(args, DummyIntent.class, DummyIntentLauncher.class);
+
     }
 }

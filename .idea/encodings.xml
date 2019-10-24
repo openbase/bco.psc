@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/control" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/dummyintent" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/identification" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/lib" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/ray-extractor" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/skeleton-merging" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/speech" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/test" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/utility" charset="UTF-8" />
+  </component>
+</project>

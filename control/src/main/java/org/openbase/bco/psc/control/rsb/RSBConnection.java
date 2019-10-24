@@ -21,16 +21,17 @@ package org.openbase.bco.psc.control.rsb;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import org.openbase.bco.psc.lib.jp.JPLocalInput;
-import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
-import org.openbase.bco.psc.lib.jp.JPSelectedUnitScope;
+import org.openbase.bco.psc.lib.jp.*;
+import org.openbase.bco.psc.lib.rsb.AbstractRSBDualConnection;
 import org.openbase.bco.psc.lib.rsb.AbstractRSBListenerConnection;
 import org.openbase.jps.core.JPService;
 import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InitializationException;
 import org.openbase.jul.extension.rsb.com.RSBFactoryImpl;
+import org.openbase.jul.extension.rsb.iface.RSBInformer;
 import org.openbase.jul.extension.rsb.iface.RSBListener;
+import org.openbase.type.domotic.action.ActionParameterType.ActionParameter;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Scope;
@@ -40,8 +41,11 @@ import org.openbase.type.domotic.unit.UnitProbabilityCollectionType.UnitProbabil
  * This class handles the RSB connections of the project.
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
+ * @author <a href="mailto:dreinsch@techfak.uni-bielefeld.de">Dennis Reinsch</a>
+ * @author <a href="mailto:jbitschene@techfak.uni-bielefeld.de">Jennifer Bitschene</a>
+ * @author <a href="mailto:jniermann@techfak.uni-bielefeld.de">Julia Niermann</a>
  */
-public class RSBConnection extends AbstractRSBListenerConnection {
+public class RSBConnection extends AbstractRSBDualConnection<UnitProbabilityCollection> {
 
     /**
      * Logger instance.
@@ -58,18 +62,6 @@ public class RSBConnection extends AbstractRSBListenerConnection {
     }
 
     /**
-     * Initializes the RSB Listeners.
-     *
-     * @param handler is used to handle incoming events.
-     * @throws InitializationException is thrown, if the initialization of the
-     * Listeners fails.
-     * @throws InterruptedException is thrown in case of an external
-     * interruption.
-     */
-    private void initializeListener(AbstractEventHandler handler) throws InitializationException, InterruptedException {
-    }
-
-    /**
      * {@inheritDoc}
      *
      * @return {@inheritDoc}
@@ -78,13 +70,14 @@ public class RSBConnection extends AbstractRSBListenerConnection {
     @Override
     protected RSBListener getInitializedListener() throws InitializationException {
         try {
-            Scope selectedUnitScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPSelectedUnitScope.class).getValue());
-            LOGGER.info("Initializing RSB Selected Unit Listener on scope: " + selectedUnitScope);
+            Scope inScope = JPService.getProperty(JPIntentScope.class).getValue()
+                    .concat(JPService.getProperty(JPMergeScope.class).getValue());
+            LOGGER.info("Initializing RSB Control Listener on scope: " + inScope);
             if (JPService.getProperty(JPLocalInput.class).getValue()) {
                 LOGGER.warn("RSB input set to socket and localhost.");
-                return RSBFactoryImpl.getInstance().createSynchronizedListener(selectedUnitScope, getLocalConfig());
+                return RSBFactoryImpl.getInstance().createSynchronizedListener(inScope, getLocalConfig());
             } else {
-                return RSBFactoryImpl.getInstance().createSynchronizedListener(selectedUnitScope);
+                return RSBFactoryImpl.getInstance().createSynchronizedListener(inScope);
             }
         } catch (CouldNotPerformException | JPNotAvailableException ex) {
             throw new InitializationException(RSBConnection.class, ex);
@@ -96,7 +89,32 @@ public class RSBConnection extends AbstractRSBListenerConnection {
      */
     @Override
     protected void registerConverters() {
+        LOGGER.debug("Registering ActionParameter converter for Listener.");
+        registerConverterForType(ActionParameter.getDefaultInstance());
         LOGGER.debug("Registering UnitProbabilityCollection converter for Listener.");
         registerConverterForType(UnitProbabilityCollection.getDefaultInstance());
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     * @throws InitializationException {@inheritDoc}
+     */
+    @Override
+    protected RSBInformer<UnitProbabilityCollection> getInitializedInformer() throws InitializationException {
+        try {
+            Scope outScope = JPService.getProperty(JPPSCBaseScope.class).getValue()
+                    .concat(JPService.getProperty(JPSelectedUnitScope.class).getValue());
+            LOGGER.info("Initializing RSB Informer on scope: " + outScope);
+            if (JPService.getProperty(JPLocalOutput.class).getValue()) {
+                LOGGER.warn("RSB output set to socket and localhost.");
+                return RSBFactoryImpl.getInstance().createSynchronizedInformer(outScope, UnitProbabilityCollection.class, getLocalConfig());
+            } else {
+                return RSBFactoryImpl.getInstance().createSynchronizedInformer(outScope, UnitProbabilityCollection.class);
+            }
+        } catch (JPNotAvailableException | CouldNotPerformException ex) {
+            throw new InitializationException(RSBConnection.class, ex);
+        }
     }
 }
