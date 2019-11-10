@@ -23,6 +23,7 @@ package org.openbase.bco.psc.sm;
  * #L%
  */
 
+import com.google.protobuf.Message;
 import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
 import org.openbase.bco.psc.lib.jp.JPPostureScope;
 import org.openbase.bco.psc.lib.registry.PointingUnitChecker;
@@ -106,7 +107,7 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
         // apply workaround to transform outdated rst TrackedPostures3DFloatType into new openbase type by just serializing the type.
         if ((event.getData() instanceof rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat)) {
             try {
-                event.setData(processor.deserialize(processor.serialize(event.getData()), TrackedPostures3DFloat.class));
+                event.setData(processor.deserialize(processor.serialize((Message) event.getData()), TrackedPostures3DFloat.class));
             } catch (CouldNotPerformException ex) {
                 ExceptionPrinter.printHistory("Could not upgrade outdated rst type["+rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat.class.getName()+"]!", ex, LOGGER);
             }

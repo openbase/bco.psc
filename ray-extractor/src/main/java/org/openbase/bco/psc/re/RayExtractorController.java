@@ -22,15 +22,20 @@ package org.openbase.bco.psc.re;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+
 import java.util.Arrays;
 import java.util.stream.Collectors;
+
+import com.google.protobuf.Message;
 import org.openbase.bco.psc.re.jp.JPRayExtractorThreshold;
 import org.openbase.bco.psc.re.jp.JPRayExtractorType;
 import org.openbase.bco.psc.re.jp.JPRaySelectorType;
 import org.openbase.bco.psc.re.pointing.AbstractRayExtractor;
 import org.openbase.bco.psc.re.pointing.ArmPostureExtractor;
 import org.openbase.bco.psc.re.pointing.ExtractorType;
+
 import static org.openbase.bco.psc.re.pointing.ExtractorType.*;
+
 import org.openbase.bco.psc.re.pointing.PostureHistoryExtractor;
 import org.openbase.bco.psc.re.pointing.SimpleExtractor;
 import org.openbase.bco.psc.re.pointing.selectors.ChoiceSelector;
@@ -40,7 +45,9 @@ import org.openbase.bco.psc.re.pointing.selectors.PolynomialSelectorDegree3;
 import org.openbase.bco.psc.re.pointing.selectors.PolynomialSelectorDegree5;
 import org.openbase.bco.psc.re.pointing.selectors.RaySelectorInterface;
 import org.openbase.bco.psc.re.pointing.selectors.SelectorType;
+
 import static org.openbase.bco.psc.re.pointing.selectors.SelectorType.*;
+
 import org.openbase.bco.psc.re.rsb.RSBConnection;
 import org.openbase.jps.core.JPService;
 import org.openbase.jps.exception.JPNotAvailableException;
@@ -59,7 +66,6 @@ import org.openbase.type.tracking.PointingRay3DFloatType.PointingRay3DFloat.Poin
 import org.openbase.type.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat;
 
 /**
- *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
 public class RayExtractorController extends AbstractEventHandler implements RayExtractor, Launchable<Void>, VoidInitializable {
@@ -80,9 +86,9 @@ public class RayExtractorController extends AbstractEventHandler implements RayE
         // apply workaround to transform outdated rst TrackedPostures3DFloatType into new openbase type by just serializing the type.
         if ((event.getData() instanceof rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat)) {
             try {
-                event.setData(processor.deserialize(processor.serialize(event.getData()), TrackedPostures3DFloat.class));
+                event.setData(processor.deserialize(processor.serialize((Message) event.getData()), TrackedPostures3DFloat.class));
             } catch (CouldNotPerformException ex) {
-                ExceptionPrinter.printHistory("Could not upgrade outdated rst type["+rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat.class.getName()+"]!", ex, LOGGER);
+                ExceptionPrinter.printHistory("Could not upgrade outdated rst type[" + rst.tracking.TrackedPostures3DFloatType.TrackedPostures3DFloat.class.getName() + "]!", ex, LOGGER);
             }
         }
 
@@ -102,8 +108,8 @@ public class RayExtractorController extends AbstractEventHandler implements RayE
             rsbConnection.publishData(PointingRay3DFloatDistributionCollection.newBuilder()
                     .addAllElement(pointingExtractor.getPointingRays().stream()
                             .filter(rd -> rd.getRayList().stream()
-                            .map(r -> r.getCertainty())
-                            .reduce(0.0f, Float::sum) >= threshold)
+                                    .map(r -> r.getCertainty())
+                                    .reduce(0.0f, Float::sum) >= threshold)
                             .collect(Collectors.toList()))
                     .build());
         } catch (CouldNotPerformException ex) {
