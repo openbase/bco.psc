@@ -345,7 +345,7 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
             Registries.getUnitRegistry().waitForData();
 
             controllableObjectRegistrySynchronizer = new RegistrySynchronizer<>(
-                    controllableObjectRegistry, getUnitRegistry().getUnitConfigRemoteRegistry(), getUnitRegistry(), ControllableObjectFactory.getInstance());
+                    controllableObjectRegistry, getUnitRegistry().getUnitConfigRemoteRegistry(true), getUnitRegistry(), ControllableObjectFactory.getInstance());
             controllableObjectRegistrySynchronizer.addFilter(config -> {
                 try {
                     return !PointingUnitChecker.isPointingControlUnit(config, registryFlags);

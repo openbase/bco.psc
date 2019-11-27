@@ -250,7 +250,7 @@ public class SkeletonMergingController extends AbstractEventHandler implements S
             Registries.getUnitRegistry().waitForData();
 
             registryTransformerRegistrySynchronizer = new RegistrySynchronizer<>(
-                    registryTransformerRegistry, getUnitRegistry().getUnitConfigRemoteRegistry(), getUnitRegistry(), RegistryTransformerFactory.getInstance());
+                    registryTransformerRegistry, getUnitRegistry().getUnitConfigRemoteRegistry(true), getUnitRegistry(), RegistryTransformerFactory.getInstance());
             registryTransformerRegistrySynchronizer.addFilter(unitConfig -> {
                 //TODO: Load Kinects from the registry by a flag or so and device type and get the scopes somehow. Also check enabled state.
                 if (!idRestriction.isEmpty() && !idRestriction.contains(unitConfig.getId())) {

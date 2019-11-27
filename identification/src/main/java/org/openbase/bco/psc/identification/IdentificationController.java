@@ -99,7 +99,7 @@ public class IdentificationController extends AbstractEventHandler implements Id
             Registries.getUnitRegistry().waitForData();
 
             selectableObjectRegistrySynchronizer = new RegistrySynchronizer<String, SelectableObject, UnitConfig, UnitConfig.Builder>(
-                    selector.getSelectedObjectRegistry(), getUnitRegistry().getUnitConfigRemoteRegistry(), getUnitRegistry(), SelectableObjectFactory.getInstance());
+                    selector.getSelectedObjectRegistry(), getUnitRegistry().getUnitConfigRemoteRegistry(true), getUnitRegistry(), SelectableObjectFactory.getInstance());
             selectableObjectRegistrySynchronizer.addFilter(config -> {
                 try {
                     return !PointingUnitChecker.isPointingControlUnit(config, registryFlags);
