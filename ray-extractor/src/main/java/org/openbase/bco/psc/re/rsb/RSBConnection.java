@@ -21,8 +21,6 @@ package org.openbase.bco.psc.re.rsb;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import org.openbase.bco.psc.lib.jp.JPLocalInput;
-import org.openbase.bco.psc.lib.jp.JPLocalOutput;
 import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
 import org.openbase.bco.psc.lib.jp.JPPostureScope;
 import org.openbase.bco.psc.lib.jp.JPRayScope;
@@ -32,6 +30,7 @@ import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InitializationException;
 import org.openbase.jul.extension.rsb.com.RSBFactoryImpl;
+import org.openbase.jul.extension.rsb.com.RSBSharedConnectionConfig;
 import org.openbase.jul.extension.rsb.iface.RSBInformer;
 import org.openbase.jul.extension.rsb.iface.RSBListener;
 import org.slf4j.LoggerFactory;
@@ -73,12 +72,7 @@ public class RSBConnection extends AbstractRSBDualConnection<PointingRay3DFloatD
         try {
             Scope outScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPRayScope.class).getValue());
             LOGGER.info("Initializing RSB Informer on scope: " + outScope);
-            if (JPService.getProperty(JPLocalOutput.class).getValue()) {
-                LOGGER.warn("RSB output set to socket and localhost.");
-                return RSBFactoryImpl.getInstance().createSynchronizedInformer(outScope, PointingRay3DFloatDistributionCollection.class, getLocalConfig());
-            } else {
-                return RSBFactoryImpl.getInstance().createSynchronizedInformer(outScope, PointingRay3DFloatDistributionCollection.class);
-            }
+            return RSBFactoryImpl.getInstance().createSynchronizedInformer(outScope, PointingRay3DFloatDistributionCollection.class, RSBSharedConnectionConfig.getParticipantConfig());
         } catch (CouldNotPerformException | JPNotAvailableException ex) {
             throw new InitializationException(RSBConnection.class, ex);
         }
@@ -95,12 +89,7 @@ public class RSBConnection extends AbstractRSBDualConnection<PointingRay3DFloatD
         try {
             Scope inScope = JPService.getProperty(JPPSCBaseScope.class).getValue().concat(JPService.getProperty(JPPostureScope.class).getValue());
             LOGGER.info("Initializing RSB Listener on scope: " + inScope);
-            if (JPService.getProperty(JPLocalInput.class).getValue()) {
-                LOGGER.warn("RSB input set to socket and localhost.");
-                return RSBFactoryImpl.getInstance().createSynchronizedListener(inScope, getLocalConfig());
-            } else {
-                return RSBFactoryImpl.getInstance().createSynchronizedListener(inScope);
-            }
+            return RSBFactoryImpl.getInstance().createSynchronizedListener(inScope, RSBSharedConnectionConfig.getParticipantConfig());
         } catch (CouldNotPerformException | JPNotAvailableException ex) {
             throw new InitializationException(RSBConnection.class, ex);
         }

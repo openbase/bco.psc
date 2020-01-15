@@ -21,14 +21,13 @@ package org.openbase.bco.psc.sm.rsb;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import org.openbase.bco.psc.lib.jp.JPLocalInput;
-import org.openbase.bco.psc.lib.jp.JPLocalOutput;
 import org.openbase.bco.psc.lib.rsb.AbstractRSBDualConnection;
 import org.openbase.jps.core.JPService;
 import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InitializationException;
 import org.openbase.jul.extension.rsb.com.RSBFactoryImpl;
+import org.openbase.jul.extension.rsb.com.RSBSharedConnectionConfig;
 import org.openbase.jul.extension.rsb.iface.RSBInformer;
 import org.openbase.jul.extension.rsb.iface.RSBListener;
 import org.slf4j.LoggerFactory;
@@ -117,13 +116,8 @@ public class RSBConnection extends AbstractRSBDualConnection<TrackedPostures3DFl
     protected RSBInformer<TrackedPostures3DFloat> getInitializedInformer() throws InitializationException {
         try {
             LOGGER.info("Initializing RSB Informer on scope: " + outScope);
-            if (JPService.getProperty(JPLocalOutput.class).getValue()) {
-                LOGGER.warn("RSB output set to socket and localhost.");
-                return RSBFactoryImpl.getInstance().createSynchronizedInformer(outScope, TrackedPostures3DFloat.class, getLocalConfig());
-            } else {
-                return RSBFactoryImpl.getInstance().createSynchronizedInformer(outScope, TrackedPostures3DFloat.class);
-            }
-        } catch (CouldNotPerformException | JPNotAvailableException ex) {
+            return RSBFactoryImpl.getInstance().createSynchronizedInformer(outScope, TrackedPostures3DFloat.class, RSBSharedConnectionConfig.getParticipantConfig());
+        } catch (CouldNotPerformException ex) {
             throw new InitializationException(RSBConnection.class, ex);
         }
     }
@@ -138,13 +132,8 @@ public class RSBConnection extends AbstractRSBDualConnection<TrackedPostures3DFl
     protected RSBListener getInitializedListener() throws InitializationException {
         try {
             LOGGER.info("Initializing RSB Listener on scope: " + baseScope);
-            if (JPService.getProperty(JPLocalInput.class).getValue()) {
-                LOGGER.warn("RSB input set to socket and localhost.");
-                return RSBFactoryImpl.getInstance().createSynchronizedListener(baseScope, getLocalConfig());
-            } else {
-                return RSBFactoryImpl.getInstance().createSynchronizedListener(baseScope);
-            }
-        } catch (CouldNotPerformException | JPNotAvailableException ex) {
+            return RSBFactoryImpl.getInstance().createSynchronizedListener(baseScope, RSBSharedConnectionConfig.getParticipantConfig());
+        } catch (CouldNotPerformException ex) {
             throw new InitializationException(RSBConnection.class, ex);
         }
     }

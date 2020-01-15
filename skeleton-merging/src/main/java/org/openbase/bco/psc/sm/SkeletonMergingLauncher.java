@@ -1,7 +1,5 @@
 package org.openbase.bco.psc.sm;
 
-import org.openbase.bco.psc.lib.jp.JPLocalInput;
-import org.openbase.bco.psc.lib.jp.JPLocalOutput;
 import org.openbase.bco.psc.lib.jp.JPPSCBaseScope;
 import org.openbase.bco.psc.lib.jp.JPPostureScope;
 import org.openbase.bco.psc.sm.jp.JPDeviceClassList;
@@ -15,6 +13,9 @@ import org.openbase.bco.authentication.lib.BCO;
 import org.openbase.jps.core.JPService;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InstantiationException;
+import org.openbase.jul.extension.rsb.com.jp.JPRSBHost;
+import org.openbase.jul.extension.rsb.com.jp.JPRSBPort;
+import org.openbase.jul.extension.rsb.com.jp.JPRSBTransport;
 import org.openbase.jul.pattern.launch.AbstractLauncher;
 
 /*
@@ -64,8 +65,9 @@ public class SkeletonMergingLauncher extends AbstractLauncher<SkeletonMergingCon
         JPService.registerProperty(JPStabilizationFactor.class);
 
         // Transport specification
-        JPService.registerProperty(JPLocalInput.class);
-        JPService.registerProperty(JPLocalOutput.class);
+        JPService.registerProperty(JPRSBTransport.class);
+        JPService.registerProperty(JPRSBHost.class);
+        JPService.registerProperty(JPRSBPort.class);
     }
 
     /**

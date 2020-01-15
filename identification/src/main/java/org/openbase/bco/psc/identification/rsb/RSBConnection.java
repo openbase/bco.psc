@@ -29,6 +29,7 @@ import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InitializationException;
 import org.openbase.jul.extension.rsb.com.RSBFactoryImpl;
+import org.openbase.jul.extension.rsb.com.RSBSharedConnectionConfig;
 import org.openbase.jul.extension.rsb.iface.RSBInformer;
 import org.openbase.jul.extension.rsb.iface.RSBListener;
 import org.slf4j.LoggerFactory;
@@ -70,11 +71,7 @@ public class RSBConnection extends AbstractRSBDualConnection<UnitProbabilityColl
             Scope inScope = JPService.getProperty(JPPSCBaseScope.class).getValue()
                     .concat(JPService.getProperty(JPRayScope.class).getValue());
             LOGGER.info("Initializing RSB Listener on scope: " + inScope);
-            if (JPService.getProperty(JPLocalInput.class).getValue()) {
-                return RSBFactoryImpl.getInstance().createSynchronizedListener(inScope, getLocalConfig());
-            } else {
-                return RSBFactoryImpl.getInstance().createSynchronizedListener(inScope);
-            }
+            return RSBFactoryImpl.getInstance().createSynchronizedListener(inScope, RSBSharedConnectionConfig.getParticipantConfig());
         } catch (CouldNotPerformException | JPNotAvailableException ex) {
             throw new InitializationException(RSBConnection.class, ex);
         }
@@ -92,12 +89,7 @@ public class RSBConnection extends AbstractRSBDualConnection<UnitProbabilityColl
             Scope outScope = JPService.getProperty(JPIntentScope.class).getValue()
                     .concat(JPService.getProperty(JPMergeScope.class).getValue());
             LOGGER.info("Initializing RSB Informer on scope: " + outScope);
-            if (JPService.getProperty(JPLocalOutput.class).getValue()) {
-                LOGGER.warn("RSB output set to socket and localhost.");
-                return RSBFactoryImpl.getInstance().createSynchronizedInformer(outScope, UnitProbabilityCollection.class, getLocalConfig());
-            } else {
-                return RSBFactoryImpl.getInstance().createSynchronizedInformer(outScope, UnitProbabilityCollection.class);
-            }
+            return RSBFactoryImpl.getInstance().createSynchronizedInformer(outScope, UnitProbabilityCollection.class, RSBSharedConnectionConfig.getParticipantConfig());
         } catch (JPNotAvailableException | CouldNotPerformException ex) {
             throw new InitializationException(RSBConnection.class, ex);
         }

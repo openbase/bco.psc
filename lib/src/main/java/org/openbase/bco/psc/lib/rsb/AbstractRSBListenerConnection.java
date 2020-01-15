@@ -40,7 +40,7 @@ import rsb.converter.ProtocolBufferConverter;
  *
  * @author <a href="mailto:thuppke@techfak.uni-bielefeld.de">Thoren Huppke</a>
  */
-public abstract class AbstractRSBListenerConnection implements Launchable<Void>, VoidInitializable, LocalConfigProviderInterface {
+public abstract class AbstractRSBListenerConnection implements Launchable<Void>, VoidInitializable {
 
     /**
      * Logger instance.
