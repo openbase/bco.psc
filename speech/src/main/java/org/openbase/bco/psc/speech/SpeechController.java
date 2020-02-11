@@ -23,6 +23,7 @@ package org.openbase.bco.psc.speech;
  * #L%
  */
 
+import org.apache.commons.lang.StringUtils;
 import org.openbase.bco.dal.lib.action.ActionDescriptionProcessor;
 import org.openbase.bco.psc.speech.conversion.KeywordConverter;
 import org.openbase.bco.psc.speech.rsb.RSBConnection;
@@ -36,10 +37,14 @@ import org.openbase.jul.iface.Launchable;
 import org.openbase.jul.iface.VoidInitializable;
 import org.openbase.type.domotic.action.ActionInitiatorType;
 import org.openbase.type.domotic.action.ActionParameterType.ActionParameter;
+import org.openbase.type.domotic.service.ServiceStateDescriptionType;
 import org.openbase.type.domotic.service.ServiceTemplateType;
 import org.openbase.type.domotic.state.BlindStateType;
+import org.openbase.type.domotic.state.BrightnessStateType;
 import org.openbase.type.domotic.state.ColorStateType;
 import org.openbase.type.domotic.state.PowerStateType;
+import org.openbase.type.domotic.unit.UnitConfigType;
+import org.openbase.type.domotic.unit.UnitTemplateType;
 import org.openbase.type.vision.ColorType.Color;
 import org.openbase.type.vision.HSBColorType.HSBColor;
 import org.slf4j.LoggerFactory;
@@ -49,7 +54,11 @@ import rst.dialog.SpeechHypothesesType.SpeechHypotheses;
 import rst.dialog.SpeechHypothesisType.SpeechHypothesis;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+
+import static com.googlecode.protobuf.format.FormatFactory.Formatter.JSON;
 
 /**
  * The speech component of this application.
@@ -86,14 +95,50 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
         if (speechHypothesis == null) return;
         LOGGER.info("SpeechHypothesis detected: " + speechHypothesis);
 
-        try {
-            // try mapping speech hypothesis to action parameter
-            ActionParameter actionParameter = keywordConverter.getAction(speechHypothesis);
-            if (actionParameter == null) {
-                LOGGER.warn("No matching action found.");
-                return;
-            }
+        String grammarTree = speechHypothesis.getGrammarTree();
+        List<String> locationStrings = getLocationStrings(grammarTree);
+        String actionString = getActionString(grammarTree);
+        List<String> entityStrings = getEntityStrings(grammarTree);
 
+        List<UnitConfigType.UnitConfig> locationConfigs = new ArrayList<>();
+        List<UnitConfigType.UnitConfig> unitConfigs = new ArrayList<>();
+        List<UnitTemplateType.UnitTemplate.UnitType> unitTypes = new ArrayList<>();
+
+        // try mapping speech hypothesis to action parameter
+        ActionParameter actionParameter = keywordConverter.getActionParameter(actionString);
+        if (actionParameter == null) {
+            LOGGER.warn("No matching action found.");
+            return;
+        }
+
+        if (locationStrings.size() > 0) {
+            locationConfigs = keywordConverter.getLocations(locationStrings);
+        }
+        if (entityStrings.size() > 0) {
+            unitConfigs = keywordConverter.getUnitConfigs(entityStrings);
+            unitTypes = keywordConverter.getUnitTypes(entityStrings);
+        }
+
+        ServiceStateDescriptionType.ServiceStateDescription serviceStateDescription = actionParameter.getServiceStateDescription();
+
+        for (UnitConfigType.UnitConfig unitConfig : unitConfigs) {
+            ServiceStateDescriptionType.ServiceStateDescription newServiceStateDescription = serviceStateDescription.toBuilder().setUnitId(unitConfig.getId()).build();
+            sendActionParameter(actionParameter.toBuilder().setServiceStateDescription(newServiceStateDescription).build());
+        }
+
+        for (UnitTemplateType.UnitTemplate.UnitType unitType : unitTypes) {
+            for (UnitConfigType.UnitConfig locationConfig : locationConfigs) {
+                ServiceStateDescriptionType.ServiceStateDescription newServiceStateDescription = serviceStateDescription.toBuilder()
+                        .setUnitId(locationConfig.getId()).setUnitType(unitType).build();
+                sendActionParameter(actionParameter.toBuilder().setServiceStateDescription(newServiceStateDescription).build());
+            }
+        }
+
+
+    }
+
+    private void sendActionParameter(ActionParameter actionParameter) {
+        try {
             // send action parameter to PSCControl component
             rsbConnection.publishData(actionParameter);
             LOGGER.info("published ActionParameter: " + actionParameter);
@@ -103,7 +148,6 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         }
-
     }
 
     private void initializeRegistryConnection() throws InterruptedException, CouldNotPerformException {
@@ -118,6 +162,27 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
         }
     }
 
+    private List<String> getLocationStrings(String grammarTree) {
+        String locationsString = StringUtils.substringBetween(grammarTree.trim(), "(", ")");
+        List<String> locationStrings = new ArrayList<>();
+        String[] locationsArray = locationsString.split(",");
+        for (String location : locationsArray) {
+            locationStrings.add(location.trim());
+        }
+        return locationStrings;
+    }
+    private String getActionString(String grammarTree) {
+        return StringUtils.substringBetween(grammarTree.trim(), "[", "]");
+    }
+    private List<String> getEntityStrings(String grammarTree) {
+        String entitiesString = grammarTree.split("\\[")[0];
+        List<String> entityStrings = new ArrayList<>();
+        String[] entitiesArray = entitiesString.split(",");
+        for (String entity : entitiesArray) {
+            entityStrings.add(entity.trim());
+        }
+        return entityStrings;
+    }
 
     /**
      * {@inheritDoc}
@@ -184,6 +249,7 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
     private void initKeywordConverter() throws IOException, CouldNotPerformException {
 
         HashMap<String, ActionParameter> intentActionMap = new HashMap<>();
+        HashMap<String, UnitTemplateType.UnitTemplate.UnitType> unitTypeMap = new HashMap<>();
 
         try {
             // Create ActionParameter for PowerState=ON
@@ -191,13 +257,17 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             ServiceTemplateType.ServiceTemplate.ServiceType powerServiceType = ServiceTemplateType.ServiceTemplate.ServiceType.POWER_STATE_SERVICE;
             ServiceTemplateType.ServiceTemplate.ServiceType blindServiceType = ServiceTemplateType.ServiceTemplate.ServiceType.BLIND_STATE_SERVICE;
             ServiceTemplateType.ServiceTemplate.ServiceType colorServiceType = ServiceTemplateType.ServiceTemplate.ServiceType.COLOR_STATE_SERVICE;
+
+            ServiceTemplateType.ServiceTemplate.ServiceType brightnessServiceType = ServiceTemplateType.ServiceTemplate.ServiceType.BRIGHTNESS_STATE_SERVICE;
+
+
             ActionInitiatorType.ActionInitiator.InitiatorType initiator = ActionInitiatorType.ActionInitiator.InitiatorType.HUMAN;
             ActionParameter.Builder builder = ActionDescriptionProcessor.generateDefaultActionParameter(onState, powerServiceType);
             builder.getActionInitiatorBuilder().setInitiatorType(ActionInitiatorType.ActionInitiator.InitiatorType.HUMAN);
 
+
             ActionParameter powerOn = builder.build();
-            intentActionMap.put("anmachen", powerOn);
-            intentActionMap.put("on", powerOn);
+            intentActionMap.put("power:an", powerOn);
             intentActionMap.put("light[power:an]", powerOn);
 
 
@@ -207,8 +277,9 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             builder.getActionInitiatorBuilder().setInitiatorType(initiator);
 
             ActionParameter powerOff = builder.build();
-            intentActionMap.put("ausmachen", powerOff);
+            intentActionMap.put("power:aus", powerOff);
             intentActionMap.put("light[power:aus]", powerOff);
+
 
             //Create ActionParameter for Blindstate=UP
             BlindStateType.BlindState upState = BlindStateType.BlindState.newBuilder().setValue(BlindStateType.BlindState.State.UP).build();
@@ -217,6 +288,8 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
 
             intentActionMap.put("blind[blind:auf]", builder.build());
             intentActionMap.put("blind[blind:hoch]", builder.build());
+            intentActionMap.put("blind:auf", builder.build());
+            intentActionMap.put("blind:hoch", builder.build());
 
             //Create ActionParameter for Blindstate=DOWN
             BlindStateType.BlindState downState = BlindStateType.BlindState.newBuilder().setValue(BlindStateType.BlindState.State.DOWN).build();
@@ -225,27 +298,42 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
 
             intentActionMap.put("blind[blind:zu]", builder.build());
             intentActionMap.put("blind[blind:runter]", builder.build());
+            intentActionMap.put("blind:zu", builder.build());
+            intentActionMap.put("blind:runter", builder.build());
 
 
             // Create color states
-            Color blue = Color.newBuilder().setHsbColor(HSBColor.newBuilder().setHue(229).setSaturation(0.5).setBrightness(0.5)).build();
-            Color red = Color.newBuilder().setHsbColor(HSBColor.newBuilder().setHue(1.0).setSaturation(1.0).setBrightness(0.5)).build();
-            Color green = Color.newBuilder().setHsbColor(HSBColor.newBuilder().setHue(110).setSaturation(1.0).setBrightness(0.5)).build();
-            Color pink = Color.newBuilder().setHsbColor(HSBColor.newBuilder().setHue(324).setSaturation(0.99).setBrightness(0.5)).build();
-            Color lila = Color.newBuilder().setHsbColor(HSBColor.newBuilder().setHue(276).setSaturation(1.0).setBrightness(1.0)).build();
+            Color white = Color.newBuilder().setHsbColor(HSBColor.newBuilder().setHue(0).setSaturation(0).setBrightness(1.0)).build();
+            Color red = Color.newBuilder().setHsbColor(HSBColor.newBuilder().setHue(0).setSaturation(1.0).setBrightness(1.0)).build();
+            Color orange = Color.newBuilder().setHsbColor(HSBColor.newBuilder().setHue(30).setSaturation(1.0).setBrightness(1.0)).build();
+            Color yellow = Color.newBuilder().setHsbColor(HSBColor.newBuilder().setHue(80).setSaturation(1.0).setBrightness(1.0)).build();
+            Color green = Color.newBuilder().setHsbColor(HSBColor.newBuilder().setHue(135).setSaturation(1.0).setBrightness(1.0)).build();
+            Color blue = Color.newBuilder().setHsbColor(HSBColor.newBuilder().setHue(255).setSaturation(1.0).setBrightness(1.0)).build();
+            Color violet = Color.newBuilder().setHsbColor(HSBColor.newBuilder().setHue(270).setSaturation(1.0).setBrightness(1.0)).build();
+            Color pink = Color.newBuilder().setHsbColor(HSBColor.newBuilder().setHue(300).setSaturation(1.0).setBrightness(1.0)).build();
 
-            ColorStateType.ColorState blueState = ColorStateType.ColorState.newBuilder().setColor(blue).build();
+
+            ColorStateType.ColorState whiteState = ColorStateType.ColorState.newBuilder().setColor(white).build();
             ColorStateType.ColorState redState = ColorStateType.ColorState.newBuilder().setColor(red).build();
+            ColorStateType.ColorState orangeState = ColorStateType.ColorState.newBuilder().setColor(orange).build();
+            ColorStateType.ColorState yellowState = ColorStateType.ColorState.newBuilder().setColor(yellow).build();
             ColorStateType.ColorState greenState = ColorStateType.ColorState.newBuilder().setColor(green).build();
+            ColorStateType.ColorState blueState = ColorStateType.ColorState.newBuilder().setColor(blue).build();
+            ColorStateType.ColorState violetState = ColorStateType.ColorState.newBuilder().setColor(violet).build();
             ColorStateType.ColorState pinkState = ColorStateType.ColorState.newBuilder().setColor(pink).build();
-            ColorStateType.ColorState lilaState = ColorStateType.ColorState.newBuilder().setColor(lila).build();
 
-            // Create ActionParameter for Color=BLUE
-            builder = ActionDescriptionProcessor.generateDefaultActionParameter(blueState, colorServiceType);
+
+            // Create ActionParameter for Color=WEIß
+            builder = ActionDescriptionProcessor.generateDefaultActionParameter(whiteState, colorServiceType);
             builder.getActionInitiatorBuilder().setInitiatorType(initiator);
 
-            intentActionMap.put("light[color:blau]", builder.build());
-            intentActionMap.put("light[color:laut]", builder.build());
+            intentActionMap.put("light[color:weiß]", builder.build());
+            intentActionMap.put("light[color:weiss]", builder.build());
+            intentActionMap.put("light[color:farblos]", builder.build());
+            intentActionMap.put("color:weiß", builder.build());
+            intentActionMap.put("color:weiss", builder.build());
+            intentActionMap.put("color:farblos", builder.build());
+
 
             // Create ActionParameter for Color=RED
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(redState, colorServiceType);
@@ -253,7 +341,22 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
 
             intentActionMap.put("light[color:rot]", builder.build());
             intentActionMap.put("light[color:ott]", builder.build());
+            intentActionMap.put("color:rot", builder.build());
+            intentActionMap.put("color:ott", builder.build());
 
+            // Create ActionParameter for Color=ORANGE
+            builder = ActionDescriptionProcessor.generateDefaultActionParameter(orangeState, colorServiceType);
+            builder.getActionInitiatorBuilder().setInitiatorType(initiator);
+
+            intentActionMap.put("light[color:orange]", builder.build());
+            intentActionMap.put("color:orange", builder.build());
+
+            // Create ActionParameter for Color=YELLOW
+            builder = ActionDescriptionProcessor.generateDefaultActionParameter(yellowState, colorServiceType);
+            builder.getActionInitiatorBuilder().setInitiatorType(initiator);
+
+            intentActionMap.put("light[color:gelb]", builder.build());
+            intentActionMap.put("color:gelb", builder.build());
 
             // Create ActionParameter for Color=GREEN
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(greenState, colorServiceType);
@@ -261,7 +364,28 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
 
             intentActionMap.put("light[color:grün]", builder.build());
             intentActionMap.put("light[color:grünen]", builder.build());
+            intentActionMap.put("color:grün", builder.build());
+            intentActionMap.put("color:grünen", builder.build());
 
+            // Create ActionParameter for Color=BLUE
+            builder = ActionDescriptionProcessor.generateDefaultActionParameter(blueState, colorServiceType);
+            builder.getActionInitiatorBuilder().setInitiatorType(initiator);
+
+            intentActionMap.put("light[color:blau]", builder.build());
+            intentActionMap.put("light[color:laut]", builder.build());
+            intentActionMap.put("color:blau", builder.build());
+            intentActionMap.put("color:laut", builder.build());
+
+            // Create ActionParameter for Color=LILA
+            builder = ActionDescriptionProcessor.generateDefaultActionParameter(violetState, colorServiceType);
+            builder.getActionInitiatorBuilder().setInitiatorType(initiator);
+
+            intentActionMap.put("light[color:violett]", builder.build());
+            intentActionMap.put("light[color:violet]", builder.build());
+            intentActionMap.put("light[color:lila]", builder.build());
+            intentActionMap.put("color:violett", builder.build());
+            intentActionMap.put("color:violet", builder.build());
+            intentActionMap.put("color:lila", builder.build());
 
             // Create ActionParameter for Color=PINK
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(pinkState, colorServiceType);
@@ -269,15 +393,53 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
 
             intentActionMap.put("light[color:pink]", builder.build());
             intentActionMap.put("light[color:peking]", builder.build());
+            intentActionMap.put("light[color:magenta]", builder.build());
+            intentActionMap.put("color:pink", builder.build());
+            intentActionMap.put("color:peking", builder.build());
+            intentActionMap.put("color:magenta", builder.build());
 
-            // Create ActionParameter for Color=LILA
-            builder = ActionDescriptionProcessor.generateDefaultActionParameter(lilaState, colorServiceType);
+
+            //Create ActionParameter for BrightnessState=light
+            BrightnessStateType.BrightnessState lightState = BrightnessStateType.BrightnessState.newBuilder().setBrightness(1.0).build();
+            builder = ActionDescriptionProcessor.generateDefaultActionParameter(lightState, brightnessServiceType);
             builder.getActionInitiatorBuilder().setInitiatorType(initiator);
 
+            intentActionMap.put("color:hell", builder.build());
 
-            intentActionMap.put("light[color:lila]", builder.build());
+            //Create ActionParameter for BrightnessState=dark
+            BrightnessStateType.BrightnessState darkState = BrightnessStateType.BrightnessState.newBuilder().setBrightness(0.2).build();
+            builder = ActionDescriptionProcessor.generateDefaultActionParameter(darkState, brightnessServiceType);
+            builder.getActionInitiatorBuilder().setInitiatorType(initiator);
 
-            keywordConverter = new KeywordConverter(intentActionMap);
+            intentActionMap.put("color:dunkel", builder.build());
+
+            //Create ActionParameter for BrightnessState=lighter
+            BrightnessStateType.BrightnessState lighterState = BrightnessStateType.BrightnessState.newBuilder().setBrightness(0.9).build();
+            builder = ActionDescriptionProcessor.generateDefaultActionParameter(lighterState, brightnessServiceType);
+            builder.getActionInitiatorBuilder().setInitiatorType(initiator);
+
+            intentActionMap.put("color:heller", builder.build());
+
+            //Create ActionParameter for BrightnessState=darker
+            BrightnessStateType.BrightnessState darkerState = BrightnessStateType.BrightnessState.newBuilder().setBrightness(0.1).build();
+            builder = ActionDescriptionProcessor.generateDefaultActionParameter(darkerState, brightnessServiceType);
+            builder.getActionInitiatorBuilder().setInitiatorType(initiator);
+
+            intentActionMap.put("color:dunkler", builder.build());
+
+
+            // Create UnitTypes
+            UnitTemplateType.UnitTemplate.UnitType colorableLight = UnitTemplateType.UnitTemplate.UnitType.COLORABLE_LIGHT;
+            UnitTemplateType.UnitTemplate.UnitType tv = UnitTemplateType.UnitTemplate.UnitType.TELEVISION;
+            UnitTemplateType.UnitTemplate.UnitType blend = UnitTemplateType.UnitTemplate.UnitType.ROLLER_SHUTTER;
+
+
+            unitTypeMap.put("light", colorableLight);
+            unitTypeMap.put("television", tv);
+            unitTypeMap.put("tv", tv);
+            unitTypeMap.put("blend", blend);
+
+            keywordConverter = new KeywordConverter(intentActionMap,unitTypeMap);
 
         } catch (IOException | ClassNotFoundException ex) {
             throw new IOException("Keyword Converter could not be initialized.", ex);
