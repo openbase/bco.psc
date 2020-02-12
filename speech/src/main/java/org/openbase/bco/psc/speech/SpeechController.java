@@ -23,6 +23,7 @@ package org.openbase.bco.psc.speech;
  * #L%
  */
 
+
 import org.apache.commons.lang.StringUtils;
 import org.openbase.bco.dal.lib.action.ActionDescriptionProcessor;
 import org.openbase.bco.psc.speech.conversion.KeywordConverter;
@@ -58,7 +59,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.googlecode.protobuf.format.FormatFactory.Formatter.JSON;
 
 /**
  * The speech component of this application.
@@ -431,13 +431,13 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             // Create UnitTypes
             UnitTemplateType.UnitTemplate.UnitType colorableLight = UnitTemplateType.UnitTemplate.UnitType.COLORABLE_LIGHT;
             UnitTemplateType.UnitTemplate.UnitType tv = UnitTemplateType.UnitTemplate.UnitType.TELEVISION;
-            UnitTemplateType.UnitTemplate.UnitType blend = UnitTemplateType.UnitTemplate.UnitType.ROLLER_SHUTTER;
+            UnitTemplateType.UnitTemplate.UnitType blind = UnitTemplateType.UnitTemplate.UnitType.ROLLER_SHUTTER;
 
 
             unitTypeMap.put("light", colorableLight);
             unitTypeMap.put("television", tv);
             unitTypeMap.put("tv", tv);
-            unitTypeMap.put("blend", blend);
+            unitTypeMap.put("blind", blind);
 
             keywordConverter = new KeywordConverter(intentActionMap,unitTypeMap);
 

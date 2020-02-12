@@ -86,18 +86,24 @@ public class KeywordConverter {
             try {
                 locationList.addAll(getUnitRegistry().getUnitConfigsByLabel(locationString));
             } catch (NotAvailableException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
+                LOGGER.info(e.toString());
             } catch (CouldNotPerformException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
+                LOGGER.info(e.toString());
+
             }
             try {
                 locationList.add(getUnitRegistry().getUnitConfigByAlias(locationString));
             } catch (NotAvailableException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
+                LOGGER.info(e.toString());
+
             }
         }
         for (UnitConfigType.UnitConfig location : locationList) {
             if ((!locations.contains(location)) && location.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.LOCATION) {
+                LOGGER.info("Location detected: "+location.getLabel().getEntry(1).getValue(0));
                 locations.add(location);
             }
         }
@@ -112,18 +118,25 @@ public class KeywordConverter {
             try {
                 unitList.addAll(getUnitRegistry().getUnitConfigsByLabel(entityString));
             } catch (NotAvailableException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
+                LOGGER.info(e.toString());
+
             } catch (CouldNotPerformException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
+                LOGGER.info(e.toString());
+
             }
             try {
                 unitList.add(getUnitRegistry().getUnitConfigByAlias(entityString));
             } catch (NotAvailableException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
+                LOGGER.info(e.toString());
+
             }
         }
         for (UnitConfigType.UnitConfig unit : unitList) {
             if ((!units.contains(unit)) && unit.getUnitType() != UnitTemplateType.UnitTemplate.UnitType.LOCATION) {
+                LOGGER.info("UnitConfig detected: "+unit.getLabel().getEntry(1).getValue(0));
                 units.add(unit);
             }
         }
@@ -134,6 +147,7 @@ public class KeywordConverter {
         List<UnitTemplateType.UnitTemplate.UnitType> unitTypes = new ArrayList<>();
         for (String entityString : entityStrings) {
             if (keywordUnitTypeMap.containsKey(entityString)) {
+                LOGGER.info("UnitType detected: "+entityString);
                 unitTypes.add(keywordUnitTypeMap.get(entityString));
             }
         }

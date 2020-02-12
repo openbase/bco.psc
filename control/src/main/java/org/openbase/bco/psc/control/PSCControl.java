@@ -25,8 +25,7 @@ package org.openbase.bco.psc.control;
 
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.bco.dal.remote.action.RemoteAction;
-import org.openbase.bco.dal.remote.layer.unit.CustomUnitPool;
-import org.openbase.bco.dal.remote.layer.unit.Units;
+import org.openbase.bco.dal.remote.layer.unit.*;
 import org.openbase.bco.dal.remote.layer.unit.connection.ConnectionRemote;
 import org.openbase.bco.dal.remote.layer.unit.location.LocationRemote;
 import org.openbase.bco.psc.control.jp.JPControlThreshold;
@@ -78,6 +77,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
+import static org.openbase.bco.registry.remote.Registries.isDataAvailable;
 import static org.openbase.type.domotic.service.ServiceTemplateType.ServiceTemplate.ServiceType.*;
 
 /**
@@ -150,8 +150,6 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
      */
     private TreeMap<Long, ActionParameter> receivedStatesIntents;
 
-    private TreeMap<String, Double> brightnessStates;
-
     private List<String> movementLocations;
 
     /**
@@ -182,6 +180,7 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
                     handleIntents();
                 }
             } else { // uni modal
+                LOGGER.info("in uni modal mode.");
                 if (event.getData() instanceof UnitProbabilityCollection) {
                     UnitProbabilityCollection collection = (UnitProbabilityCollection) event.getData();
                     collection.getElementList().stream().filter(x -> x.getProbability() >= threshold).forEach(x -> {
@@ -243,13 +242,7 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
                     UnitConfigType.UnitConfig unitConfig;
 
                     if (actionParameter.getServiceStateDescription().hasUnitId()) {
-                        unitConfig = getUnitRegistry().getUnitConfigById(actionParameter.getServiceStateDescription().getUnitId());
-                        if (unitConfig.getServiceConfigList().stream().anyMatch(isMatchingAndOperationServiceType(serviceType))) {
-                            completeActionDescription(actionParameter);
-                        } else {
-                            LOGGER.info("no match of unit: "+unitConfig.getLabel().getEntry(1).getValue(0)+ "with service type: "+serviceType.name());
-                        }
-
+                        completeActionDescription(actionParameter);
                     } else {
                         if (selectedUnitIntents.size() > 0) {
                             while (selectedUnitIntents.size() > 0) {
@@ -278,7 +271,7 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
                                     break;
                                 }
                             }
-                        } else { // no input from pointing component
+                        } else if (actionParameter.getServiceStateDescription().hasUnitType()){ // no input from pointing component
                             for (String locationId : movementLocations) {
                                 ServiceStateDescriptionType.ServiceStateDescription.Builder serviceStateDescriptionBuilder =
                                         actionParameter.getServiceStateDescription().toBuilder().setUnitId(locationId);
@@ -302,23 +295,34 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
 
     private void completeActionDescription(ActionParameterType.ActionParameter actionParameter)
             throws CouldNotPerformException, InterruptedException {
-        try {
+        LOGGER.info("completeActionDescription( "+actionParameter+")");
             ServiceType serviceType = actionParameter.getServiceStateDescription().getServiceType();
-            if (serviceType == BRIGHTNESS_STATE_SERVICE || serviceType == COLOR_STATE_SERVICE) {
-                UnitConfigType.UnitConfig unitConfig = getUnitRegistry().getUnitConfigById(actionParameter.getServiceStateDescription().getUnitId());
-                if (unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.LOCATION) {
-                    List<UnitConfigType.UnitConfig> lightConfigs = getUnitRegistry().getUnitConfigsByLocationIdAndUnitType(unitConfig.getId(), UnitTemplateType.UnitTemplate.UnitType.DIMMABLE_LIGHT);
-                    for (UnitConfigType.UnitConfig lightConfig : lightConfigs) {
+            UnitConfigType.UnitConfig unitConfig = getUnitRegistry().getUnitConfigById(actionParameter.getServiceStateDescription().getUnitId());
+            if (unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.LOCATION) {
+                UnitTemplateType.UnitTemplate.UnitType unitType = actionParameter.getServiceStateDescription().getUnitType();
+                List<UnitConfigType.UnitConfig> unitConfigs = getUnitRegistry().getUnitConfigsByLocationId(unitConfig.getId());
+                for (UnitConfigType.UnitConfig unit : unitConfigs) {
+                    if (unit.getUnitType() != UnitTemplateType.UnitTemplate.UnitType.LOCATION
+                    && unit.getUnitType() != UnitTemplateType.UnitTemplate.UnitType.UNIT_GROUP
+                    && unit.getUnitType() != UnitTemplateType.UnitTemplate.UnitType.DIMMER
+                    /*&& unit.getUnitType() == unitType*/) {
                         ServiceStateDescriptionType.ServiceStateDescription.Builder builder = actionParameter.getServiceStateDescription().toBuilder()
-                                .setUnitId(lightConfig.getId());
-                        ActionParameter newActionParameter = actionParameter.toBuilder().setServiceStateDescription(builder).build();
+                                .setUnitId(unit.getId());
+                        ActionParameter newActionParameter = actionParameter.toBuilder().setServiceStateDescription(builder.build()).build();
                         completeActionDescription(newActionParameter);
                     }
-                    return;
                 }
-                Double brightness = brightnessStates.get(unitConfig.getId());
+                return;
+            }
+            if (unitConfig.getServiceConfigList().stream().noneMatch(isMatchingAndOperationServiceType(serviceType))) {
+                return;
+            }
+            if (serviceType == BRIGHTNESS_STATE_SERVICE || serviceType == COLOR_STATE_SERVICE) {
+
+                ColorableLightRemote l = Units.getUnit(unitConfig,true,Units.COLORABLE_LIGHT);
+                Double brightness = l.getData().getBrightnessState().getBrightness();
                 String serviceState = actionParameter.getServiceStateDescription().getServiceState();
-                String newServiceState = new String(serviceState);
+                String newServiceState = serviceState;
 
                 if (serviceType == BRIGHTNESS_STATE_SERVICE) {
                     Double actionBrightness = getValueFromServiceState(serviceState, "brightness");
@@ -326,17 +330,13 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
                         if (brightness < 0.4) {
                             return;
                         }
-                        LOGGER.info(brightness.toString());
                         brightness = (brightness*10 - 2)/10;
-                        LOGGER.info(brightness.toString());
                         newServiceState = setValueInServiceState(serviceState, "brightness", brightness);
                     }else if (actionBrightness == 0.9) { //heller
                         if (brightness > 0.8) {
                             return;
                         }
-                        LOGGER.info(brightness.toString());
                         brightness = (brightness*10+2)/10;
-                        LOGGER.info(brightness.toString());
                         newServiceState = setValueInServiceState(serviceState, "brightness", brightness);
                     }
                 } else if (serviceType == COLOR_STATE_SERVICE) {
@@ -359,13 +359,14 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
                     }
                 }
             }
-
+        try {
             RemoteAction remoteAction = new RemoteAction(actionParameter);
             remoteAction.execute().get(5, TimeUnit.SECONDS);
             LOGGER.info("RemoteAction was delivered " + remoteAction);
-
+            return;
         } catch (CouldNotPerformException | ExecutionException | TimeoutException ex) {
-            throw new CouldNotPerformException("could not complete action.", ex);
+            //throw new CouldNotPerformException("could not complete action.", ex);
+            LOGGER.warn(ex.toString());
         }
     }
 
@@ -380,12 +381,14 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
     }
 
     private String setValueInServiceState(String serviceState, String key, Double value) {
+
         int keyIndex = serviceState.indexOf(key);
         char[] serviceStateArray = serviceState.toCharArray();
         char[] valueArray = Double.toString(value).toCharArray();
         serviceStateArray[keyIndex + key.length() + 3] = valueArray[0];
         serviceStateArray[keyIndex + key.length() + 4] = valueArray[1];
         serviceStateArray[keyIndex + key.length() + 5] = valueArray[2];
+
         return new String(serviceStateArray);
     }
 
@@ -413,27 +416,6 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
 
                 Registries.waitForData();
                 BCOLogin.getSession().loginUserViaUsername("admin", "admin", true);
-                brightnessStates = new TreeMap<>();
-                final CustomUnitPool lightPool = new CustomUnitPool();
-
-                lightPool.init(
-                        unitConfig -> unitConfig.getUnitType() != UnitTemplateType.UnitTemplate.UnitType.COLORABLE_LIGHT
-                );
-                lightPool.activate();
-                lightPool.addObserver((source, data) -> {
-                    if (source.getServiceType() == ServiceType.BRIGHTNESS_STATE_SERVICE) {
-                        final BrightnessStateType.BrightnessState brightnessState = (BrightnessStateType.BrightnessState) data;
-                        final UnitRemote unitRemote = (UnitRemote) source.getServiceProvider();
-                        final String unitId = unitRemote.getId().toString();
-                        if (brightnessStates.containsKey(unitId)) {
-                            brightnessStates.remove(unitId);
-                        }
-                        brightnessStates.put(unitId, brightnessState.getBrightness());
-                        LOGGER.info("brightnessState: "+getUnitRegistry().getUnitConfigById(unitId).getLabel().getEntry(0).getValue(0)+" br: "+brightnessState.getBrightness());
-                    } else {
-                        return;
-                    }
-                });
                 movementLocations = new ArrayList<>();
                 final CustomUnitPool locationPool = new CustomUnitPool();
 
