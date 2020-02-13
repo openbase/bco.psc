@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import com.google.gson.Gson;
 
 /**
  * The speech component of this application.
@@ -95,17 +96,22 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
         if (speechHypothesis == null) return;
         LOGGER.info("SpeechHypothesis detected: " + speechHypothesis);
 
-        String grammarTree = speechHypothesis.getGrammarTree();
-        List<String> locationStrings = getLocationStrings(grammarTree);
-        String actionString = getActionString(grammarTree);
-        List<String> entityStrings = getEntityStrings(grammarTree);
+        String grammarTreeString = speechHypothesis.getGrammarTree();
+
+        Gson gson = new Gson();
+        GrammarTree grammarTree = gson.fromJson(grammarTreeString, GrammarTree.class);
+
+        List<String> locationStrings = grammarTree.locations;
+        String actionString = grammarTree.action;
+        String valueString = grammarTree.value;
+        List<String> entityStrings = grammarTree.entities;
 
         List<UnitConfigType.UnitConfig> locationConfigs = new ArrayList<>();
         List<UnitConfigType.UnitConfig> unitConfigs = new ArrayList<>();
         List<UnitTemplateType.UnitTemplate.UnitType> unitTypes = new ArrayList<>();
 
         // try mapping speech hypothesis to action parameter
-        ActionParameter actionParameter = keywordConverter.getActionParameter(actionString);
+        ActionParameter actionParameter = keywordConverter.getActionParameter(actionString, valueString);
         if (actionParameter == null) {
             LOGGER.warn("No matching action found.");
             return;
@@ -127,10 +133,17 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
         }
 
         for (UnitTemplateType.UnitTemplate.UnitType unitType : unitTypes) {
-            for (UnitConfigType.UnitConfig locationConfig : locationConfigs) {
-                ServiceStateDescriptionType.ServiceStateDescription newServiceStateDescription = serviceStateDescription.toBuilder()
-                        .setUnitId(locationConfig.getId()).setUnitType(unitType).build();
-                sendActionParameter(actionParameter.toBuilder().setServiceStateDescription(newServiceStateDescription).build());
+            ServiceStateDescriptionType.ServiceStateDescription.Builder newServiceStateDescriptionBuilder =
+                    serviceStateDescription.toBuilder().setUnitType(unitType);
+            if (locationConfigs.size() > 0) {
+                for (UnitConfigType.UnitConfig locationConfig : locationConfigs) {
+                    ServiceStateDescriptionType.ServiceStateDescription newServiceStateDescription = newServiceStateDescriptionBuilder
+                            .setUnitId(locationConfig.getId()).setUnitType(unitType).build();
+                    sendActionParameter(actionParameter.toBuilder().setServiceStateDescription(newServiceStateDescription).build());
+                }
+            } else {
+                sendActionParameter(actionParameter.toBuilder().setServiceStateDescription(newServiceStateDescriptionBuilder).build());
+
             }
         }
 
@@ -162,7 +175,9 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
         }
     }
 
+    // decoder for "old"/non-json grammar tree
     private List<String> getLocationStrings(String grammarTree) {
+        grammarTree = grammarTree + "()";
         String locationsString = StringUtils.substringBetween(grammarTree.trim(), "(", ")");
         List<String> locationStrings = new ArrayList<>();
         String[] locationsArray = locationsString.split(",");
@@ -182,6 +197,13 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             entityStrings.add(entity.trim());
         }
         return entityStrings;
+    }
+
+    private class GrammarTree {
+        public String action = null;
+        public String value = null;
+        public List<String> locations = new ArrayList<>();
+        public List<String> entities = new ArrayList<>();
     }
 
     /**

@@ -67,8 +67,8 @@ public class KeywordConverter {
     }
 
 
-    public ActionParameter getActionParameter(String actionString) {
-
+    public ActionParameter getActionParameter(String actionString, String valueString) {
+        actionString = actionString+":"+valueString;
         if (keywordIntentMap.containsKey(actionString)) {
             LOGGER.info("Intent detected: " + actionString);
             return keywordIntentMap.get(actionString);
