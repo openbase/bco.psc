@@ -66,7 +66,12 @@ public class KeywordConverter {
 
     }
 
-
+    /***
+     * Takes two Strings: an action and a value and returns the corresponding ActionParameter or null.
+     * @param actionString String of the action
+     * @param valueString String of the value for the action
+     * @return ActionParameter or null.
+     */
     public ActionParameter getActionParameter(String actionString, String valueString) {
         actionString = actionString+":"+valueString;
         if (keywordIntentMap.containsKey(actionString)) {
@@ -79,6 +84,11 @@ public class KeywordConverter {
 
     }
 
+    /***
+     * Takes a list of Strings and returns a list of UnitConfig which have a given String as alias or label.
+     * @param locationStrings list of strings that could resolve a location
+     * @return list of UnitConfig of locations or null
+     */
     public List<UnitConfigType.UnitConfig> getLocations(List<String> locationStrings) {
         List<UnitConfigType.UnitConfig> locations = new ArrayList<>();
         List<UnitConfigType.UnitConfig> locationList = new ArrayList<>();
@@ -111,6 +121,11 @@ public class KeywordConverter {
 
     }
 
+    /***
+     * Takes a list of Strings and returns a list of UnitConfig which have a given String as alias or label.
+     * @param entityStrings list of strings that could resolve a unit
+     * @return list of UnitConfig of units or null
+     */
     public List<UnitConfigType.UnitConfig> getUnitConfigs(List<String> entityStrings) {
         List<UnitConfigType.UnitConfig> units = new ArrayList<>();
         List<UnitConfigType.UnitConfig> unitList = new ArrayList<>();
@@ -143,6 +158,11 @@ public class KeywordConverter {
         return units;
     }
 
+    /***
+     * Takes a list of strings and returns the corresponding UnitType or null.
+     * @param entityStrings list of strings that could match an unit type
+     * @return list of UnitType or null
+     */
     public List<UnitTemplateType.UnitTemplate.UnitType> getUnitTypes(List<String> entityStrings) {
         List<UnitTemplateType.UnitTemplate.UnitType> unitTypes = new ArrayList<>();
         for (String entityString : entityStrings) {
