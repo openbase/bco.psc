@@ -23,7 +23,6 @@ package org.openbase.bco.psc.control;
  * #L%
  */
 
-import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.bco.dal.remote.action.RemoteAction;
 import org.openbase.bco.dal.remote.layer.unit.*;
 import org.openbase.bco.dal.remote.layer.unit.connection.ConnectionRemote;
@@ -53,7 +52,6 @@ import org.openbase.type.domotic.service.ServiceConfigType;
 import org.openbase.type.domotic.service.ServiceStateDescriptionType;
 import org.openbase.type.domotic.service.ServiceTemplateType.ServiceTemplate;
 import org.openbase.type.domotic.service.ServiceTemplateType.ServiceTemplate.ServiceType;
-import org.openbase.type.domotic.state.BrightnessStateType;
 import org.openbase.type.domotic.state.MotionStateType;
 import org.openbase.type.domotic.state.WindowStateType.WindowState;
 import org.openbase.type.domotic.unit.UnitConfigType;
@@ -77,7 +75,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
-import static org.openbase.bco.registry.remote.Registries.isDataAvailable;
 import static org.openbase.type.domotic.service.ServiceTemplateType.ServiceTemplate.ServiceType.*;
 
 /**
@@ -300,16 +297,17 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
             UnitConfigType.UnitConfig unitConfig = getUnitRegistry().getUnitConfigById(actionParameter.getServiceStateDescription().getUnitId());
             if (unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.LOCATION) {
                 UnitTemplateType.UnitTemplate.UnitType unitType = actionParameter.getServiceStateDescription().getUnitType();
-                List<UnitConfigType.UnitConfig> unitConfigs = getUnitRegistry().getUnitConfigsByLocationId(unitConfig.getId());
+                List<UnitConfigType.UnitConfig> unitConfigs = getUnitRegistry().getUnitConfigsByLocationIdAndUnitType(unitConfig.getId(), unitType);
                 for (UnitConfigType.UnitConfig unit : unitConfigs) {
                     if (unit.getUnitType() != UnitTemplateType.UnitTemplate.UnitType.LOCATION
                     && unit.getUnitType() != UnitTemplateType.UnitTemplate.UnitType.UNIT_GROUP
-                    && unit.getUnitType() != UnitTemplateType.UnitTemplate.UnitType.DIMMER
-                    /*&& unit.getUnitType() == unitType*/) {
+                    && unit.getUnitType() != UnitTemplateType.UnitTemplate.UnitType.DIMMER) {
                         ServiceStateDescriptionType.ServiceStateDescription.Builder builder = actionParameter.getServiceStateDescription().toBuilder()
                                 .setUnitId(unit.getId());
                         ActionParameter newActionParameter = actionParameter.toBuilder().setServiceStateDescription(builder.build()).build();
                         completeActionDescription(newActionParameter);
+                    } else {
+                        LOGGER.info("unitType was: "+unit.getUnitType());
                     }
                 }
                 return;
@@ -361,6 +359,10 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
             }
         try {
             RemoteAction remoteAction = new RemoteAction(actionParameter);
+            if (remoteAction.getTargetUnit().isInfrastructure()) {
+                LOGGER.info(remoteAction.getTargetUnit().getConfig().getAlias(0)+"is infrastructure. No remote action executed.");
+                return;
+            }
             remoteAction.execute().get(5, TimeUnit.SECONDS);
             LOGGER.info("RemoteAction was delivered " + remoteAction);
             return;
