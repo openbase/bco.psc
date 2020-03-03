@@ -147,12 +147,13 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
      */
     private TreeMap<Long, ActionParameter> receivedStatesIntents;
 
+    /**
+     * List of location IDs of locations where movement is detected.
+     */
     private List<String> movementLocations;
 
     /**
      * {@inheritDoc}
-     *
-     * @param event {@inheritDoc}
      */
     @Override
     public void handleEvent(final Event event) throws InterruptedException {
@@ -226,11 +227,8 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
 
     private void executeMatchingIntents() throws CouldNotPerformException, InterruptedException {
         try {
-            Map<Long, UnitProbabilityCollection> unmatchedSelectedUnitIntents = new TreeMap<>();
-            //Map<Long, ActionParameter> unmatchedReceivedStatesIntents = new TreeMap<>();
-
             LOGGER.trace("executeMatchingIntents");
-            if (receivedStatesIntents.size() > 0) {
+            if (receivedStatesIntents.size() > 0) { // if there are action parameters from speech controller
                 while (receivedStatesIntents.size() > 0) {
                     Long receivedStateTime = receivedStatesIntents.firstKey();
                     ActionParameter actionParameter = receivedStatesIntents.remove(receivedStateTime);
@@ -241,7 +239,7 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
                     if (actionParameter.getServiceStateDescription().hasUnitId()) {
                         completeActionDescription(actionParameter);
                     } else {
-                        if (selectedUnitIntents.size() > 0) {
+                        if (selectedUnitIntents.size() > 0) { // if there are selected units from pointing component
                             while (selectedUnitIntents.size() > 0) {
                                 Long selectedUnitTime = selectedUnitIntents.firstKey();
                                 UnitProbabilityCollection unitProbabilityCollection = selectedUnitIntents.get(selectedUnitTime);
@@ -279,7 +277,6 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
                     }
                 }
             }
-            selectedUnitIntents.putAll(unmatchedSelectedUnitIntents);
         } catch (CouldNotPerformException ex) {
             throw new CouldNotPerformException("cannot match intents.", ex);
         }
@@ -371,7 +368,7 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
             LOGGER.warn(ex.toString());
         }
     }
-
+    // gets the the value from String key in (JSON) String serviceState. used to get brightness.
     private Double getValueFromServiceState(String serviceState, String key) {
         int keyIndex = serviceState.indexOf(key);
         char[] serviceStateArray = serviceState.toCharArray();
@@ -381,7 +378,7 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
         valueArray[2] = serviceStateArray[keyIndex + key.length() + 5];
         return Double.parseDouble(new String(valueArray));
     }
-
+    // sets the the value from String key in (JSON) String serviceState to value. used to set brightness.
     private String setValueInServiceState(String serviceState, String key, Double value) {
 
         int keyIndex = serviceState.indexOf(key);
