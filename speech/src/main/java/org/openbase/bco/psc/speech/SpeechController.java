@@ -102,7 +102,7 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
         GrammarTree grammarTree = gson.fromJson(grammarTreeString, GrammarTree.class);
 
         List<String> locationStrings = grammarTree.locations;
-        String actionString = grammarTree.action;
+        String actionString = grammarTree.state;
         String valueString = grammarTree.value;
         List<String> entityStrings = grammarTree.entities;
 
@@ -190,7 +190,7 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
         }
         return locationStrings;
     }
-    private String getActionString(String grammarTree) {
+    private String getStateString(String grammarTree) {
         return StringUtils.substringBetween(grammarTree.trim(), "[", "]");
     }
     private List<String> getEntityStrings(String grammarTree) {
@@ -204,7 +204,7 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
     }
 
     private class GrammarTree {
-        public String action = null;
+        public String state = null;
         public String value = null;
         public List<String> locations = new ArrayList<>();
         public List<String> entities = new ArrayList<>();
@@ -430,28 +430,28 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(lightState, brightnessServiceType);
             builder.getActionInitiatorBuilder().setInitiatorType(initiator);
 
-            intentActionMap.put("color:hell", builder.build());
+            intentActionMap.put("brightness:hell", builder.build());
 
             //Create ActionParameter for BrightnessState=dark
             BrightnessStateType.BrightnessState darkState = BrightnessStateType.BrightnessState.newBuilder().setBrightness(0.2).build();
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(darkState, brightnessServiceType);
             builder.getActionInitiatorBuilder().setInitiatorType(initiator);
 
-            intentActionMap.put("color:dunkel", builder.build());
+            intentActionMap.put("brightness:dunkel", builder.build());
 
             //Create ActionParameter for BrightnessState=lighter
             BrightnessStateType.BrightnessState lighterState = BrightnessStateType.BrightnessState.newBuilder().setBrightness(0.9).build();
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(lighterState, brightnessServiceType);
             builder.getActionInitiatorBuilder().setInitiatorType(initiator);
 
-            intentActionMap.put("color:heller", builder.build());
+            intentActionMap.put("brightness:heller", builder.build());
 
             //Create ActionParameter for BrightnessState=darker
             BrightnessStateType.BrightnessState darkerState = BrightnessStateType.BrightnessState.newBuilder().setBrightness(0.1).build();
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(darkerState, brightnessServiceType);
             builder.getActionInitiatorBuilder().setInitiatorType(initiator);
 
-            intentActionMap.put("color:dunkler", builder.build());
+            intentActionMap.put("brightness:dunkler", builder.build());
 
 
             // Create UnitTypes
@@ -460,7 +460,7 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             UnitTemplateType.UnitTemplate.UnitType blind = UnitTemplateType.UnitTemplate.UnitType.ROLLER_SHUTTER;
 
 
-            unitTypeMap.put("light", colorableLight);
+            unitTypeMap.put("licht", colorableLight);
             unitTypeMap.put("television", tv);
             unitTypeMap.put("tv", tv);
             unitTypeMap.put("blind", blind);
