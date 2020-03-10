@@ -146,6 +146,7 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
 
             }
         }
+	sendActionParameter(actionParameter);
 
 
     }
