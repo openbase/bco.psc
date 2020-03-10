@@ -68,17 +68,17 @@ public class KeywordConverter {
 
     /***
      * Takes two Strings: an action and a value and returns the corresponding ActionParameter or null.
-     * @param actionString String of the action
+     * @param stateString String of the action
      * @param valueString String of the value for the action
      * @return ActionParameter or null.
      */
-    public ActionParameter getActionParameter(String actionString, String valueString) {
-        actionString = actionString+":"+valueString;
-        if (keywordIntentMap.containsKey(actionString)) {
-            LOGGER.info("Intent detected: " + actionString);
-            return keywordIntentMap.get(actionString);
+    public ActionParameter getActionParameter(String stateString, String valueString) {
+        stateString = stateString+":"+valueString;
+        if (keywordIntentMap.containsKey(stateString)) {
+            LOGGER.info("Intent detected: " + stateString);
+            return keywordIntentMap.get(stateString);
         } else {
-            LOGGER.info("Intent (" + actionString + ") not in Map.");
+            LOGGER.info("Intent (" + stateString + ") not in Map.");
             return null;
         }
 
