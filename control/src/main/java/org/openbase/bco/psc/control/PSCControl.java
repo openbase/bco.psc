@@ -23,10 +23,12 @@ package org.openbase.bco.psc.control;
  * #L%
  */
 
+import org.openbase.bco.dal.lib.layer.unit.Unit;
 import org.openbase.bco.dal.remote.action.RemoteAction;
 import org.openbase.bco.dal.remote.layer.unit.*;
 import org.openbase.bco.dal.remote.layer.unit.connection.ConnectionRemote;
 import org.openbase.bco.dal.remote.layer.unit.location.LocationRemote;
+import org.openbase.bco.dal.remote.layer.unit.unitgroup.UnitGroupRemote;
 import org.openbase.bco.psc.control.jp.JPControlThreshold;
 import org.openbase.bco.psc.control.jp.JPIntentTimeout;
 import org.openbase.bco.psc.control.jp.JPMultimodalMode;
@@ -251,7 +253,7 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
                                     if (unitConfig.getServiceConfigList().stream().noneMatch(isMatchingAndOperationServiceType(serviceType))) { //unit does not match the service type
                                         selectedUnitIds.remove(unitId);
                                     }
-                                    if (unitType != null) {
+                                    if (unitType != UnitTemplateType.UnitTemplate.UnitType.UNKNOWN) {
                                         if (unitType != unitConfig.getUnitType() && unitType != unitConfig.getUnitGroupConfig().getUnitType()) {
                                             selectedUnitIds.remove(unitId);
                                         }
@@ -292,6 +294,16 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
         LOGGER.info("completeActionDescription( "+actionParameter+")");
             ServiceType serviceType = actionParameter.getServiceStateDescription().getServiceType();
             UnitConfigType.UnitConfig unitConfig = getUnitRegistry().getUnitConfigById(actionParameter.getServiceStateDescription().getUnitId());
+            if (unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.UNIT_GROUP) {
+                List<String> unitIds = unitConfig.getUnitGroupConfig().getMemberIdList();
+                for (String unitId : unitIds) {
+                    ServiceStateDescriptionType.ServiceStateDescription.Builder builder = actionParameter.getServiceStateDescription().toBuilder()
+                            .setUnitId(unitId);
+                    ActionParameter newActionParameter = actionParameter.toBuilder().setServiceStateDescription(builder.build()).build();
+                    completeActionDescription(newActionParameter);
+                }
+                return;
+            }
             if (unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.LOCATION) {
                 UnitTemplateType.UnitTemplate.UnitType unitType = actionParameter.getServiceStateDescription().getUnitType();
                 List<UnitConfigType.UnitConfig> unitConfigs = getUnitRegistry().getUnitConfigsByLocationIdAndUnitType(unitConfig.getId(), unitType);
