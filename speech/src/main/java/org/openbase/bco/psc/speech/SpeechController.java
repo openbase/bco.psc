@@ -317,8 +317,10 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
 
             intentActionMap.put("blind[blind:auf]", builder.build());
             intentActionMap.put("blind[blind:hoch]", builder.build());
-            intentActionMap.put("blind:auf", builder.build());
-            intentActionMap.put("blind:hoch", builder.build());
+            intentActionMap.put("rollo:auf", builder.build());
+            intentActionMap.put("rollladen:auf", builder.build());
+            intentActionMap.put("rollo:hoch", builder.build());
+            intentActionMap.put("rollladen:auf", builder.build());
 
             //Create ActionParameter for Blindstate=DOWN
             BlindStateType.BlindState downState = BlindStateType.BlindState.newBuilder().setValue(BlindStateType.BlindState.State.DOWN).build();
@@ -327,8 +329,10 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
 
             intentActionMap.put("blind[blind:zu]", builder.build());
             intentActionMap.put("blind[blind:runter]", builder.build());
-            intentActionMap.put("blind:zu", builder.build());
-            intentActionMap.put("blind:runter", builder.build());
+            intentActionMap.put("rollo:zu", builder.build());
+            intentActionMap.put("rollladen:zu", builder.build());
+            intentActionMap.put("rollo:runter", builder.build());
+            intentActionMap.put("rolladen:runter", builder.build());
 
 
             // Create color states
@@ -394,7 +398,6 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             intentActionMap.put("light[color:grün]", builder.build());
             intentActionMap.put("light[color:grünen]", builder.build());
             intentActionMap.put("color:grün", builder.build());
-            intentActionMap.put("color:grünen", builder.build());
 
             // Create ActionParameter for Color=BLUE
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(blueState, colorServiceType);
@@ -403,7 +406,6 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             intentActionMap.put("light[color:blau]", builder.build());
             intentActionMap.put("light[color:laut]", builder.build());
             intentActionMap.put("color:blau", builder.build());
-            intentActionMap.put("color:laut", builder.build());
 
             // Create ActionParameter for Color=LILA
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(violetState, colorServiceType);
@@ -424,8 +426,8 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             intentActionMap.put("light[color:peking]", builder.build());
             intentActionMap.put("light[color:magenta]", builder.build());
             intentActionMap.put("color:pink", builder.build());
-            intentActionMap.put("color:peking", builder.build());
             intentActionMap.put("color:magenta", builder.build());
+            intentActionMap.put("color:rosa", builder.build());
 
 
             //Create ActionParameter for BrightnessState=light
@@ -466,7 +468,7 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             unitTypeMap.put("licht", colorableLight);
             unitTypeMap.put("television", tv);
             unitTypeMap.put("tv", tv);
-            unitTypeMap.put("blind", blind);
+            unitTypeMap.put("lamellen", blind);
 
             keywordConverter = new KeywordConverter(intentActionMap,unitTypeMap);
 
