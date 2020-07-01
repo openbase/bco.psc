@@ -181,7 +181,7 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             throw new CouldNotPerformException("The RegistrySynchronization could not be activated although connection to the registry is possible.", ex);
         }
     }
-    
+
 
     private class GrammarTree {
         public String state = null;
@@ -274,8 +274,6 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
 
             ActionParameter powerOn = builder.build();
             intentActionMap.put("power:an", powerOn);
-            intentActionMap.put("light[power:an]", powerOn);
-
 
             // Create ActionParameter for PowerState=OFF
             PowerStateType.PowerState offState = PowerStateType.PowerState.newBuilder().setValue(PowerStateType.PowerState.State.OFF).build();
@@ -284,16 +282,12 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
 
             ActionParameter powerOff = builder.build();
             intentActionMap.put("power:aus", powerOff);
-            intentActionMap.put("light[power:aus]", powerOff);
-
 
             //Create ActionParameter for Blindstate=UP
             BlindStateType.BlindState upState = BlindStateType.BlindState.newBuilder().setValue(BlindStateType.BlindState.State.UP).build();
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(upState, blindServiceType);
             builder.getActionInitiatorBuilder().setInitiatorType(initiator);
 
-            intentActionMap.put("blind[blind:auf]", builder.build());
-            intentActionMap.put("blind[blind:hoch]", builder.build());
             intentActionMap.put("rollo:auf", builder.build());
             intentActionMap.put("rollladen:auf", builder.build());
             intentActionMap.put("rollo:hoch", builder.build());
@@ -304,8 +298,6 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(downState, blindServiceType);
             builder.getActionInitiatorBuilder().setInitiatorType(initiator);
 
-            intentActionMap.put("blind[blind:zu]", builder.build());
-            intentActionMap.put("blind[blind:runter]", builder.build());
             intentActionMap.put("rollo:zu", builder.build());
             intentActionMap.put("rollladen:zu", builder.build());
             intentActionMap.put("rollo:runter", builder.build());
@@ -337,9 +329,6 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(whiteState, colorServiceType);
             builder.getActionInitiatorBuilder().setInitiatorType(initiator);
 
-            intentActionMap.put("light[color:weiß]", builder.build());
-            intentActionMap.put("light[color:weiss]", builder.build());
-            intentActionMap.put("light[color:farblos]", builder.build());
             intentActionMap.put("color:weiß", builder.build());
             intentActionMap.put("color:weiss", builder.build());
             intentActionMap.put("color:farblos", builder.build());
@@ -349,8 +338,6 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(redState, colorServiceType);
             builder.getActionInitiatorBuilder().setInitiatorType(initiator);
 
-            intentActionMap.put("light[color:rot]", builder.build());
-            intentActionMap.put("light[color:ott]", builder.build());
             intentActionMap.put("color:rot", builder.build());
             intentActionMap.put("color:ott", builder.build());
 
@@ -358,39 +345,30 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(orangeState, colorServiceType);
             builder.getActionInitiatorBuilder().setInitiatorType(initiator);
 
-            intentActionMap.put("light[color:orange]", builder.build());
             intentActionMap.put("color:orange", builder.build());
 
             // Create ActionParameter for Color=YELLOW
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(yellowState, colorServiceType);
             builder.getActionInitiatorBuilder().setInitiatorType(initiator);
 
-            intentActionMap.put("light[color:gelb]", builder.build());
             intentActionMap.put("color:gelb", builder.build());
 
             // Create ActionParameter for Color=GREEN
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(greenState, colorServiceType);
             builder.getActionInitiatorBuilder().setInitiatorType(initiator);
 
-            intentActionMap.put("light[color:grün]", builder.build());
-            intentActionMap.put("light[color:grünen]", builder.build());
             intentActionMap.put("color:grün", builder.build());
 
             // Create ActionParameter for Color=BLUE
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(blueState, colorServiceType);
             builder.getActionInitiatorBuilder().setInitiatorType(initiator);
 
-            intentActionMap.put("light[color:blau]", builder.build());
-            intentActionMap.put("light[color:laut]", builder.build());
             intentActionMap.put("color:blau", builder.build());
 
             // Create ActionParameter for Color=LILA
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(violetState, colorServiceType);
             builder.getActionInitiatorBuilder().setInitiatorType(initiator);
 
-            intentActionMap.put("light[color:violett]", builder.build());
-            intentActionMap.put("light[color:violet]", builder.build());
-            intentActionMap.put("light[color:lila]", builder.build());
             intentActionMap.put("color:violett", builder.build());
             intentActionMap.put("color:violet", builder.build());
             intentActionMap.put("color:lila", builder.build());
@@ -399,9 +377,6 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             builder = ActionDescriptionProcessor.generateDefaultActionParameter(pinkState, colorServiceType);
             builder.getActionInitiatorBuilder().setInitiatorType(initiator);
 
-            intentActionMap.put("light[color:pink]", builder.build());
-            intentActionMap.put("light[color:peking]", builder.build());
-            intentActionMap.put("light[color:magenta]", builder.build());
             intentActionMap.put("color:pink", builder.build());
             intentActionMap.put("color:magenta", builder.build());
             intentActionMap.put("color:rosa", builder.build());
