@@ -181,30 +181,7 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
             throw new CouldNotPerformException("The RegistrySynchronization could not be activated although connection to the registry is possible.", ex);
         }
     }
-
-    // decoder for "old"/non-json grammar tree
-    private List<String> getLocationStrings(String grammarTree) {
-        grammarTree = grammarTree + "()";
-        String locationsString = StringUtils.substringBetween(grammarTree.trim(), "(", ")");
-        List<String> locationStrings = new ArrayList<>();
-        String[] locationsArray = locationsString.split(",");
-        for (String location : locationsArray) {
-            locationStrings.add(location.trim());
-        }
-        return locationStrings;
-    }
-    private String getStateString(String grammarTree) {
-        return StringUtils.substringBetween(grammarTree.trim(), "[", "]");
-    }
-    private List<String> getEntityStrings(String grammarTree) {
-        String entitiesString = grammarTree.split("\\[")[0];
-        List<String> entityStrings = new ArrayList<>();
-        String[] entitiesArray = entitiesString.split(",");
-        for (String entity : entitiesArray) {
-            entityStrings.add(entity.trim());
-        }
-        return entityStrings;
-    }
+    
 
     private class GrammarTree {
         public String state = null;
