@@ -376,8 +376,7 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
             LOGGER.info("RemoteAction was delivered " + remoteAction);
             return;
         } catch (CouldNotPerformException | ExecutionException | TimeoutException ex) {
-            //throw new CouldNotPerformException("could not complete action.", ex);
-            LOGGER.warn(ex.toString());
+            throw new CouldNotPerformException("could not complete action.", ex);
         }
     }
     // gets the the value from String key in (JSON) String serviceState. used to get brightness.
@@ -448,10 +447,8 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
                     final String locationId = locationRemote.getConfig().getId();
                     if (motionState.getValue() == MotionStateType.MotionState.State.MOTION) {
                         movementLocations.add(locationId);
-                        //LOGGER.info("added "+locationRemote.getLabel());
                     } else if (motionState.getValue() == MotionStateType.MotionState.State.NO_MOTION) {
                         movementLocations.remove(locationId);
-                        //LOGGER.info("removed "+locationRemote.getLabel());
                     }
 
                 });
