@@ -66,7 +66,7 @@ public class KeywordConverter {
 
     }
 
-    /***
+    /**
      * Takes two Strings: an action and a value and returns the corresponding ActionParameter or null.
      * @param stateString String of the action
      * @param valueString String of the value for the action
@@ -84,7 +84,7 @@ public class KeywordConverter {
 
     }
 
-    /***
+    /**
      * Takes a list of Strings and returns a list of UnitConfig which have a given String as alias or label.
      * @param locationStrings list of strings that could resolve a location
      * @return list of UnitConfig of locations or null
@@ -97,14 +97,12 @@ public class KeywordConverter {
             try {
                 locationList.addAll(getUnitRegistry().getUnitConfigsByLabel(locationString));
             } catch (CouldNotPerformException e) {
-                //e.printStackTrace();
-                LOGGER.info(e.toString());
+                e.printStackTrace();
             }
             try {
                 locationList.add(getUnitRegistry().getUnitConfigByAlias(locationString));
             } catch (NotAvailableException e) {
-                //e.printStackTrace();
-                LOGGER.info(e.toString());
+                e.printStackTrace();
             }
         }
         for (UnitConfigType.UnitConfig location : locationList) {
@@ -118,7 +116,7 @@ public class KeywordConverter {
 
     }
 
-    /***
+    /**
      * Takes a list of Strings and returns a list of UnitConfig which have a given String as alias or label.
      * @param entityStrings list of strings that could resolve a unit
      * @return list of UnitConfig of units or null
@@ -130,19 +128,16 @@ public class KeywordConverter {
             try {
                 unitList.addAll(getUnitRegistry().getUnitConfigsByLabel(entityString));
             } catch (NotAvailableException e) {
-                //e.printStackTrace();
-                LOGGER.info(e.toString());
+                e.printStackTrace();
 
             } catch (CouldNotPerformException e) {
-                //e.printStackTrace();
-                LOGGER.info(e.toString());
+                e.printStackTrace();
 
             }
             try {
                 unitList.add(getUnitRegistry().getUnitConfigByAlias(entityString));
             } catch (NotAvailableException e) {
-                //e.printStackTrace();
-                LOGGER.info(e.toString());
+                e.printStackTrace();
 
             }
         }
@@ -155,10 +150,10 @@ public class KeywordConverter {
         return units;
     }
 
-    /***
-     * Takes a list of strings and returns the corresponding UnitType or null.
-     * @param entityStrings list of strings that could match an unit type
-     * @return list of UnitType or null
+    /**
+     * Takes a list of strings and returns the corresponding UnitTypes.
+     * @param entityStrings list of strings that could match a UnitType
+     * @return list of UnitType or empty list
      */
     public List<UnitTemplateType.UnitTemplate.UnitType> getUnitTypes(List<String> entityStrings) {
         List<UnitTemplateType.UnitTemplate.UnitType> unitTypes = new ArrayList<>();

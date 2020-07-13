@@ -156,6 +156,8 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
 
     /**
      * {@inheritDoc}
+     *
+     * @param event {@inheritDoc}
      */
     @Override
     public void handleEvent(final Event event) throws InterruptedException {
@@ -179,8 +181,8 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
                     receivedStatesIntents.put(event.getMetaData().getReceiveTime(), (ActionParameter) event.getData());
                     handleIntents();
                 }
-            } else { // uni modal
-                LOGGER.info("in uni modal mode.");
+            } else {
+                LOGGER.debug("in uni modal mode.");
                 if (event.getData() instanceof UnitProbabilityCollection) {
                     UnitProbabilityCollection collection = (UnitProbabilityCollection) event.getData();
                     collection.getElementList().stream().filter(x -> x.getProbability() >= threshold).forEach(x -> {
@@ -293,27 +295,37 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
             throws CouldNotPerformException, InterruptedException {
         LOGGER.info("completeActionDescription( "+actionParameter+")");
             ServiceType serviceType = actionParameter.getServiceStateDescription().getServiceType();
-            UnitConfigType.UnitConfig unitConfig = getUnitRegistry().getUnitConfigById(actionParameter.getServiceStateDescription().getUnitId());
+            UnitConfigType.UnitConfig unitConfig =
+                    getUnitRegistry().getUnitConfigById(actionParameter.getServiceStateDescription().getUnitId());
+
             if (unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.UNIT_GROUP) {
                 List<String> unitIds = unitConfig.getUnitGroupConfig().getMemberIdList();
                 for (String unitId : unitIds) {
-                    ServiceStateDescriptionType.ServiceStateDescription.Builder builder = actionParameter.getServiceStateDescription().toBuilder()
-                            .setUnitId(unitId);
-                    ActionParameter newActionParameter = actionParameter.toBuilder().setServiceStateDescription(builder.build()).build();
+                    ServiceStateDescriptionType.ServiceStateDescription.Builder builder =
+                            actionParameter.getServiceStateDescription().toBuilder().setUnitId(unitId);
+                    ActionParameter newActionParameter =
+                            actionParameter.toBuilder().setServiceStateDescription(builder.build()).build();
                     completeActionDescription(newActionParameter);
                 }
                 return;
             }
+
             if (unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.LOCATION) {
-                UnitTemplateType.UnitTemplate.UnitType unitType = actionParameter.getServiceStateDescription().getUnitType();
-                List<UnitConfigType.UnitConfig> unitConfigs = getUnitRegistry().getUnitConfigsByLocationIdAndUnitType(unitConfig.getId(), unitType);
+                UnitTemplateType.UnitTemplate.UnitType unitType =
+                        actionParameter.getServiceStateDescription().getUnitType();
+                List<UnitConfigType.UnitConfig> unitConfigs =
+                        getUnitRegistry().getUnitConfigsByLocationIdAndUnitType(unitConfig.getId(), unitType);
                 for (UnitConfigType.UnitConfig unit : unitConfigs) {
+                    // we already get the units of the whole location so we don't need sub-locations.
                     if (unit.getUnitType() != UnitTemplateType.UnitTemplate.UnitType.LOCATION
+                    // we don't need UNIT_GROUPs because we get the members anyway.
                     && unit.getUnitType() != UnitTemplateType.UnitTemplate.UnitType.UNIT_GROUP
+                    // we don't apply anything to DIMMER so we drop it here.
                     && unit.getUnitType() != UnitTemplateType.UnitTemplate.UnitType.DIMMER) {
-                        ServiceStateDescriptionType.ServiceStateDescription.Builder builder = actionParameter.getServiceStateDescription().toBuilder()
-                                .setUnitId(unit.getId());
-                        ActionParameter newActionParameter = actionParameter.toBuilder().setServiceStateDescription(builder.build()).build();
+                        ServiceStateDescriptionType.ServiceStateDescription.Builder builder =
+                                actionParameter.getServiceStateDescription().toBuilder().setUnitId(unit.getId());
+                        ActionParameter newActionParameter =
+                                actionParameter.toBuilder().setServiceStateDescription(builder.build()).build();
                         completeActionDescription(newActionParameter);
                     } else {
                         LOGGER.info("unitType was: "+unit.getUnitType());
@@ -324,6 +336,8 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
             if (unitConfig.getServiceConfigList().stream().noneMatch(isMatchingAndOperationServiceType(serviceType))) {
                 return;
             }
+            // these two serviceTypes need special 'care' because we need to get the current values in order to change
+            // them. Instead of just overwriting.
             if (serviceType == BRIGHTNESS_STATE_SERVICE || serviceType == COLOR_STATE_SERVICE) {
 
                 ColorableLightRemote l = Units.getUnit(unitConfig,true,Units.COLORABLE_LIGHT);
@@ -333,13 +347,15 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
 
                 if (serviceType == BRIGHTNESS_STATE_SERVICE) {
                     Double actionBrightness = getValueFromServiceState(serviceState, "brightness");
-                    if (actionBrightness == 0.1) { //dunkler
+                    // as a workaround, because there is no service to make a lamp darker depending on its current
+                    // brightnessstate, brightness value 0.1 stands for 'darker'
+                    if (actionBrightness == 0.1) { //darker
                         if (brightness < 0.4) {
                             return;
                         }
                         brightness = (brightness*10 - 2)/10;
                         newServiceState = setValueInServiceState(serviceState, "brightness", brightness);
-                    }else if (actionBrightness == 0.9) { //heller
+                    }else if (actionBrightness == 0.9) { //brighter
                         if (brightness > 0.8) {
                             return;
                         }
@@ -349,7 +365,8 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
                 } else if (serviceType == COLOR_STATE_SERVICE) {
                     newServiceState = setValueInServiceState(serviceState, "brightness", brightness);
                 }
-                ServiceStateDescriptionType.ServiceStateDescription serviceStateDescription = actionParameter.getServiceStateDescription().toBuilder().setServiceState(newServiceState).build();
+                ServiceStateDescriptionType.ServiceStateDescription serviceStateDescription =
+                        actionParameter.getServiceStateDescription().toBuilder().setServiceState(newServiceState).build();
                 actionParameter = actionParameter.toBuilder().setServiceStateDescription(serviceStateDescription).build();
             }
 
@@ -379,7 +396,13 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
             throw new CouldNotPerformException("could not complete action.", ex);
         }
     }
-    // gets the the value from String key in (JSON) String serviceState. used to get brightness.
+
+    /**
+     * Gets the the value from String key in (JSON) String serviceState. Only used to get brightness.
+     * @param serviceState serviceState of a unit as JSON string
+     * @param key as String
+     * @return the Double value of the key in the serviceState
+     */
     private Double getValueFromServiceState(String serviceState, String key) {
         int keyIndex = serviceState.indexOf(key);
         char[] serviceStateArray = serviceState.toCharArray();
@@ -389,7 +412,13 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
         valueArray[2] = serviceStateArray[keyIndex + key.length() + 5];
         return Double.parseDouble(new String(valueArray));
     }
-    // sets the the value from String key in (JSON) String serviceState to value. used to set brightness.
+    /**
+     * Sets the the value from String key in (JSON) String serviceState to value. Only used to set brightness.
+     * @param serviceState serviceState of a unit as JSON string
+     * @param key as String
+     * @param value Double to be set as value
+     * @return the new serviceState as String with value as value for key in serviceState
+     */
     private String setValueInServiceState(String serviceState, String key, Double value) {
 
         int keyIndex = serviceState.indexOf(key);
@@ -425,7 +454,7 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
                 LOGGER.info("Selected intent timeout: " + intentTimeout);
 
                 Registries.waitForData();
-                BCOLogin.getSession().loginUserViaUsername("admin", "admin", true);
+                BCOLogin.getSession().autoLogin(true);
                 movementLocations = new ArrayList<>();
                 final CustomUnitPool locationPool = new CustomUnitPool();
 
