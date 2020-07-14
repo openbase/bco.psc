@@ -153,7 +153,7 @@ public class SpeechController extends AbstractEventHandler implements Speech, La
 
     }
 
-    /***
+    /**
      * Takes an ActionParameter and publishes it on scope.
      * @param actionParameter the ActionParameter to publish
      */
