@@ -93,22 +93,22 @@ public class KeywordConverter {
         List<UnitConfigType.UnitConfig> locations = new ArrayList<>();
         List<UnitConfigType.UnitConfig> locationList = new ArrayList<>();
         for (String locationString : locationStrings) {
-            LOGGER.info(locationString);
+            LOGGER.debug(locationString);
             try {
                 locationList.addAll(getUnitRegistry().getUnitConfigsByLabel(locationString));
             } catch (CouldNotPerformException e) {
-                e.printStackTrace();
+                ExceptionPrinter.printHistory(new CouldNotPerformException("Lookup failed!\nNo unit with given label.", e), LOGGER, LogLevel.INFO);
             }
             try {
                 locationList.add(getUnitRegistry().getUnitConfigByAlias(locationString));
             } catch (NotAvailableException e) {
-                e.printStackTrace();
+                ExceptionPrinter.printHistory(new CouldNotPerformException("Lookup failed!\nNo unit with given alias.", e), LOGGER, LogLevel.INFO);
             }
         }
         for (UnitConfigType.UnitConfig location : locationList) {
-            LOGGER.info(location.getUnitType().name());
+            LOGGER.debug(location.getUnitType().name());
             if ((!locations.contains(location)) && location.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.LOCATION) {
-                LOGGER.info("Location detected: "+location.getAlias(0));
+                LOGGER.debug("Location detected: "+location.getAlias(0));
                 locations.add(location);
             }
         }
@@ -128,16 +128,16 @@ public class KeywordConverter {
             try {
                 unitList.addAll(getUnitRegistry().getUnitConfigsByLabel(entityString));
             } catch (NotAvailableException e) {
-                e.printStackTrace();
+                ExceptionPrinter.printHistory(new NotAvailableException("Lookup failed!", e), LOGGER, LogLevel.INFO);
 
             } catch (CouldNotPerformException e) {
-                e.printStackTrace();
+                ExceptionPrinter.printHistory(new CouldNotPerformException("Lookup failed!\nNo unit with given label.", e), LOGGER, LogLevel.INFO);
 
             }
             try {
                 unitList.add(getUnitRegistry().getUnitConfigByAlias(entityString));
             } catch (NotAvailableException e) {
-                e.printStackTrace();
+                ExceptionPrinter.printHistory(new CouldNotPerformException("Lookup failed!\nNo unit with given alias.", e), LOGGER, LogLevel.INFO);
 
             }
         }
