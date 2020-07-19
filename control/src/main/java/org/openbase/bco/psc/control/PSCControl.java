@@ -23,10 +23,12 @@ package org.openbase.bco.psc.control;
  * #L%
  */
 
+import org.openbase.bco.dal.lib.layer.unit.Unit;
 import org.openbase.bco.dal.remote.action.RemoteAction;
-import org.openbase.bco.dal.remote.layer.unit.Units;
+import org.openbase.bco.dal.remote.layer.unit.*;
 import org.openbase.bco.dal.remote.layer.unit.connection.ConnectionRemote;
 import org.openbase.bco.dal.remote.layer.unit.location.LocationRemote;
+import org.openbase.bco.dal.remote.layer.unit.unitgroup.UnitGroupRemote;
 import org.openbase.bco.psc.control.jp.JPControlThreshold;
 import org.openbase.bco.psc.control.jp.JPIntentTimeout;
 import org.openbase.bco.psc.control.jp.JPMultimodalMode;
@@ -34,6 +36,7 @@ import org.openbase.bco.psc.control.rsb.RSBConnection;
 import org.openbase.bco.psc.lib.jp.JPPscUnitFilterList;
 import org.openbase.bco.psc.lib.registry.PointingUnitChecker;
 import org.openbase.bco.registry.remote.Registries;
+import org.openbase.bco.registry.remote.login.BCOLogin;
 import org.openbase.jps.core.JPService;
 import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -48,18 +51,22 @@ import org.openbase.jul.storage.registry.SynchronizableRegistryImpl;
 import org.openbase.type.domotic.action.ActionParameterType;
 import org.openbase.type.domotic.action.ActionParameterType.ActionParameter;
 import org.openbase.type.domotic.service.ServiceConfigType;
+import org.openbase.type.domotic.service.ServiceStateDescriptionType;
 import org.openbase.type.domotic.service.ServiceTemplateType.ServiceTemplate;
 import org.openbase.type.domotic.service.ServiceTemplateType.ServiceTemplate.ServiceType;
+import org.openbase.type.domotic.state.MotionStateType;
 import org.openbase.type.domotic.state.WindowStateType.WindowState;
 import org.openbase.type.domotic.unit.UnitConfigType;
 import org.openbase.type.domotic.unit.UnitProbabilityCollectionType.UnitProbabilityCollection;
 import org.openbase.type.domotic.unit.UnitProbabilityType.UnitProbability;
 import org.openbase.type.domotic.unit.UnitTemplateType;
 import org.openbase.type.domotic.unit.connection.ConnectionConfigType.ConnectionConfig.ConnectionType;
+import org.openbase.type.domotic.unit.location.LocationConfigType;
 import org.slf4j.LoggerFactory;
 import rsb.AbstractEventHandler;
 import rsb.Event;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -70,7 +77,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.openbase.bco.registry.remote.Registries.getUnitRegistry;
-import static org.openbase.type.domotic.service.ServiceTemplateType.ServiceTemplate.ServiceType.BLIND_STATE_SERVICE;
+import static org.openbase.type.domotic.service.ServiceTemplateType.ServiceTemplate.ServiceType.*;
 
 /**
  * The controller class of this application.
@@ -143,6 +150,11 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
     private TreeMap<Long, ActionParameter> receivedStatesIntents;
 
     /**
+     * List of location IDs of locations where movement is detected.
+     */
+    private List<String> movementLocations;
+
+    /**
      * {@inheritDoc}
      *
      * @param event {@inheritDoc}
@@ -164,13 +176,13 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
                     if (selectedUnits.size() > 0) {
                         unitProbabilityCollection = UnitProbabilityCollection.newBuilder().addAllElement(selectedUnits).build();
                         selectedUnitIntents.put(event.getMetaData().getReceiveTime(), unitProbabilityCollection);
-                        handleIntents();
                     }
                 } else if (event.getData() instanceof ActionParameter) {
                     receivedStatesIntents.put(event.getMetaData().getReceiveTime(), (ActionParameter) event.getData());
                     handleIntents();
                 }
             } else {
+                LOGGER.debug("in uni modal mode.");
                 if (event.getData() instanceof UnitProbabilityCollection) {
                     UnitProbabilityCollection collection = (UnitProbabilityCollection) event.getData();
                     collection.getElementList().stream().filter(x -> x.getProbability() >= threshold).forEach(x -> {
@@ -219,45 +231,56 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
 
     private void executeMatchingIntents() throws CouldNotPerformException, InterruptedException {
         try {
-            Map<Long, UnitProbabilityCollection> unmatchedSelectedUnitIntents = new TreeMap<>();
-            Map<Long, ActionParameter> unmatchedReceivedStatesIntents = new TreeMap<>();
-
             LOGGER.trace("executeMatchingIntents");
-            if (selectedUnitIntents.size() > 0 && receivedStatesIntents.size() > 0) {
-                while (selectedUnitIntents.size() > 0) {
-                    Long selectedUnitTime = selectedUnitIntents.firstKey();
-                    UnitProbabilityCollection unitProbabilityCollection = selectedUnitIntents.remove(selectedUnitTime);
-                    List<String> selectedUnitIds = unitProbabilityCollection.getElementList().stream()
-                            .map(UnitProbability::getId)
-                            .collect(Collectors.toList());
+            if (receivedStatesIntents.size() > 0) { // if there are action parameters from speech controller
+                while (receivedStatesIntents.size() > 0) {
+                    Long receivedStateTime = receivedStatesIntents.firstKey();
+                    ActionParameter actionParameter = receivedStatesIntents.remove(receivedStateTime);
+                    ServiceType serviceType = actionParameter.getServiceStateDescription().getServiceType();
+                    UnitTemplateType.UnitTemplate.UnitType unitType = actionParameter.getServiceStateDescription().getUnitType();
+                    UnitConfigType.UnitConfig unitConfig;
 
-                    for (String unitId : selectedUnitIds) {
-                        LOGGER.debug("unitId " + unitId + " used for matching");
-                        UnitConfigType.UnitConfig unitConfig = getUnitRegistry().getUnitConfigById(unitId);
+                    if (actionParameter.getServiceStateDescription().hasUnitId()) {
+                        completeActionDescription(actionParameter);
+                    } else {
+                        if (selectedUnitIntents.size() > 0) { // if there are selected units from pointing component
+                            while (selectedUnitIntents.size() > 0) {
+                                Long selectedUnitTime = selectedUnitIntents.firstKey();
+                                UnitProbabilityCollection unitProbabilityCollection = selectedUnitIntents.get(selectedUnitTime);
+                                List<String> selectedUnitIds = unitProbabilityCollection.getElementList().stream()
+                                        .map(UnitProbability::getId)
+                                        .collect(Collectors.toList());
+                                for (String unitId : selectedUnitIds) {
+                                    unitConfig = getUnitRegistry().getUnitConfigById(unitId);
+                                    if (unitConfig.getServiceConfigList().stream().noneMatch(isMatchingAndOperationServiceType(serviceType))) { //unit does not match the service type
+                                        selectedUnitIds.remove(unitId);
+                                    }
+                                    if (unitType != UnitTemplateType.UnitTemplate.UnitType.UNKNOWN) {
+                                        if (unitType != unitConfig.getUnitType() && unitType != unitConfig.getUnitGroupConfig().getUnitType()) {
+                                            selectedUnitIds.remove(unitId);
+                                        }
+                                    }
+                                }
+                                if (selectedUnitIds.size() > 0) {
+                                    ActionParameter.Builder builder = actionParameter.toBuilder();
+                                    builder.getServiceStateDescriptionBuilder().setUnitId(selectedUnitIds.get(0));
+                                    actionParameter = builder.build();
 
-                        while (receivedStatesIntents.size() > 0) {
-                            Long receivedStateTime = receivedStatesIntents.firstKey();
-                            ActionParameter actionParameter = receivedStatesIntents.remove(receivedStateTime);
-                            ServiceType serviceType = actionParameter.getServiceStateDescription().getServiceType();
-
-                            LOGGER.debug(" >   matching with " + serviceType);
-
-                            if (unitConfig.getServiceConfigList().stream().anyMatch(isMatchingAndOperationServiceType(serviceType))) {
-                                LOGGER.debug(" >>>>>>>>>>> MATCH <<<<<<<<<<<<<<<");
-                                completeActionDescription(actionParameter, unitId);
-                                break;
-                            } else {
-                                // restore unmatched intents for reuse
-                                unmatchedSelectedUnitIntents.put(selectedUnitTime, unitProbabilityCollection);
-                                unmatchedReceivedStatesIntents.put(receivedStateTime, actionParameter);
+                                    completeActionDescription(actionParameter);
+                                    break;
+                                }
                             }
-
+                        } else if (actionParameter.getServiceStateDescription().hasUnitType()){ // no input from pointing component
+                            for (String locationId : movementLocations) {
+                                ServiceStateDescriptionType.ServiceStateDescription.Builder serviceStateDescriptionBuilder =
+                                        actionParameter.getServiceStateDescription().toBuilder().setUnitId(locationId);
+                                actionParameter = actionParameter.toBuilder().setServiceStateDescription(serviceStateDescriptionBuilder).build();
+                                completeActionDescription(actionParameter);
+                            }
                         }
                     }
                 }
             }
-            selectedUnitIntents.putAll(unmatchedSelectedUnitIntents);
-            receivedStatesIntents.putAll(unmatchedReceivedStatesIntents);
         } catch (CouldNotPerformException ex) {
             throw new CouldNotPerformException("cannot match intents.", ex);
         }
@@ -268,15 +291,87 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
                 && x.getServiceDescription().getPattern() == ServiceTemplate.ServicePattern.OPERATION;
     }
 
-    private void completeActionDescription(ActionParameterType.ActionParameter actionParameter, String unitId)
+    private void completeActionDescription(ActionParameterType.ActionParameter actionParameter)
             throws CouldNotPerformException, InterruptedException {
-        try {
-            ActionParameter.Builder builder = actionParameter.toBuilder();
-            builder.getServiceStateDescriptionBuilder().setUnitId(unitId);
-            ActionParameter actionParameterNew = builder.build();
+        LOGGER.info("completeActionDescription( "+actionParameter+")");
+            ServiceType serviceType = actionParameter.getServiceStateDescription().getServiceType();
+            UnitConfigType.UnitConfig unitConfig =
+                    getUnitRegistry().getUnitConfigById(actionParameter.getServiceStateDescription().getUnitId());
+
+            if (unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.UNIT_GROUP) {
+                List<String> unitIds = unitConfig.getUnitGroupConfig().getMemberIdList();
+                for (String unitId : unitIds) {
+                    ServiceStateDescriptionType.ServiceStateDescription.Builder builder =
+                            actionParameter.getServiceStateDescription().toBuilder().setUnitId(unitId);
+                    ActionParameter newActionParameter =
+                            actionParameter.toBuilder().setServiceStateDescription(builder.build()).build();
+                    completeActionDescription(newActionParameter);
+                }
+                return;
+            }
+
+            if (unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.LOCATION) {
+                UnitTemplateType.UnitTemplate.UnitType unitType =
+                        actionParameter.getServiceStateDescription().getUnitType();
+                List<UnitConfigType.UnitConfig> unitConfigs =
+                        getUnitRegistry().getUnitConfigsByLocationIdAndUnitType(unitConfig.getId(), unitType);
+                for (UnitConfigType.UnitConfig unit : unitConfigs) {
+                    // we already get the units of the whole location so we don't need sub-locations.
+                    if (unit.getUnitType() != UnitTemplateType.UnitTemplate.UnitType.LOCATION
+                    // we don't need UNIT_GROUPs because we get the members anyway.
+                    && unit.getUnitType() != UnitTemplateType.UnitTemplate.UnitType.UNIT_GROUP
+                    // we don't apply anything to DIMMER so we drop it here.
+                    && unit.getUnitType() != UnitTemplateType.UnitTemplate.UnitType.DIMMER) {
+                        ServiceStateDescriptionType.ServiceStateDescription.Builder builder =
+                                actionParameter.getServiceStateDescription().toBuilder().setUnitId(unit.getId());
+                        ActionParameter newActionParameter =
+                                actionParameter.toBuilder().setServiceStateDescription(builder.build()).build();
+                        completeActionDescription(newActionParameter);
+                    } else {
+                        LOGGER.info("unitType was: "+unit.getUnitType());
+                    }
+                }
+                return;
+            }
+            if (unitConfig.getServiceConfigList().stream().noneMatch(isMatchingAndOperationServiceType(serviceType))) {
+                return;
+            }
+            // these two serviceTypes need special 'care' because we need to get the current values in order to change
+            // them. Instead of just overwriting.
+            if (serviceType == BRIGHTNESS_STATE_SERVICE || serviceType == COLOR_STATE_SERVICE) {
+
+                ColorableLightRemote l = Units.getUnit(unitConfig,true,Units.COLORABLE_LIGHT);
+                Double brightness = l.getData().getBrightnessState().getBrightness();
+                String serviceState = actionParameter.getServiceStateDescription().getServiceState();
+                String newServiceState = serviceState;
+
+                if (serviceType == BRIGHTNESS_STATE_SERVICE) {
+                    Double actionBrightness = getValueFromServiceState(serviceState, "brightness");
+                    // as a workaround, because there is no service to make a lamp darker depending on its current
+                    // brightnessstate, brightness value 0.1 stands for 'darker'
+                    if (actionBrightness == 0.1) { //darker
+                        if (brightness < 0.4) {
+                            return;
+                        }
+                        brightness = (brightness*10 - 2)/10;
+                        newServiceState = setValueInServiceState(serviceState, "brightness", brightness);
+                    }else if (actionBrightness == 0.9) { //brighter
+                        if (brightness > 0.8) {
+                            return;
+                        }
+                        brightness = (brightness*10+2)/10;
+                        newServiceState = setValueInServiceState(serviceState, "brightness", brightness);
+                    }
+                } else if (serviceType == COLOR_STATE_SERVICE) {
+                    newServiceState = setValueInServiceState(serviceState, "brightness", brightness);
+                }
+                ServiceStateDescriptionType.ServiceStateDescription serviceStateDescription =
+                        actionParameter.getServiceStateDescription().toBuilder().setServiceState(newServiceState).build();
+                actionParameter = actionParameter.toBuilder().setServiceStateDescription(serviceStateDescription).build();
+            }
 
             // WORKAROUND: security check if windows are closed when using blind service
-            if (actionParameterNew.getServiceStateDescription().getServiceType() == BLIND_STATE_SERVICE) {
+            if (actionParameter.getServiceStateDescription().getServiceType() == BLIND_STATE_SERVICE) {
                 LocationRemote living = Units.getUnitByAlias("LIVING", false, Units.LOCATION);
                 List<? extends ConnectionRemote> connectionRemotes = living.getUnits(UnitTemplateType.UnitTemplate.UnitType.CONNECTION, false, Units.CONNECTION);
                 for (ConnectionRemote connectionRemote : connectionRemotes) {
@@ -288,14 +383,52 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
                     }
                 }
             }
-
-            RemoteAction remoteAction = new RemoteAction(actionParameterNew);
+        try {
+            RemoteAction remoteAction = new RemoteAction(actionParameter);
+            if (remoteAction.getTargetUnit().isInfrastructure()) {
+                LOGGER.info(remoteAction.getTargetUnit().getConfig().getAlias(0)+"is infrastructure. No remote action executed.");
+                return;
+            }
             remoteAction.execute().get(5, TimeUnit.SECONDS);
             LOGGER.info("RemoteAction was delivered " + remoteAction);
-
+            return;
         } catch (CouldNotPerformException | ExecutionException | TimeoutException ex) {
             throw new CouldNotPerformException("could not complete action.", ex);
         }
+    }
+
+    /**
+     * Gets the the value from String key in (JSON) String serviceState. Only used to get brightness.
+     * @param serviceState serviceState of a unit as JSON string
+     * @param key as String
+     * @return the Double value of the key in the serviceState
+     */
+    private Double getValueFromServiceState(String serviceState, String key) {
+        int keyIndex = serviceState.indexOf(key);
+        char[] serviceStateArray = serviceState.toCharArray();
+        char[] valueArray = new char[3];
+        valueArray[0] = serviceStateArray[keyIndex + key.length() + 3];
+        valueArray[1] = serviceStateArray[keyIndex + key.length() + 4];
+        valueArray[2] = serviceStateArray[keyIndex + key.length() + 5];
+        return Double.parseDouble(new String(valueArray));
+    }
+    /**
+     * Sets the the value from String key in (JSON) String serviceState to value. Only used to set brightness.
+     * @param serviceState serviceState of a unit as JSON string
+     * @param key as String
+     * @param value Double to be set as value
+     * @return the new serviceState as String with value as value for key in serviceState
+     */
+    private String setValueInServiceState(String serviceState, String key, Double value) {
+
+        int keyIndex = serviceState.indexOf(key);
+        char[] serviceStateArray = serviceState.toCharArray();
+        char[] valueArray = Double.toString(value).toCharArray();
+        serviceStateArray[keyIndex + key.length() + 3] = valueArray[0];
+        serviceStateArray[keyIndex + key.length() + 4] = valueArray[1];
+        serviceStateArray[keyIndex + key.length() + 5] = valueArray[2];
+
+        return new String(serviceStateArray);
     }
 
     /**
@@ -319,6 +452,36 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
                 LOGGER.info("Selected intent timeout: " + intentTimeout);
                 inMultimodalMode = JPService.getProperty(JPMultimodalMode.class).getValue();
                 LOGGER.info("Selected intent timeout: " + intentTimeout);
+
+                Registries.waitForData();
+                BCOLogin.getSession().autoLogin(true);
+                movementLocations = new ArrayList<>();
+                final CustomUnitPool locationPool = new CustomUnitPool();
+
+                locationPool.init(
+                        unitConfig -> unitConfig.getUnitType() != UnitTemplateType.UnitTemplate.UnitType.LOCATION,
+                        unitConfig -> unitConfig.getLocationConfig().getLocationType() != LocationConfigType.LocationConfig.LocationType.TILE
+                );
+
+                locationPool.activate();
+
+                locationPool.addObserver((source, data) -> {
+
+                    if (source.getServiceType() != ServiceType.MOTION_STATE_SERVICE) {
+                        return;
+                    }
+
+                    final MotionStateType.MotionState motionState = (MotionStateType.MotionState) data;
+                    final LocationRemote locationRemote = (LocationRemote) source.getServiceProvider();
+                    final String locationId = locationRemote.getConfig().getId();
+                    if (motionState.getValue() == MotionStateType.MotionState.State.MOTION) {
+                        movementLocations.add(locationId);
+                    } else if (motionState.getValue() == MotionStateType.MotionState.State.NO_MOTION) {
+                        movementLocations.remove(locationId);
+                    }
+
+                });
+
 
                 initializeRegistryConnection();
 
