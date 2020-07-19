@@ -24,6 +24,9 @@ package org.openbase.bco.psc.speech.conversion;
 
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
+import org.openbase.jul.exception.printer.ExceptionPrinter;
+import org.openbase.jul.exception.printer.LogLevel;
+import org.openbase.jul.extension.type.processing.LabelProcessor;
 import org.openbase.type.domotic.action.ActionParameterType.ActionParameter;
 import org.openbase.type.domotic.unit.UnitConfigType;
 import org.openbase.type.domotic.unit.UnitTemplateType;
@@ -96,19 +99,19 @@ public class KeywordConverter {
             LOGGER.debug(locationString);
             try {
                 locationList.addAll(getUnitRegistry().getUnitConfigsByLabel(locationString));
-            } catch (CouldNotPerformException e) {
-                ExceptionPrinter.printHistory(new CouldNotPerformException("Lookup failed!\nNo unit with given label.", e), LOGGER, LogLevel.INFO);
+            } catch (CouldNotPerformException ex) {
+                ExceptionPrinter.printHistory(new CouldNotPerformException("Lookup failed: No unit with given label!", ex), LOGGER, LogLevel.WARN);
             }
             try {
                 locationList.add(getUnitRegistry().getUnitConfigByAlias(locationString));
-            } catch (NotAvailableException e) {
-                ExceptionPrinter.printHistory(new CouldNotPerformException("Lookup failed!\nNo unit with given alias.", e), LOGGER, LogLevel.INFO);
+            } catch (NotAvailableException ex) {
+                ExceptionPrinter.printHistory(new CouldNotPerformException("Lookup failed: No unit with given alias!", ex), LOGGER, LogLevel.WARN);
             }
         }
         for (UnitConfigType.UnitConfig location : locationList) {
             LOGGER.debug(location.getUnitType().name());
             if ((!locations.contains(location)) && location.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.LOCATION) {
-                LOGGER.debug("Location detected: "+location.getAlias(0));
+                LOGGER.debug("Location detected: "+ LabelProcessor.getBestMatch(location.getLabel(), "?"));
                 locations.add(location);
             }
         }
@@ -127,23 +130,23 @@ public class KeywordConverter {
         for (String entityString : entityStrings) {
             try {
                 unitList.addAll(getUnitRegistry().getUnitConfigsByLabel(entityString));
-            } catch (NotAvailableException e) {
-                ExceptionPrinter.printHistory(new NotAvailableException("Lookup failed!", e), LOGGER, LogLevel.INFO);
+            } catch (NotAvailableException ex) {
+                ExceptionPrinter.printHistory(new NotAvailableException("Lookup failed!", ex), LOGGER, LogLevel.INFO);
 
-            } catch (CouldNotPerformException e) {
-                ExceptionPrinter.printHistory(new CouldNotPerformException("Lookup failed!\nNo unit with given label.", e), LOGGER, LogLevel.INFO);
+            } catch (CouldNotPerformException ex) {
+                ExceptionPrinter.printHistory(new CouldNotPerformException("Lookup failed: No unit with given label.", ex), LOGGER, LogLevel.INFO);
 
             }
             try {
                 unitList.add(getUnitRegistry().getUnitConfigByAlias(entityString));
-            } catch (NotAvailableException e) {
-                ExceptionPrinter.printHistory(new CouldNotPerformException("Lookup failed!\nNo unit with given alias.", e), LOGGER, LogLevel.INFO);
+            } catch (NotAvailableException ex) {
+                ExceptionPrinter.printHistory(new CouldNotPerformException("Lookup failed: No unit with given alias.", ex), LOGGER, LogLevel.INFO);
 
             }
         }
         for (UnitConfigType.UnitConfig unit : unitList) {
             if ((!units.contains(unit)) && unit.getUnitType() != UnitTemplateType.UnitTemplate.UnitType.LOCATION) {
-                LOGGER.info("UnitConfig detected: "+unit.getAlias(0));
+                LOGGER.info("UnitConfig detected: "+ LabelProcessor.getBestMatch(unit.getLabel(), "?"));
                 units.add(unit);
             }
         }
