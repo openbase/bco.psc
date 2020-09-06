@@ -46,7 +46,7 @@ public class PSCLauncher {
      */
     public static void main(final String[] args) {
         BCO.printLogo();
-        AbstractLauncher.main(args, PSC.class,
+        AbstractLauncher.main(BCO.class, PSC.class, args,
                 SkeletonMergingLauncher.class,
                 RayExtractorLauncher.class,
                 IdentificationLauncher.class,

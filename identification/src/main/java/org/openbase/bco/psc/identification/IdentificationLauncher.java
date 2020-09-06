@@ -80,7 +80,7 @@ public class IdentificationLauncher extends AbstractLauncher<IdentificationContr
      */
     public static void main(final String[] args) throws InterruptedException, CouldNotPerformException {
         BCO.printLogo();
-        AbstractLauncher.main(args, Identification.class, IdentificationLauncher.class);
+        AbstractLauncher.main(BCO.class, Identification.class, args, IdentificationLauncher.class);
 
         //TODO: Remove this!
 //        try {

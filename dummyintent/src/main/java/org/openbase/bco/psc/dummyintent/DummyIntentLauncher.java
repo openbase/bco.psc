@@ -78,7 +78,7 @@ public class DummyIntentLauncher extends AbstractLauncher<DummyIntentController>
      */
     public static void main(final String[] args) throws InterruptedException, CouldNotPerformException {
         BCO.printLogo();
-        AbstractLauncher.main(args, DummyIntent.class, DummyIntentLauncher.class);
+        AbstractLauncher.main(BCO.class, DummyIntent.class, args, DummyIntentLauncher.class);
 
     }
 }

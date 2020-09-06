@@ -77,6 +77,6 @@ public class SkeletonMergingLauncher extends AbstractLauncher<SkeletonMergingCon
      */
     public static void main(final String[] args) throws InterruptedException, CouldNotPerformException {
         BCO.printLogo();
-        AbstractLauncher.main(args, SkeletonMerging.class, SkeletonMergingLauncher.class);
+        AbstractLauncher.main(BCO.class, SkeletonMerging.class, args, SkeletonMergingLauncher.class);
     }
 }

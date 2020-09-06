@@ -90,6 +90,6 @@ public class ControlLauncher extends AbstractLauncher<PSCControl> {
      */
     public static void main(final String[] args) throws InterruptedException, CouldNotPerformException {
         BCO.printLogo();
-        AbstractLauncher.main(args, Control.class, ControlLauncher.class);
+        AbstractLauncher.main(BCO.class, Control.class, args, ControlLauncher.class);
     }
 }

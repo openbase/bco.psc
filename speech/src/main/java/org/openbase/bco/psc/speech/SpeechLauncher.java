@@ -80,7 +80,7 @@ public class SpeechLauncher extends AbstractLauncher<SpeechController> {
      */
     public static void main(final String[] args) throws InterruptedException, CouldNotPerformException {
         BCO.printLogo();
-        AbstractLauncher.main(args, Speech.class, SpeechLauncher.class);
+        AbstractLauncher.main(BCO.class, Speech.class, args, SpeechLauncher.class);
 
     }
 }

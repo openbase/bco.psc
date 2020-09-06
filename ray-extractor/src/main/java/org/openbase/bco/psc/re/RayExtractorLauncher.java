@@ -83,6 +83,6 @@ public class RayExtractorLauncher extends AbstractLauncher<RayExtractorControlle
      */
     public static void main(final String[] args) throws InterruptedException, CouldNotPerformException {
         BCO.printLogo();
-        AbstractLauncher.main(args, RayExtractor.class, RayExtractorLauncher.class);
+        AbstractLauncher.main(BCO.class, RayExtractor.class, args, RayExtractorLauncher.class);
     }
 }
