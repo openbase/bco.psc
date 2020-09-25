@@ -55,14 +55,6 @@ public class BoundingBoxTest {
     public BoundingBoxTest() {
     }
 
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
     @Before
     public void setUp() {
         unitTranslation = new Vector3d();
@@ -74,10 +66,6 @@ public class BoundingBoxTest {
         rotation = new Transform3D(orientation, new Vector3d(), 1);
         inverse = new Transform3D(rotation);
         inverse.invert();
-    }
-
-    @After
-    public void tearDown() {
     }
 
     @Test
