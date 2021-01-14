@@ -23,12 +23,10 @@ package org.openbase.bco.psc.control;
  * #L%
  */
 
-import org.openbase.bco.dal.lib.layer.unit.Unit;
 import org.openbase.bco.dal.remote.action.RemoteAction;
 import org.openbase.bco.dal.remote.layer.unit.*;
 import org.openbase.bco.dal.remote.layer.unit.connection.ConnectionRemote;
 import org.openbase.bco.dal.remote.layer.unit.location.LocationRemote;
-import org.openbase.bco.dal.remote.layer.unit.unitgroup.UnitGroupRemote;
 import org.openbase.bco.psc.control.jp.JPControlThreshold;
 import org.openbase.bco.psc.control.jp.JPIntentTimeout;
 import org.openbase.bco.psc.control.jp.JPMultimodalMode;
@@ -68,7 +66,6 @@ import rsb.Event;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -459,13 +456,13 @@ public class PSCControl extends AbstractEventHandler implements Control, Launcha
                 final CustomUnitPool locationPool = new CustomUnitPool();
 
                 locationPool.init(
-                        unitConfig -> unitConfig.getUnitType() != UnitTemplateType.UnitTemplate.UnitType.LOCATION,
-                        unitConfig -> unitConfig.getLocationConfig().getLocationType() != LocationConfigType.LocationConfig.LocationType.TILE
+                        unitConfig -> unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.LOCATION,
+                        unitConfig -> unitConfig.getLocationConfig().getLocationType() == LocationConfigType.LocationConfig.LocationType.TILE
                 );
 
                 locationPool.activate();
 
-                locationPool.addObserver((source, data) -> {
+                locationPool.addServiceStateObserver((source, data) -> {
 
                     if (source.getServiceType() != ServiceType.MOTION_STATE_SERVICE) {
                         return;
